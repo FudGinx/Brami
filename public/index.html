@@ -311,6 +311,13 @@ body.art-ui .tray .cell{border:none}
 .grow{background:#efe6d2;border-radius:12px;padding:10px 12px;margin:8px 0}.grow b{display:flex;align-items:center;gap:6px}.grow small{display:block;color:#6b5f50;margin:2px 0 6px}
 .gnow{display:flex;gap:12px;flex-wrap:wrap}.gnow span{display:flex;align-items:center;gap:5px;font-weight:700}.gnow .ava{width:24px;height:24px}
 @media(max-width:1500px){.gchip{font-size:0;padding:7px;gap:0}.gchip .ic{width:18px;height:18px}}
+.coach{position:fixed;z-index:58;background:#fbf7ee;color:#2a241d;border-radius:16px;padding:14px 16px;box-shadow:0 16px 40px rgba(0,0,0,.5);border:2px solid var(--brass);animation:pop .3s;transition:opacity .2s}
+.coach b{font:800 18px Alegreya,serif;display:block}.coach p{margin:6px 0 10px;font-size:14px;line-height:1.4}
+.coach .cbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.coach .btn{min-height:38px;padding:7px 12px;font-size:14px}.coach .btn.alt{color:#2a241d;background:#ece3cf;border-color:#d8cbb0}.coach .cbtns span{margin-left:auto;font-size:12px;color:#8a7a66}
+.coach::before{content:"";position:absolute;left:calc(var(--ax) - 9px);width:18px;height:18px;background:#fbf7ee;border:2px solid var(--brass);transform:rotate(45deg)}
+.coach.down::before{top:-11px;border-right:0;border-bottom:0}.coach.up::before{bottom:-11px;border-left:0;border-top:0}
+.coach-hl{box-shadow:0 0 0 4px var(--brass),0 0 30px 6px rgba(214,166,64,.55)!important;border-radius:14px;animation:hlp 1.6s infinite}
+@keyframes hlp{50%{box-shadow:0 0 0 4px var(--brass),0 0 12px 2px rgba(214,166,64,.35)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -587,7 +594,7 @@ function act(m){if(!canAct())return;if(m.a==="take"&&takeSet(G,m.pid,m.mode).len
  if(NET.role==="guest"){if(!netSend(m))toast("Немає зв’язку з господарем",1);return;}doMove(G.cur,m);}
 function warnFull(n){toast(`Не влізе: береш ${n}, а в лотку вільно ${free(G,G.cur)}. Скиньте зайве з лотка (−1★ за кожну) або оберіть інший набір чи підробіток.`,1);}
 function doMove(seat,m){if(!apply(G,seat,m))return false;G.seq++;SELP=null;save();const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();afterFx(fx);bcast();schedule();return true;}
-function afterFx(fx){scoreBumps();if(!fx)return;
+function afterFx(fx){scoreBumps();if(!fx)return;if(fx.k==="turn"&&TUT.step===3)TUT.step=4;
  if(fx.k==="take")play("take");if(fx.k==="work")play("star");if(fx.k==="mdisc"||fx.k==="sdisc")setTimeout(()=>play("bin"),350);
  if(fx.k==="place"){setTimeout(()=>play("place"),380);if(fx.done){const dd=G.pl[fx.seat].doors[fx.slot];setTimeout(()=>play(dd&&matches(dd)===5?"perfect":"done"),650);}}
  if(fx.k==="turn")setTimeout(()=>play("turn"),250);if(fx.k==="over")setTimeout(()=>play("fanfare"),300);
@@ -699,7 +706,7 @@ function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  const ph=G.phase,w=warnText();
  h+=`<div class="turn"><div class="steps"><span class="step ${ph==="take"?"on":"done"}">${ic("palette")}1 · Взяти</span><span class="step ${ph==="place"?"on":""}">${ic("base")}2 · Поставити ${G.placed}/2</span><span class="step ${G.otook?"done":"on"}" style="${G.otook?"":"opacity:.85"}">${ic("scroll")}Замовлення ${G.otook?"✓":"0/1"}</span></div>
  <div class="hint ${w?"warn":""}">${w||hint()}</div>${my?`<button class="btn" onclick="act({a:'end'})" ${ph==="place"?"":"disabled"}>${ic("end")}Завершити хід</button>`:""}</div></div>`;
- app.innerHTML=h;document.body.classList.add('ingame');animate(before);ambient(true);}
+ app.innerHTML=h;document.body.classList.add('ingame');animate(before);ambient(true);setTimeout(coach,700);}
 /* ---- FLIP ---- */
 function snap(){const m={};document.querySelectorAll("[data-pid]").forEach(e=>{m[e.dataset.pid]={r:e.getBoundingClientRect(),h:e.outerHTML};});return m;}
 function animate(before){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const now={},had=Object.keys(before).length>0;
@@ -725,7 +732,7 @@ function whyNot(pid,key){if(G.phase==="take")return "Спочатку крок 1
  if(isDone(d))return "Ці двері вже завершено.";
  return `Зараз цим дверям потрібен шар «${LN[nextIdx(d)]}». ${TN[p.t]} кладеться пізніше — шари йдуть по черзі.`;}
 document.addEventListener("pointercancel",()=>{if(DR&&DR.on)endDrag(DR);DR=null;});
-function startDrag(){DR.on=true;play("pick");document.body.classList.add("dragging");const r=DR.el.getBoundingClientRect();DR.ox=DR.x-r.left;DR.oy=DR.y-r.top;const g=DR.el.cloneNode(true);g.classList.add("ghost");g.style.width=r.width+"px";g.style.height=r.height+"px";document.body.appendChild(g);DR.g=g;DR.el.classList.add("lift");
+function startDrag(){DR.on=true;document.querySelectorAll(".coach").forEach(e=>e.style.opacity=".25");play("pick");document.body.classList.add("dragging");const r=DR.el.getBoundingClientRect();DR.ox=DR.x-r.left;DR.oy=DR.y-r.top;const g=DR.el.cloneNode(true);g.classList.add("ghost");g.style.width=r.width+"px";g.style.height=r.height+"px";document.body.appendChild(g);DR.g=g;DR.el.classList.add("lift");
  const [k,v]=DR.src.split(":");DR.valid=validDrops(k,+v);document.querySelectorAll("[data-drop]").forEach(z=>{if(DR.valid.has(z.dataset.drop))z.classList.add("ok");});
  if(k==="m"){document.body.classList.add("dm");const p=PT(+v),fr=free(G,G.cur),ns=takeSet(G,+v,"s").length,nt=takeSet(G,+v,"t").length;
   dock(`<div class="zone ${ns>fr?"full":""}" data-drop="take:s"><b><span style="background:${STY[p.s].c};width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff">${ic(p.s)}</span>×${ns}</b><small>${ns>fr?"не влізе — у лотку вільно "+fr:"взяти увесь колір «"+STY[p.s].n+"»"}</small></div><div class="zone ${nt>fr?"full":""}" data-drop="take:t"><b>${ic(p.t)}×${nt}</b><small>${nt>fr?"не влізе — у лотку вільно "+fr:"взяти всі «"+TN[p.t]+"»"}</small></div><div class="zone" data-drop="bin"><b>${ic("bin")}</b><small>скинути цю одну замість «взяти» — без штрафу, далі крок 2</small></div>`);}
@@ -790,7 +797,7 @@ function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі п’ять правильні.</p>
 <p>${ic("palette")} <b>Цілі партії.</b> Щогри відкриваються 3 спільні цілі (зверху екрана) — бонуси в кінці. <b>Ансамбль дворика:</b> +2 за кожну пару сусідніх завершених дверей з однаковим переважаючим стилем.</p>
 <p><b>Кінець:</b> коли хтось завершує треті двері, інші ходять ще по разу. Кожна деталь у лотку — −1★.</p>`,[["Зрозуміло",null]]);}
-function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Вийти в лобі",leave]]);}
+function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Показати навчання",tutRestart],["Вийти в лобі",leave]]);}
 function leave(){clearTimeout(BOTT);clearInterval(NET.timer);clearTimeout(NET.rt);if(NET.role==="host")wsSend({t:"close"});const w=NET.ws;NET.leaving=true;try{if(w)w.close();}catch(e){}netBanner(null);lsSet("brami-host",null);lsSet("brami-guest",null);lsSet("brami-lobby",null);NET={role:null,code:"",myPeer:null,lobby:null,timer:null,ws:null,live:[]};G=null;try{localStorage.removeItem("brami3");history.replaceState(null,"",location.pathname);}catch(e){}lobbyRender();}
 
 /* ================= ЛОБІ ================= */
@@ -841,6 +848,27 @@ function sndCycle(){SND.mode=SND.mode==="all"?"sfx":SND.mode==="sfx"?"off":"all"
 function sndBtn(){const ic2={all:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/>',sfx:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8a5 5 0 0 1 0 8"/>',off:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/>'}[SND.mode];
  return `<button class="ibtn" id="sndbtn" onclick="sndCycle()" title="Звук: ${SND.mode==="all"?"усе":SND.mode==="sfx"?"лише ефекти":"вимкнено"}"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ic2}</svg></button>`;}
 document.addEventListener("pointerdown",()=>{if(SND.mode!=="off"&&!SND.ctx){actx();birds();}},{once:true,capture:true});
+
+/* ================= НАВЧАННЯ ================= */
+const TUT={step:(()=>{try{return localStorage.getItem("brami-tut")==="done"?-1:0;}catch(e){return 0;}})(),shownFor:null};
+const TSTEPS=[
+ {sel:".shelf",t:"Крок 1 — візьміть деталі",b:"Перетягніть картку з крамниці вниз: з’являться зони «увесь колір» і «весь тип». Зелена рамка — деталь підходить вашим дверям, золота ★ — ідеально за типом і кольором.",when:()=>G.phase==="take"},
+ {sel:".walls",t:"Крок 2 — поставте на двері",b:"Тягніть деталі з лотка на стіну. Першою завжди йде Основа — тоді оберете замовлення. За хід можна поставити до 2 деталей.",when:()=>G.phase==="place"&&G.placed===0},
+ {sel:".door .strip",t:"Шари дверей",b:"Під кожною стіною — 5 шарів по черзі. ◀ показує, що потрібно зараз, колір рамки — потрібний стиль. ✓ — влучили. Перетягніть деталь на вже заповнений шар, щоб замінити.",when:()=>G.phase==="place"&&G.placed>=1,next:true},
+ {sel:".turn .btn",t:"Завершіть хід",b:"Коли поставили, що хотіли, — завершуйте хід. Деталі, що лишились у лотку, почекають.",when:()=>G.phase==="place",next:true},
+ {sel:".omkt",t:"Замовлення",b:"Раз за хід можна взяти одне з трьох відкритих замовлень у руку (до 3). Наведіть, щоб збільшити. Вгорі — спільні цілі партії: натисніть на них, щоб побачити бонуси.",when:()=>true,next:true}];
+function tutEnd(){TUT.step=-1;try{localStorage.setItem("brami-tut","done");}catch(e){}coachHide();}
+function tutRestart(){TUT.step=0;try{localStorage.removeItem("brami-tut");}catch(e){}mclose(-1);if(G)coach();toast("Навчання увімкнено");}
+function coachHide(){document.querySelectorAll(".coach").forEach(e=>e.remove());document.querySelectorAll(".coach-hl").forEach(e=>e.classList.remove("coach-hl"));}
+function tutNext(){TUT.step++;if(TUT.step>=TSTEPS.length)return tutEnd();coachHide();coach();}
+function coach(){coachHide();if(TUT.step<0||!G||G.over||!canAct()||VIEW!==G.cur)return;
+ if(TUT.step===1&&G.phase==="place"&&G.placed>=1)TUT.step=2;if(TUT.step===0&&G.phase==="place")TUT.step=1;
+ const s=TSTEPS[TUT.step];if(!s||!s.when())return;const el=document.querySelector(s.sel);if(!el)return;
+ el.classList.add("coach-hl");const r=el.getBoundingClientRect(),b=document.createElement("div");b.className="coach";
+ b.innerHTML=`<b>${s.t}</b><p>${s.b}</p><div class="cbtns">${s.next?`<button class="btn" onclick="tutNext()">Далі</button>`:""}<button class="btn alt" onclick="tutEnd()">Пропустити навчання</button><span>${TUT.step+1}/${TSTEPS.length}</span></div>`;document.body.appendChild(b);
+ const bw=Math.min(340,innerWidth-20),bh=b.offsetHeight;let x=r.left+r.width/2-bw/2,y=r.bottom+12,up=false;if(y+bh>innerHeight-10){y=r.top-bh-12;up=true;}if(y<10){y=Math.max(10,Math.min(innerHeight-bh-10,r.top+20));}
+ x=Math.max(10,Math.min(innerWidth-bw-10,x));Object.assign(b.style,{left:x+"px",top:y+"px",width:bw+"px"});b.classList.add(up?"up":"down");b.style.setProperty("--ax",Math.max(16,Math.min(bw-16,r.left+r.width/2-x))+"px");}
+addEventListener("resize",()=>{if(document.querySelector(".coach"))coach();});
 
 /* ================= ВАУ-ЕФЕКТИ ================= */
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
