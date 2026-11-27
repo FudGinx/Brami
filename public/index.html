@@ -186,6 +186,19 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:7px 5px;b
  .game .legend{display:none}.game .otitle small{display:none}.game .ptitle .meta{font-size:11px}
  .game .tray{grid-template-columns:repeat(8,minmax(0,62px))}.game .hand .ocard{width:62px}
 }
+/* замовлення: відкриті — малі зі збільшенням при наведенні, у руці — великі */
+.omkt{grid-template-columns:repeat(3,minmax(0,96px))}
+.omkt .ocard{transition:transform .18s ease,box-shadow .18s;transform-origin:top center;position:relative}
+.omkt .ocard:first-child{transform-origin:top left}.omkt .ocard:last-child{transform-origin:top right}
+.omkt .ocard:hover,.omkt .ocard:focus-visible{transform:scale(2);z-index:30;box-shadow:0 18px 40px rgba(0,0,0,.6)}
+.hand .ocard{width:140px}
+@media(min-width:900px) and (min-height:560px){
+ .game>.panel:first-child{overflow:visible;position:relative;z-index:5}
+ .game .omkt{grid-template-columns:repeat(3,minmax(0,78px))}
+ .game .omkt .ocard:hover,.game .omkt .ocard:focus-visible{transform:scale(2.3)}
+ .game .hand .ocard{width:108px}.game .hand .ocard .on{font-size:11.5px;padding:4px 6px 6px}
+}
+@media(min-width:900px) and (max-height:760px) and (min-height:560px){.game .hand .ocard{width:96px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
