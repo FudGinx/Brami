@@ -1,16 +1,25 @@
 {
  "parts": [
+  "base_bar",
   "base_cls",
   "base_mod",
+  "base_nar",
+  "dec_bar",
   "dec_cls",
   "dec_mod",
   "dec_nar",
+  "fit_bar",
   "fit_cls",
   "fit_mod",
+  "fit_nar",
+  "glass_bar",
   "glass_cls",
   "glass_mod",
+  "glass_nar",
+  "panel_bar",
   "panel_cls",
-  "panel_mod"
+  "panel_mod",
+  "panel_nar"
  ],
  "walls": {
   "uzhhorod": {
