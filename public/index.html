@@ -155,7 +155,8 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:7px 5px;b
 @media(max-width:600px){.logo{font-size:18px}.sn,.dd{display:none}.seat{padding-right:8px}.wrap{padding:8px 8px 0}.panel{padding:10px}.turn{margin:0 -8px}.hint{min-width:0;flex-basis:100%;order:3}}
 @media(min-width:900px) and (min-height:560px){
  body.ingame{height:100vh;overflow:hidden}
- .game{height:calc(100vh - 66px);display:grid;grid-template-columns:minmax(0,37fr) minmax(0,63fr);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px;max-width:none}
+ body.ingame #app{height:100vh;display:flex;flex-direction:column}body.ingame .bar{flex:none}body.ingame .seats{flex-wrap:nowrap;overflow:hidden}
+ .game{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:minmax(0,37fr) minmax(0,63fr);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px;max-width:none}
  .game>.panel{margin:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:10px}
  .game .ptitle{margin-bottom:8px;font-size:18px}
  .game>.turn{grid-column:1/-1;position:static;margin:0;border-radius:14px;padding:8px 12px}
@@ -304,6 +305,12 @@ body.art-ui .tray .cell{border:none}
 }
 @media(max-width:899px){body.art-ui .tray{background:linear-gradient(#e7dcc5,#d8c9ab);padding:10px;gap:8px;border-radius:16px}body.art-ui .tray .cell{border:2px dashed rgba(90,70,40,.3)}.turn .step{white-space:nowrap}}
 @media(max-width:420px){.turn .step:nth-child(3){display:none}.turn .btn{padding:8px 10px}}
+.goalbar{display:flex;gap:6px;cursor:pointer;flex-wrap:wrap}
+.gchip{display:flex;align-items:center;gap:5px;background:rgba(214,166,64,.14);border:1px solid rgba(214,166,64,.45);border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.gchip .ic{width:15px;height:15px}
+.grow{background:#efe6d2;border-radius:12px;padding:10px 12px;margin:8px 0}.grow b{display:flex;align-items:center;gap:6px}.grow small{display:block;color:#6b5f50;margin:2px 0 6px}
+.gnow{display:flex;gap:12px;flex-wrap:wrap}.gnow span{display:flex;align-items:center;gap:5px;font-weight:700}.gnow .ava{width:24px;height:24px}
+@media(max-width:1500px){.gchip{font-size:0;padding:7px;gap:0}.gchip .ic{width:18px;height:18px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -477,7 +484,7 @@ const nextIdx=d=>d.L.findIndex(x=>x==null);
 const cnt=v=>typeof v==="number"?v:v.length;
 const reqOf=(d,k)=>d&&d.o>=0?ORD[d.o].req[k]:null;
 function mkGame(seats){const g={seats,cur:0,phase:"take",placed:0,mdisc:false,otook:false,market:[],deck:shuffle(PARTS.map(p=>p.id)),disc:[],od:shuffle(ORD.map((_,i)=>i)),om:[],
- pl:seats.map(()=>({doors:[null,null,null],st:[],hand:[],work:0,brak:0})),endBy:-1,left:-1,trig:false,over:false,seq:0,fx:null,round:1,rs:0};
+ pl:seats.map(()=>({doors:[null,null,null],st:[],hand:[],work:0,brak:0})),endBy:-1,left:-1,trig:false,over:false,seq:0,fx:null,round:1,rs:0,first:null,goals:shuffle([0,1,2,3,4,5,6,7,8]).slice(0,3)};
  g.pl.forEach(p=>{if(g.od.length)p.hand.push(g.od.pop());});refillO(g);refillM(g);return g;}
 function drawP(g){if(!g.deck.length){if(!g.disc.length)return null;g.deck=shuffle(g.disc);g.disc=[];g.rs++;}return g.deck.pop();}
 function refillM(g){while(g.market.length<MK){const c=drawP(g);if(c==null)break;g.market.push(c);}}
@@ -489,7 +496,7 @@ function targets(g,seat,pid){const P=g.pl[seat],p=PT(pid),res=[];
   if(ACC[n].includes(p.t))res.push({slot:i,layer:n});for(let k=0;k<n;k++)if(ACC[k].includes(p.t))res.push({slot:i,layer:k,rep:true});});return res;}
 function doorScore(d){if(!isDone(d))return 0;let s=0,m=0;d.L.forEach((id,i)=>{s++;if(d.o>=0&&PT(id).s===ORD[d.o].req[i]){s++;m++;}});return s+(m===5?3:0);}
 function matches(d){return d.o<0?0:d.L.filter((id,i)=>id!=null&&PT(id).s===ORD[d.o].req[i]).length;}
-function score(g,i){const P=g.pl[i];return P.doors.reduce((a,d)=>a+doorScore(d),0)+P.work-P.brak-(g.over?P.st.length:0);}
+function score(g,i){const P=g.pl[i];return P.doors.reduce((a,d)=>a+doorScore(d),0)+P.work-P.brak-(g.over?P.st.length:0)+(g.over&&typeof extras==="function"?extras(g,i).tot:0);}
 function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.pl[seat];
  switch(m.a){
  case "order":{if(g.otook||P.hand.length>=HMAX||!g.om.includes(m.o))return false;g.om.splice(g.om.indexOf(m.o),1);P.hand.push(m.o);refillO(g);g.otook=true;g.fx={k:"order",o:m.o,seat};return true;}
@@ -503,7 +510,7 @@ function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.
   let d=P.doors[m.slot];if(!d){let o=-1;if(P.hand.length){o=P.hand.includes(m.o)?m.o:P.hand[0];P.hand.splice(P.hand.indexOf(o),1);}d=P.doors[m.slot]={o,L:[null,null,null,null,null]};}
   const old=d.L[t.layer];if(old!=null)g.disc.push(old);d.L[t.layer]=m.pid;P.st.splice(P.st.indexOf(m.pid),1);g.placed++;
   g.fx={k:"place",pid:m.pid,seat,slot:m.slot,layer:t.layer,rep:old!=null};
-  if(isDone(d)){g.fx.done=true;g.fx.pts=doorScore(d);if(g.endBy<0&&P.doors.every(isDone)){g.endBy=seat;g.left=g.seats.length-1;}}return true;}
+  if(isDone(d)){g.fx.done=true;g.fx.pts=doorScore(d);if(g.first==null)g.first=seat;if(g.endBy<0&&P.doors.every(isDone)){g.endBy=seat;g.left=g.seats.length-1;}}return true;}
  case "end":{if(g.phase!=="place")return false;const n=g.seats.length;
   if(!g.market.length&&!cnt(g.deck)&&!cnt(g.disc)){g.over=true;g.fx={k:"over"};return true;}
   if(g.endBy>=0){if(!g.trig&&g.cur===g.endBy){g.trig=true;if(g.left<=0){g.over=true;g.fx={k:"over"};return true;}}else{g.left--;if(g.left<=0){g.over=true;g.fx={k:"over"};return true;}}}
@@ -516,11 +523,32 @@ function hintMarket(g,seat,pid){const P=g.pl[seat],p=PT(pid);let r="";
 function hintStore(g,seat,pid){const T=targets(g,seat,pid).filter(t=>!t.rep);if(!T.length)return "";const P=g.pl[seat],p=PT(pid);
  for(const t of T){const d=P.doors[t.slot];if(!d){if(P.hand.some(o=>ORD[o].req[0]===p.s))return "perfect";}else if(reqOf(d,t.layer)===p.s)return "perfect";}return "fit";}
 
+
+/* ================= СПІЛЬНІ ЦІЛІ ТА АНСАМБЛЬ ================= */
+const finD=P=>P.doors.filter(isDone);
+const cntS=(P,s)=>finD(P).reduce((a,d)=>a+d.L.filter(id=>PT(id).s===s).length,0);
+const domS=d=>{const c={};d.L.forEach(id=>{const s=PT(id).s;c[s]=(c[s]||0)+1;});return Object.keys(c).sort((a,b)=>c[b]-c[a])[0];};
+const GOALS=[
+ {n:"Шанувальники сецесії",ic:"mod",d:"Найбільше деталей Модерну в завершених дверях: +5",maj:P=>cntS(P,"mod"),v:5},
+ {n:"Класична школа",ic:"cls",d:"Найбільше деталей Класицизму в завершених дверях: +5",maj:P=>cntS(P,"cls"),v:5},
+ {n:"Бароковий смак",ic:"bar",d:"Найбільше деталей Бароко в завершених дверях: +5",maj:P=>cntS(P,"bar"),v:5},
+ {n:"Народні майстри",ic:"nar",d:"Найбільше народних деталей у завершених дверях: +5",maj:P=>cntS(P,"nar"),v:5},
+ {n:"Мандрівник",ic:"scroll",d:"Завершені двері з 3 різних міст: +4",f:P=>new Set(finD(P).filter(d=>d.o>=0).map(d=>ORD[d.o].city)).size>=3?4:0},
+ {n:"Еклектик",ic:"palette",d:"+3 за кожні завершені двері, де 3 і більше різних стилів",f:P=>finD(P).filter(d=>new Set(d.L.map(id=>PT(id).s)).size>=3).length*3},
+ {n:"Пурист",ic:"star",d:"+3 за кожні завершені двері в одному стилі",f:P=>finD(P).filter(d=>new Set(d.L.map(id=>PT(id).s)).size===1).length*3},
+ {n:"Перші в місті",ic:"base",d:"Хто першим завершив двері: +3",f:(P,i,g)=>g.first===i?3:0},
+ {n:"Охайна майстерня",ic:"tray",d:"Без жодного браку й з порожнім лотком наприкінці: +3",f:P=>!P.brak&&!P.st.length?3:0}];
+function goalPts(g,gi,i){const G2=GOALS[gi],P=g.pl[i];if(G2.f)return G2.f(P,i,g);const vals=g.pl.map(G2.maj),mx=Math.max(...vals);return mx>0&&G2.maj(P)===mx?G2.v:0;}
+function ensemble(P){let e=0;for(const [a,b] of [[0,1],[1,2]]){const A=P.doors[a],B=P.doors[b];if(isDone(A)&&isDone(B)&&domS(A)===domS(B))e+=2;}return e;}
+function extras(g,i){const gl=(g.goals||[]).reduce((a,gi)=>a+goalPts(g,gi,i),0),en=ensemble(g.pl[i]);return {gl,en,tot:gl+en};}
+function goalsBar(){if(!G||!G.goals)return "";return `<div class="goalbar" onclick="goalsModal()" title="Спільні цілі партії">${G.goals.map(gi=>`<span class="gchip" title="${GOALS[gi].n}: ${GOALS[gi].d}">${ic(GOALS[gi].ic)}${GOALS[gi].n}</span>`).join("")}</div>`;}
+function goalsModal(){const rows=G.goals.map(gi=>`<div class="grow"><b>${ic(GOALS[gi].ic)} ${GOALS[gi].n}</b><small>${GOALS[gi].d}</small><div class="gnow">${G.seats.map((s,i)=>`<span>${seatAva(s,i)} ${goalPts(G,gi,i)?"+"+goalPts(G,gi,i):"0"}</span>`).join("")}</div></div>`).join("");
+ modal(`<h2>Цілі партії</h2><p class="waitb" style="color:#6b5f50">Очки за цілі й ансамбль нараховуються в кінці гри. Нижче — скільки кожен отримав би зараз.</p>${rows}<div class="grow"><b>${ic("base")} Ансамбль дворика</b><small>+2 за кожну пару сусідніх завершених дверей з однаковим переважаючим стилем (місця 1–2 і 2–3).</small><div class="gnow">${G.seats.map((s,i)=>`<span>${seatAva(s,i)} ${ensemble(G.pl[i])?"+"+ensemble(G.pl[i]):"0"}</span>`).join("")}</div></div>`,[["Зрозуміло",null]]);}
 /* ================= БОТ ================= */
-function useVal(g,P,id,have){const p=PT(id);let best=-0.7;
+function useVal(g,P,id,have){const p=PT(id);let best=-1.0;
  P.doors.forEach(d=>{if(!d){if(p.t==="base"){const ok=P.hand.some(o=>ORD[o].req[0]===p.s),al=have.some(h=>PT(h).t==="base");best=Math.max(best,al?0.1:(ok?3:1.6));}return;}if(isDone(d))return;const n=nextIdx(d);
-  for(let k=n;k<5;k++){if(!ACC[k].includes(p.t))continue;const req=reqOf(d,k);const al=have.some(h=>{const q=PT(h);return ACC[k].includes(q.t)&&(!req||q.s===req);});let v=req===p.s?3:1;if(k>n)v*=.8;if(al)v*=.3;best=Math.max(best,v);}
-  for(let k=0;k<n;k++)if(ACC[k].includes(p.t)&&d.o>=0&&PT(d.L[k]).s!==ORD[d.o].req[k]&&p.s===ORD[d.o].req[k])best=Math.max(best,1.5);});return best;}
+  for(let k=n;k<5;k++){if(!ACC[k].includes(p.t))continue;const req=reqOf(d,k);const al=have.some(h=>{const q=PT(h);return ACC[k].includes(q.t)&&(!req||q.s===req);});let v=req===p.s?3:1;if(k>n)v*=.8;if(al)v=v*.15-.3;best=Math.max(best,v);}
+  for(let k=0;k<n;k++)if(ACC[k].includes(p.t)&&d.o>=0&&PT(d.L[k]).s!==ORD[d.o].req[k]&&p.s===ORD[d.o].req[k])best=Math.max(best,1.5);});if(best>0&&g.goals){const si=["mod","cls","bar","nar"].indexOf(p.s);if(g.goals.includes(si))best+=.4;if(g.goals.includes(6)&&P.doors.some(d=>d&&!isDone(d)&&d.L[0]!=null&&PT(d.L[0]).s===p.s))best+=.3;}return best;}
 function botOrder(g,seat){const P=g.pl[seat];if(g.otook||P.hand.length>=2||!g.om.length)return null;const empty=P.doors.some(d=>!d);if(!empty)return null;
  let best=g.om[0],bv=-1;for(const o of g.om){let v=0;ORD[o].req.forEach((s,k)=>{if(P.st.some(id=>PT(id).s===s&&ACC[k].includes(PT(id).t)))v++;});if(v>bv){bv=v;best=o;}}return {a:"order",o:best};}
 function botTake(g,seat){const P=g.pl[seat];let best={a:"work"},bv=0.9;const seen=new Set(),fr=free(g,seat);
@@ -655,7 +683,7 @@ function hint(){const s=G.seats[G.cur];if(!canAct())return s.k==="bot"?esc(s.n)+
 function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  const before=snap();const n=G.seats.length;if(VIEW>=n)VIEW=G.cur;const P=G.pl[VIEW],my=canAct(),isCur=VIEW===G.cur;
  let h=`<div class="bar"><div class="logo">Брами та дворики</div><div class="seats">`+G.seats.map((s,i)=>`<div class="seat ${i===G.cur?"cur":""} ${i===VIEW?"view":""}" onclick="VIEW=${i};render()" title="${esc(s.n)}">${seatAva(s,i)}<span class="sn">${esc(s.n)}</span><span class="sc">${ic("star")}${score(G,i)}</span><span class="dd">${G.pl[i].doors.map(d=>`<i class="${isDone(d)?"on":""}"></i>`).join("")}</span></div>`).join("")+`</div>
- ${NET.role?`<span class="plq" title="Код кімнати">${esc(NET.code.toUpperCase())}</span>`:""}${G.over?`<button class="btn" onclick="finalScreen()">${ic("star")}Підсумки</button>`:""}${sndBtn()}<button class="ibtn" onclick="gallery()" title="Альбоми: усі завершені двері">${ic("scroll")}</button><button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button><button class="ibtn" onclick="menu()" title="Меню">${ic("menu")}</button></div><div class="wrap game">`;
+ ${NET.role?`<span class="plq" title="Код кімнати">${esc(NET.code.toUpperCase())}</span>`:""}${goalsBar()}${G.over?`<button class="btn" onclick="finalScreen()">${ic("star")}Підсумки</button>`:""}${sndBtn()}<button class="ibtn" onclick="gallery()" title="Альбоми: усі завершені двері">${ic("scroll")}</button><button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button><button class="ibtn" onclick="menu()" title="Меню">${ic("menu")}</button></div><div class="wrap game">`;
  const hm=id=>my&&G.phase==="take"?(hintMarket(G,G.cur,id)||"dim"):"";
  h+=`<section class="panel"><div class="ptitle">Крамниця<span class="meta"><span title="Деталей у колоді">${ic("deck")}колода ${cnt(G.deck)}</span><span title="Скинуті деталі повернуться в колоду, коли вона скінчиться">${ic("recycle")}скинуто ${cnt(G.disc)}</span></span></div>
  <div class="shop"><div><div class="shelf">${G.market.map(id=>cardHTML(id,"m",(my&&G.phase==="take"?"":"off ")+hm(id)+(SELP===id?" sel":""))).join("")}</div>
@@ -751,8 +779,8 @@ function gallery(){let any=false;const rows=G.seats.map((s,i)=>{const ds=G.pl[i]
  return `<div class="galrow"><div class="galname">${seatAva(s,i)} ${esc(s.n)} <span class="sc">${ic("star")}${score(G,i)}</span></div><div class="galdoors">${ds.length?ds.map(([d,k])=>{const o=d.o>=0?ORD[d.o]:null;return `<button class="galdoor" onclick="mclose(-1);postcard(${i},${k},'gal')" title="${o?esc(o.city+" · "+o.name):"Вільна реставрація"}">${wallSVG(o?o.city:"",o?o.shape:"rect",d.L.map(id=>PT(id)))}<span class="galst">${"★".repeat(matches(d))}${"☆".repeat(5-matches(d))}</span></button>`;}).join(""):'<span class="waitb" style="color:#6b5f50">жодних завершених дверей</span>'}</div></div>`;}).join("");
  modal(`<h2>Альбоми реставраторів</h2>${rows}${any?`<p class="waitb" style="color:#6b5f50">Натисніть на двері, щоб відкрити листівку.</p>`:""}`,G.over?[["Підсумки",finalScreen],["Закрити",null]]:[["Закрити",null]]);}
 function finalScreen(){const rows=G.seats.map((s,i)=>{const P=G.pl[i];return {i,s,doors:P.doors.reduce((a,d)=>a+doorScore(d),0),work:P.work,brak:P.brak,left:P.st.length,tot:score(G,i)};}).sort((a,b)=>b.tot-a.tot);
- modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Підробіток</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
- ${rows.map(r=>`<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${r.work}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`).join("")}</table></div>`,[["Альбоми",gallery],["Нова гра",()=>{leave();}],["Закрити",null]]);}
+ modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Цілі</th><th class="n">Ансамбль</th><th class="n">Підробіток</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
+ ${rows.map(r=>{const x=extras(G,r.i);return `<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${x.gl}</td><td class="n">+${x.en}</td><td class="n">+${r.work}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`;}).join("")}</table></div><p class="waitb" style="color:#6b5f50">Цілі: ${G.goals.map(gi=>GOALS[gi].n).join(" · ")}</p>`,[["Альбоми",gallery],["Нова гра",()=>{leave();}],["Закрити",null]]);}
 function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("scroll")} <b>Замовлення.</b> На старті у вас одне. Відкриті три — беріть одне за хід у будь-який момент (у руці до ${HMAX}).</p>
 <p>${ic("palette")} <b>1 · Взяти.</b> Перетягніть картку з крамниці в лоток: ліва половина — <b>усі деталі цього кольору</b>, права — <b>усі деталі цього типу</b>. Якщо не влізе в лоток — гра попередить. Або ${ic("hammer")} <b>підробіток</b>: +1★.</p>
@@ -760,6 +788,7 @@ function rules(){modal(`<h2>Як грати</h2>
 <p><b>Підсвітка:</b> зелена рамка — деталь підходить за типом; золота з ★ — і за типом, і за кольором замовлення.</p>
 <p>${ic("bin")} <b>Кошик.</b> Замість кроку 1 можна безкоштовно скинути одну картку з крамниці — і переходити до кроку 2. Скинуте з лотка — −1★. Коли колода скінчиться, скинуте перемішується назад.</p>
 <p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі п’ять правильні.</p>
+<p>${ic("palette")} <b>Цілі партії.</b> Щогри відкриваються 3 спільні цілі (зверху екрана) — бонуси в кінці. <b>Ансамбль дворика:</b> +2 за кожну пару сусідніх завершених дверей з однаковим переважаючим стилем.</p>
 <p><b>Кінець:</b> коли хтось завершує треті двері, інші ходять ще по разу. Кожна деталь у лотку — −1★.</p>`,[["Зрозуміло",null]]);}
 function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Вийти в лобі",leave]]);}
 function leave(){clearTimeout(BOTT);clearInterval(NET.timer);clearTimeout(NET.rt);if(NET.role==="host")wsSend({t:"close"});const w=NET.ws;NET.leaving=true;try{if(w)w.close();}catch(e){}netBanner(null);lsSet("brami-host",null);lsSet("brami-guest",null);lsSet("brami-lobby",null);NET={role:null,code:"",myPeer:null,lobby:null,timer:null,ws:null,live:[]};G=null;try{localStorage.removeItem("brami3");history.replaceState(null,"",location.pathname);}catch(e){}lobbyRender();}
