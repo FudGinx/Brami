@@ -18,10 +18,17 @@ const server = http.createServer((req, res) => {
     const rel = decodeURIComponent(req.url.split("?")[0].slice(5));
     const file = path.normalize(path.join(ART, rel));
     if (!file.startsWith(ART + path.sep)) { res.writeHead(403); return res.end(); }
-    return fs.readFile(file, (err, buf) => {
-      if (err) { res.writeHead(404); return res.end(); }
-      res.writeHead(200, { "Content-Type": MIME[path.extname(file)] || "application/octet-stream", "Cache-Control": rel === "manifest.json" ? "no-cache" : "public, max-age=86400" });
-      res.end(buf);
+    return fs.stat(file, (err, st) => {
+      if (err || !st.isFile()) { res.writeHead(404); return res.end(); }
+      // браузер щоразу перепитує сервер (304, якщо файл той самий) — старі картинки не застрягають у кеші
+      const tag = `"${st.size.toString(36)}-${Math.floor(st.mtimeMs).toString(36)}"`;
+      const head = { "Cache-Control": "no-cache", ETag: tag, "Last-Modified": st.mtime.toUTCString() };
+      if (req.headers["if-none-match"] === tag) { res.writeHead(304, head); return res.end(); }
+      fs.readFile(file, (e2, buf) => {
+        if (e2) { res.writeHead(404); return res.end(); }
+        res.writeHead(200, { ...head, "Content-Type": MIME[path.extname(file)] || "application/octet-stream" });
+        res.end(buf);
+      });
     });
   }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });

@@ -305,6 +305,23 @@ body.art-ui .tray .cell{border:none}
 }
 @media(max-width:899px){body.art-ui .tray{background:linear-gradient(#e7dcc5,#d8c9ab);padding:10px;gap:8px;border-radius:16px}body.art-ui .tray .cell{border:2px dashed rgba(90,70,40,.3)}.turn .step{white-space:nowrap}}
 @media(max-width:420px){.turn .step:nth-child(3){display:none}.turn .btn{padding:8px 10px}}
+.gwrap{grid-column:1/-1}
+.game .side>:first-child{grid-column:1;grid-row:1}.game .side .tools{grid-column:2;grid-row:1/span 2}.game .gwrap{grid-column:1;grid-row:2}
+.game .gwrap .ptitle{margin-bottom:5px!important}.game .gcards{gap:5px}
+.game .gcard{min-height:0;padding:5px 10px 5px 5px;grid-template-columns:34px minmax(0,1fr) auto;gap:8px;box-shadow:0 2px 0 #b99a5e,0 4px 10px rgba(0,0,0,.3)}
+.game .gcard .gic{width:34px;height:34px}.game .gcard .gic .ic{width:21px;height:21px}.game .gcard .gtx b{font-size:12.5px}.game .gcard .gfm .ic{width:14px;height:14px}.game .gcard .gv{font-size:18px}
+.gcard .gtip{top:auto;bottom:calc(100% + 6px)}
+.gcards{display:flex;flex-direction:column;gap:7px}
+.gcard{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;background:linear-gradient(90deg,#f6ead0,#ecdcb7);color:#3b2f22;border-radius:12px;padding:8px 12px 8px 8px;box-shadow:0 3px 0 #b99a5e,0 6px 14px rgba(0,0,0,.3);cursor:pointer;min-height:58px}
+.gcard .gic{display:grid;place-items:center;width:44px;height:44px;border-radius:10px;background:#3b2f22;color:#e9c26a}.gcard .gic .ic{width:26px;height:26px}
+.gcard .gtx{display:flex;flex-direction:column;gap:3px;min-width:0}.gcard .gtx b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .gfm{display:flex;align-items:center;gap:2px;color:#6b5236}.gcard .gfm .ic{width:17px;height:17px}.gcard .gfm i{font-style:normal;font-size:11.5px;margin:0 4px;opacity:.85}
+.gcard .gv{font:800 22px/1 Georgia,serif;color:#a87b22;text-align:center}.gcard .gv small{display:block;font:600 10px/1.2 system-ui;color:#6b5f50}
+.gcard .gwho{position:absolute;top:-7px;right:-5px;display:flex;gap:2px}.gcard .gwho>*{transform:scale(.75)}
+.gcard .gtip{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#2a2119;color:#f3e6c8;font-size:12.5px;line-height:1.35;padding:8px 10px;border-radius:9px;box-shadow:0 8px 20px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .15s;z-index:40}
+.gcard:hover .gtip,.gcard:focus-visible .gtip{opacity:1}.gcard:hover{transform:translateY(-1px)}
+.cmp{max-width:1100px;margin:16px auto}.cmprow{border-top:1px solid rgba(255,255,255,.12);padding:14px 0}.cmph{margin-bottom:8px}
+.cmp .pair figure{max-width:420px}.cmpsel{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.cmpsel label{display:flex;flex-direction:column;font-size:12px;gap:3px}.cmpsel select,.cmpsel input{font:inherit;padding:5px 7px;border-radius:7px;border:1px solid #8a7752;background:#f6ead0;color:#2a2119}
 .goalbar{display:flex;gap:6px;cursor:pointer;flex-wrap:wrap}
 .gchip{display:flex;align-items:center;gap:5px;background:rgba(214,166,64,.14);border:1px solid rgba(214,166,64,.45);border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:700;white-space:nowrap}
 .gchip .ic{width:15px;height:15px}
@@ -353,13 +370,13 @@ const ORD=[
 {city:"Київ",name:"Класицизм Подолу",shape:"rect",req:["cls","cls","cls","cls","cls"],desc:"Бездоганно пропорційні двері купецького будинку з фронтоном і замковим каменем.",fact:"Після великої пожежі 1811 року Поділ відбудовували за новим регулярним планом, і багато споруд постали в стилі класицизму."},
 {city:"Чернігів",name:"Будинок з пропильною різьбою",shape:"rect",req:["nar","nar","nar","nar","nar"],desc:"Дерев’яні двері під ажурною лиштвою: ромби, розетки, зубчасті карнизи.",fact:"Для старого Чернігова характерні дерев’яні будинки кінця ХІХ — початку ХХ ст. з пропильним різьбленням на лиштвах і фронтонах."},
 {city:"Чернігів",name:"Бароковий вхід",shape:"arch",req:["bar","bar","bar","bar","bar"],desc:"Фігурні філенки, кольорове скло, калатало з левовою головою й маскарон.",fact:"Чернігів зберіг визначні пам’ятки козацького бароко, зокрема Катерининську церкву початку XVIII ст. з фігурними фронтонами."},
-{city:"Полтава",name:"Український модерн",shape:"trap",req:["nar","mod","mod","nar","nar"],desc:"Трапецієподібний отвір, народна різьба й стримані модернові лінії.",fact:"Будинок Полтавського губернського земства (1903–1908, арх. Василь Кричевський) — маніфест українського модерну: трапецієподібні вікна й двері, кераміка з народними орнаментами."},
+{city:"Полтава",name:"Український модерн",shape:"trap",req:["mod","mod","mod","nar","nar"],desc:"Трапецієподібний отвір, народна різьба й стримані модернові лінії.",fact:"Будинок Полтавського губернського земства (1903–1908, арх. Василь Кричевський) — маніфест українського модерну: трапецієподібні вікна й двері, кераміка з народними орнаментами."},
 {city:"Чернівці",name:"Маленький Відень",shape:"arch",req:["cls","mod","mod","mod","mod"],desc:"Віденська елегантність: класична основа, модернові філенки й кована квітка.",fact:"На початку ХХ ст. Чернівці через тісні зв’язки з Віднем часто називали «маленьким Віднем»."},
 {city:"Гуцульщина",name:"Ворота гражди",shape:"rect",req:["nar","nar","nar","nar","nar"],desc:"Масивні дерев’яні ворота з ромбами, сонячними розетками й кованою клямкою.",fact:"Гражда — гуцульська садиба, де хата й господарські будівлі утворюють замкнений двір з одними воротами."},
 {city:"Харків",name:"Будинок Бекетова",shape:"seg",req:["cls","cls","cls","cls","bar"],desc:"Монументальний вхід із чіткою симетрією, віяловою фрамугою і маскароном.",fact:"Архітектор Олексій Бекетов спроєктував у Харкові десятки будівель; на його честь названо станцію метро «Архітектора Бекетова»."},
 {city:"Кам’янець",name:"Брама Старого міста",shape:"arch",req:["bar","nar","bar","bar","bar"],desc:"Кам’яна арка, важкі стулки й ковані цвяхи — двері міста-фортеці.",fact:"Старе місто Кам’янця-Подільського стоїть на скелястому «острові», який майже з усіх боків оточує каньйон річки Смотрич."},
-{city:"Луцьк",name:"Біля замку Любарта",shape:"arch",req:["bar","cls","bar","nar","bar"],desc:"Цегляна стіна, низька арка й ковані деталі старого міста.",fact:"Верхній замок у Луцьку називають замком Любарта: мурований замок тут почав зводити в XIV ст. князь Любарт, син Гедиміна. Замок зображено на банкноті 200 гривень."},
-{city:"Ужгород",name:"Двері Ґалаґова",shape:"rect",req:["cls","mod","cls","mod","cls"],desc:"Лаконічні двері міжвоєнної забудови: чисті лінії, скло і метал. Навесні над ними цвіте сакура.",fact:"У 1920–30-х роках, коли Ужгород був столицею Підкарпатської Русі у складі Чехословаччини, тут постав модерністський урядовий квартал Малий Ґалаґов. Місто також славиться алеями сакур."}
+{city:"Луцьк",name:"Біля замку Любарта",shape:"arch",req:["bar","bar","cls","nar","bar"],desc:"Цегляна стіна, низька арка й ковані деталі старого міста.",fact:"Верхній замок у Луцьку називають замком Любарта: мурований замок тут почав зводити в XIV ст. князь Любарт, син Гедиміна. Замок зображено на банкноті 200 гривень."},
+{city:"Ужгород",name:"Двері Ґалаґова",shape:"rect",req:["cls","cls","cls","mod","cls"],desc:"Лаконічні двері міжвоєнної забудови: чисті лінії, скло і метал. Навесні над ними цвіте сакура.",fact:"У 1920–30-х роках, коли Ужгород був столицею Підкарпатської Русі у складі Чехословаччини, тут постав модерністський урядовий квартал Малий Ґалаґов. Місто також славиться алеями сакур."}
 ];
 const WALLS={"Одеса":{bg:"#e8d29d",k:"rust",l:"#c7a868"},"Львів":{bg:"#d8a05a",k:"plaster",l:"#b8843f",c2:"#efe1c1",c3:"#9c8f7c"},"Київ":{bg:"#efdfae",k:"pilaster",l:"#d1bd86"},"Чернігів":{bg:"#7096b8",k:"planks",l:"#557c9f"},"Гуцульщина":{bg:"#8a5a32",k:"logs",l:"#5a3820"},"Полтава":{bg:"#f4f0e5",k:"tiles",l:"#dad3c1"},"Чернівці":{bg:"#e9c2b6",k:"stucco",l:"#cfa395"},"Харків":{bg:"#cfcac0",k:"rust",l:"#a8a296"},"Кам’янець":{bg:"#d6c6a2",k:"stone",l:"#a8987a"},"Луцьк":{bg:"#b8613f",k:"brick",l:"#8e4529"},"Ужгород":{bg:"#efe9dc",k:"plaster",l:"#d3cab8",c2:"#ffffff",c3:"#b9b2a4"},_:{bg:"#d7cdbb",k:"shabby",l:"#b9ad97"}};
 
@@ -466,7 +483,7 @@ function wallSVG0(city,shape,L,ghost){const W=WALLS[city]||WALLS._;
 /* ================= АРТ (картинки з /art, якщо є) ================= */
 let ARTM={parts:[],walls:{},cards:[],ps:new Set(),cs:new Set(),ui:new Set()};
 const CITYKEY={"Одеса":"odesa","Львів":"lviv","Київ":"kyiv","Чернігів":"chernihiv","Гуцульщина":"hutsul","Полтава":"poltava","Чернівці":"chernivtsi","Харків":"kharkiv","Кам’янець":"kamianets","Луцьк":"lutsk","Ужгород":"uzhhorod"};
-try{fetch("/art/manifest.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(m=>{if(!m)return;ARTM=m;ARTM.ps=new Set(m.parts||[]);ARTM.cs=new Set(m.cards||[]);ARTM.ui=new Set(m.ui||[]);document.body.classList.toggle("art-ui",ARTM.ui.has("table"));if(G)render();else if(!NET.role)lobbyRender();}).catch(()=>{});}catch(e){}
+try{fetch("/art/manifest.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(m=>{if(!m)return;ARTM=m;ARTM.ps=new Set(m.parts||[]);ARTM.cs=new Set(m.cards||[]);ARTM.ui=new Set(m.ui||[]);document.body.classList.toggle("art-ui",ARTM.ui.has("table"));if(location.hash==="#compare")compareTool();else if(G)render();else if(!NET.role)lobbyRender();}).catch(()=>{});}catch(e){}
 const AK=p=>p.t+"_"+p.s;
 const LAYOUT={0:[0,0,100,100],2:[0,0,100,21],1:[8,24,84,72],3:[36,46,28,22],4:[4,-19,92,21]};
 function partImg(p){return ARTM.ps.has(AK(p))?`<img class="part" src="/art/parts/${AK(p)}.webp" alt="" draggable="false">`:partSVG(p);}
@@ -548,6 +565,16 @@ const GOALS=[
  {n:"Пурист",ic:"star",d:"+3 за кожні завершені двері в одному стилі",f:P=>finD(P).filter(d=>new Set(d.L.map(id=>PT(id).s)).size===1).length*3},
  {n:"Перші в місті",ic:"base",d:"Хто першим завершив двері: +3",f:(P,i,g)=>g.first===i?3:0},
  {n:"Охайна майстерня",ic:"tray",d:"Без жодного браку й з порожнім лотком наприкінці: +3",f:P=>!P.brak&&!P.st.length?3:0}];
+const GFM=[s=>`${ic(s)}${ic(s)}${ic(s)}<i>найбільше</i>`];
+function goalFm(gi){const G2=GOALS[gi];if(gi<4)return GFM[0](G2.ic);return [null,null,null,null,
+ `${ic("base")}${ic("base")}${ic("base")}<i>3 міста</i>`,
+ `${ic("mod")}${ic("cls")}${ic("bar")}<i>на дверях</i>`,
+ `${ic("cls")}${ic("cls")}${ic("cls")}${ic("cls")}${ic("cls")}<i>один стиль</i>`,
+ `${ic("base")}<i>№1</i>`,
+ `${ic("bin")}<i>0</i>${ic("tray")}<i>0</i>`][gi];}
+const GVAL=[5,5,5,5,4,3,3,3,3],GEACH=[0,0,0,0,0,1,1,0,0];
+function goalCards(){if(!G||!G.goals)return "";return `<div class="gcards">${G.goals.map(gi=>{const G2=GOALS[gi],who=G.seats.map((s,i)=>goalPts(G,gi,i)?seatAva(s,i):"").join("");
+ return `<div class="gcard" tabindex="0" onclick="goalsModal()" title="${G2.n}: ${G2.d}"><span class="gic">${ic(G2.ic)}</span><span class="gtx"><b>${G2.n}</b><span class="gfm">${goalFm(gi)}</span></span><span class="gv">+${GVAL[gi]}${GEACH[gi]?"<small>кожні</small>":""}</span>${who?`<span class="gwho" title="Зараз отримали б">${who}</span>`:""}<span class="gtip">${G2.d}</span></div>`;}).join("")}</div>`;}
 function goalPts(g,gi,i){const G2=GOALS[gi],P=g.pl[i];if(G2.f)return G2.f(P,i,g);const vals=g.pl.map(G2.maj),mx=Math.max(...vals);return mx>0&&G2.maj(P)===mx?G2.v:0;}
 function ensemble(P){let e=0;for(const [a,b] of [[0,1],[1,2]]){const A=P.doors[a],B=P.doors[b];if(isDone(A)&&isDone(B)&&domS(A)===domS(B))e+=2;}return e;}
 function extras(g,i){const gl=(g.goals||[]).reduce((a,gi)=>a+goalPts(g,gi,i),0),en=ensemble(g.pl[i]);return {gl,en,tot:gl+en};}
@@ -655,7 +682,7 @@ function onNet(d){
   if(d.t==="hostback"){netBanner(null);return;}
   if(d.t==="hostgone"){netBanner(null);toast("Господар закрив кімнату",1);lsSet("brami-guest",null);return;}
   if(d.t==="full"){toast("У кімнаті немає вільних онлайн-місць",1);return;}
-  if(d.t==="state"&&d.data){if(d.data.g){const prev=G?G.seq:-1;G=d.data.g;if(G.seq!==prev){const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();if(prev>=0)afterFx(fx);}}else if(d.data.lobby){NET.lobby=d.data.lobby;guestWait();}}}}
+  if(d.t==="state"&&d.data){if(d.data.g){const prev=G?G.seq:-1,wasOver=G&&G.over;G=d.data.g;if(wasOver&&!G.over){mclose(-1);toast("Нова партія з тими ж гравцями!");}if(G.seq!==prev){const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();if(prev>=0)afterFx(fx);}}else if(d.data.lobby){NET.lobby=d.data.lobby;guestWait();}}}}
 async function hostRoom(){NET.role="host";NET.code=null;NET.leaving=false;const got=new Promise(r=>NET.codeP=r);
  try{await connect();}catch(e){NET.role=null;toast("Не вдалося з’єднатися із сервером гри. Якщо сервер щойно прокинувся — спробуйте ще раз за хвилину.",1);return false;}
  hello();const code=await Promise.race([got,new Promise(r=>setTimeout(()=>r(null),10000))]);if(!code){toast("Сервер не відповів",1);NET.role=null;return false;}
@@ -693,14 +720,15 @@ function hint(){const s=G.seats[G.cur];if(!canAct())return s.k==="bot"?esc(s.n)+
 function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  const before=snap();const n=G.seats.length;if(VIEW>=n)VIEW=G.cur;const P=G.pl[VIEW],my=canAct(),isCur=VIEW===G.cur;
  let h=`<div class="bar"><div class="logo">Брами та дворики</div><div class="seats">`+G.seats.map((s,i)=>`<div class="seat ${i===G.cur?"cur":""} ${i===VIEW?"view":""}" onclick="VIEW=${i};render()" title="${esc(s.n)}">${seatAva(s,i)}<span class="sn">${esc(s.n)}</span><span class="sc">${ic("star")}${score(G,i)}</span><span class="dd">${G.pl[i].doors.map(d=>`<i class="${isDone(d)?"on":""}"></i>`).join("")}</span></div>`).join("")+`</div>
- ${NET.role?`<span class="plq" title="Код кімнати">${esc(NET.code.toUpperCase())}</span>`:""}${goalsBar()}${G.over?`<button class="btn" onclick="finalScreen()">${ic("star")}Підсумки</button>`:""}${sndBtn()}<button class="ibtn" onclick="gallery()" title="Альбоми: усі завершені двері">${ic("scroll")}</button><button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button><button class="ibtn" onclick="menu()" title="Меню">${ic("menu")}</button></div><div class="wrap game">`;
+ ${NET.role?`<span class="plq" title="Код кімнати">${esc(NET.code.toUpperCase())}</span>`:""}${G.over?`<button class="btn" onclick="finalScreen()">${ic("star")}Підсумки</button>`:""}${sndBtn()}<button class="ibtn" onclick="gallery()" title="Альбоми: усі завершені двері">${ic("scroll")}</button><button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button><button class="ibtn" onclick="menu()" title="Меню">${ic("menu")}</button></div><div class="wrap game">`;
  const hm=id=>my&&G.phase==="take"?(hintMarket(G,G.cur,id)||"dim"):"";
  h+=`<section class="panel"><div class="ptitle">Крамниця<span class="meta"><span title="Деталей у колоді">${ic("deck")}колода ${cnt(G.deck)}</span><span title="Скинуті деталі повернуться в колоду, коли вона скінчиться">${ic("recycle")}скинуто ${cnt(G.disc)}</span></span></div>
  <div class="shop"><div><div class="shelf">${G.market.map(id=>cardHTML(id,"m",(my&&G.phase==="take"?"":"off ")+hm(id)+(SELP===id?" sel":""))).join("")}</div>
  <div class="legend"><span><i style="box-shadow:0 0 0 3px var(--ok)"></i>підходить за типом</span><span><i style="background:var(--brass)"></i>★ тип і колір як у замовленні</span><span><i class="dimkey"></i>зараз нікуди</span></div></div>
  <div class="side"><div><div class="ptitle" style="font-size:16px;margin-bottom:8px">${ic("scroll")} Замовлення<span class="meta">${G.otook?"вже взято цього ходу":"1 за хід, у руці до "+HMAX}</span></div><div class="omkt">${G.om.map(o=>ocardHTML(o,"o")).join("")||'<span class="waitb">Замовлення скінчились</span>'}</div></div>
  <div class="tools"><button class="tool" id="work" onclick="act({a:'work'})" ${my&&G.phase==="take"?"":"disabled"}><b>${ic("hammer")}+1${ic("star")}</b>Підробіток<small>допомогти в іншій реставрації замість деталей</small></button>
- <div class="tool" id="bin" data-drop="bin" onclick="binClick()"><b>${ic("bin")}</b>Кошик<small>з крамниці — безкоштовно, замість «взяти» · з лотка −1★</small></div></div></div></div></section>`;
+ <div class="tool" id="bin" data-drop="bin" onclick="binClick()"><b>${ic("bin")}</b>Кошик<small>з крамниці — безкоштовно, замість «взяти» · з лотка −1★</small></div></div>
+ <div class="gwrap"><div class="ptitle" style="font-size:16px;margin-bottom:8px">${ic("star")} Цілі партії<span class="meta">для всіх · у кінці гри</span></div>${goalCards()}</div></div></div></section>`;
  const hs=id=>my&&isCur&&G.phase==="place"&&G.placed<2?(hintStore(G,G.cur,id)||"dim"):"";
  h+=`<section class="panel"><div class="ptitle">${seatAva(G.seats[VIEW],VIEW)} Альбом: ${esc(G.seats[VIEW].n)}<span class="meta"><span>коло ${G.round}${G.endBy>=0?" · фінальне":""}</span><span title="Підробіток">${ic("hammer")}+${P.work}</span><span title="Брак">${ic("bin")}−${P.brak}</span></span></div>
  <div class="walls">${[0,1,2].map(i=>doorHTML(P,i)).join("")}</div>
@@ -790,7 +818,11 @@ function gallery(){let any=false;const rows=G.seats.map((s,i)=>{const ds=G.pl[i]
  modal(`<h2>Альбоми реставраторів</h2>${rows}${any?`<p class="waitb" style="color:#6b5f50">Натисніть на двері, щоб відкрити листівку.</p>`:""}`,G.over?[["Підсумки",finalScreen],["Закрити",null]]:[["Закрити",null]]);}
 function finalScreen(){const rows=G.seats.map((s,i)=>{const P=G.pl[i];return {i,s,doors:P.doors.reduce((a,d)=>a+doorScore(d),0),work:P.work,brak:P.brak,left:P.st.length,tot:score(G,i)};}).sort((a,b)=>b.tot-a.tot);
  modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Цілі</th><th class="n">Ансамбль</th><th class="n">Підробіток</th><th class="n">Старт</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
- ${rows.map(r=>{const x=extras(G,r.i);return `<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${x.gl}</td><td class="n">+${x.en}</td><td class="n">+${r.work}</td><td class="n">+${G.pl[r.i].hc||0}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`;}).join("")}</table></div><p class="waitb" style="color:#6b5f50">Цілі: ${G.goals.map(gi=>GOALS[gi].n).join(" · ")}</p>`,[["Альбоми",gallery],["Нова гра",()=>{leave();}],["Закрити",null]]);}
+ ${rows.map(r=>{const x=extras(G,r.i);return `<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${x.gl}</td><td class="n">+${x.en}</td><td class="n">+${r.work}</td><td class="n">+${G.pl[r.i].hc||0}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`;}).join("")}</table></div>${G.series?`<p class="waitb" style="color:#6b5f50">Серія (до цієї партії, ${G.games-1} зіграно): ${G.seats.map((s,i)=>esc(s.n)+" "+G.series[i]).join(" · ")}</p>`:""}<p class="waitb" style="color:#6b5f50">Цілі: ${G.goals.map(gi=>GOALS[gi].n).join(" · ")}</p>`,NET.role==="guest"?[["Альбоми",gallery],["Вийти",()=>{leave();}],["Закрити",null]]:[["Ще партію з ними ж",rematch],["Альбоми",gallery],["Нова гра",()=>{leave();}],["Закрити",null]]);}
+function rematch(){const old=G,sc=old.seats.map((_,i)=>score(old,i)),mx=Math.max(...sc),ser=(old.series||old.seats.map(()=>0)).slice();sc.forEach((x,i)=>{if(x===mx)ser[i]++;});
+ /* у новій партії першим ходить наступний за попереднім першим — черга обертається */
+ const n=old.seats.length,sh=((old.shift||0)+1)%n,seats=old.seats.map((_,k)=>old.seats[(k+1)%n]),ser2=ser.map((_,k)=>ser[(k+1)%n]);
+ clearTimeout(BOTT);mclose(-1);beginGame(seats.map(s=>({n:s.n,k:s.k,peer:s.peer||null})));G.series=ser2;G.games=(old.games||1)+1;G.shift=sh;const me=G.seats.findIndex(s=>s.k==="local");if(me>=0)VIEW=me;save();render();bcast();toast(`Партія ${G.games}. Першим ходить ${G.seats[0].n}`);}
 function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("scroll")} <b>Замовлення.</b> На старті у вас одне. Відкриті три — беріть одне за хід у будь-який момент (у руці до ${HMAX}).</p>
 <p>${ic("palette")} <b>1 · Взяти.</b> Перетягніть картку з крамниці в лоток: ліва половина — <b>усі деталі цього кольору</b>, права — <b>усі деталі цього типу</b>. Якщо не влізе в лоток — гра попередить. Або ${ic("hammer")} <b>підробіток</b>: +1★.</p>
@@ -800,7 +832,7 @@ function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі п’ять правильні.</p>
 <p>${ic("palette")} <b>Цілі партії.</b> Щогри відкриваються 3 спільні цілі (зверху екрана) — бонуси в кінці. <b>Ансамбль дворика:</b> +2 за кожну пару сусідніх завершених дверей з однаковим переважаючим стилем.</p>
 <p><b>Кінець:</b> коли хтось завершує треті двері, інші ходять ще по разу. Кожна деталь у лотку — −1★.</p>`,[["Зрозуміло",null]]);}
-function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Показати навчання",tutRestart],["Вийти в лобі",leave]]);}
+function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Показати навчання",tutRestart],["Звірка листівок",()=>window.open(location.pathname+"#compare","_blank")],["Вийти в лобі",leave]]);}
 function leave(){clearTimeout(BOTT);clearInterval(NET.timer);clearTimeout(NET.rt);if(NET.role==="host")wsSend({t:"close"});const w=NET.ws;NET.leaving=true;try{if(w)w.close();}catch(e){}netBanner(null);lsSet("brami-host",null);lsSet("brami-guest",null);lsSet("brami-lobby",null);NET={role:null,code:"",myPeer:null,lobby:null,timer:null,ws:null,live:[]};G=null;try{localStorage.removeItem("brami3");history.replaceState(null,"",location.pathname);}catch(e){}lobbyRender();}
 
 /* ================= ЛОБІ ================= */
@@ -909,6 +941,17 @@ document.addEventListener("pointermove",e=>{if(DR||RM)return;const c=e.target.cl
  const r=c.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;c.classList.add("tilting");c.style.transform=`perspective(500px) rotateY(${(px-.5)*16}deg) rotateX(${(.5-py)*16}deg) translateY(-4px) scale(1.04)`;c.style.setProperty("--mx",px*100+"%");c.style.setProperty("--my",py*100+"%");});
 
 lobbyRender();
+/* ===== #compare — звірка листівки-прототипу з дверима, що збираються з деталей ===== */
+function compareTool(){document.body.classList.remove('ingame');const fix=lsGet("brami-cmp")||{};
+ const row=o=>{const f=fix[o]||{},req=f.req||ORD[o].req;return `<div class="cmprow" data-o="${o}"><div class="cmph"><b>${o} · ${esc(ORD[o].city)} · ${esc(ORD[o].name)}</b></div><div class="pair"><figure>${protoPic(o)}<figcaption>Листівка-прототип</figcaption></figure><figure class="cmpres">${wallSVG(ORD[o].city,ORD[o].shape,req.map((s,k)=>({t:TYPES[k],s})))}<figcaption>Що збирається з деталей</figcaption></figure></div>
+  <div class="cmpsel">${LN.map((n,k)=>`<label>${n}<select onchange="cmpSet(${o},${k},this.value)">${SK.map(s=>`<option value="${s}" ${req[k]===s?"selected":""}>${STY[s].n}</option>`).join("")}</select></label>`).join("")}<label style="flex:1 1 100%">Що не так (для мене)<input value="${esc(f.note||"")}" oninput="cmpNote(${o},this.value)" placeholder="напр. рамка темніша, на листівці немає маскарона…"></label></div></div>`;};
+ app.innerHTML=`<section class="panel cmp"><div class="ptitle">Звірка листівок і дверей<span style="margin-left:auto;display:flex;gap:8px"><button class="btn" onclick="cmpExport()">${ic("copy")}Вивантажити JSON</button><button class="btn ghost" onclick="location.hash='';location.reload()">До гри</button></span></div><p class="waitb">Змініть стиль шару — праворуч одразу видно результат. Можна дописати коментар. Потім «Вивантажити JSON» і надішліть файл мені.</p>${ORD.map((_,o)=>row(o)).join("")}</section>`;}
+function cmpSet(o,k,s){const fix=lsGet("brami-cmp")||{};const f=fix[o]||(fix[o]={});f.req=(f.req||ORD[o].req.slice());f.req[k]=s;lsSet("brami-cmp",fix);
+ const el=document.querySelector(`.cmprow[data-o="${o}"] .cmpres`);el.innerHTML=wallSVG(ORD[o].city,ORD[o].shape,f.req.map((x,i)=>({t:TYPES[i],s:x})))+"<figcaption>Що збирається з деталей</figcaption>";}
+function cmpNote(o,v){const fix=lsGet("brami-cmp")||{};(fix[o]||(fix[o]={})).note=v;lsSet("brami-cmp",fix);}
+function cmpExport(){const fix=lsGet("brami-cmp")||{};const out=ORD.map((o,i)=>({id:i,city:o.city,name:o.name,card:"/art/cards/card_"+String(i).padStart(2,"0")+".webp",req_now:o.req,req_new:(fix[i]&&fix[i].req)||o.req,changed:!!(fix[i]&&fix[i].req&&fix[i].req.join()!==o.req.join()),note:(fix[i]&&fix[i].note)||""}));
+ const b=new Blob([JSON.stringify({game:"brami",layers:LN,styles:SK,orders:out},null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="brami-zvirka.json";document.body.appendChild(a);a.click();a.remove();toast("Файл brami-zvirka.json збережено");}
+if(location.hash==="#compare")compareTool();
 (function autoResume(){const m=(location.hash||"").match(/^#g-([a-z0-9]{4,6})$/);if(!m)return;const hh=lsGet("brami-host"),gg=lsGet("brami-guest");
  if(hh&&hh.code===m[1])resumeHost(hh.code);else if(gg&&gg.code===m[1])joinRoom(gg.code,gg.name);})();
 </script>
