@@ -251,14 +251,24 @@ body.art-ui .tray .cell{border:none}
 .coverhero img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
 .coverhero h1{position:absolute;left:0;right:0;top:5%;margin:0;text-align:center;font:800 clamp(34px,6vw,76px)/1 Alegreya,serif;color:#fff8e6;text-shadow:0 3px 0 #8a5a12,0 8px 26px rgba(0,0,0,.45)}
 .coverhero p{position:absolute;left:0;right:0;top:calc(5% + clamp(40px,7vw,86px));margin:0;text-align:center;color:#fff3d6;font-weight:600;text-shadow:0 2px 8px rgba(0,0,0,.5)}
-/* ===== однаковий розмір стін: список шарів поверх стіни ===== */
+/* ===== компактний рядок шарів під стіною ===== */
+.lr .sh{display:none}
 @media(min-width:900px) and (min-height:560px){
- .game .door{position:relative}
- .game .door>.strip{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;width:min(100%,calc((100% - 0px)));max-width:94%;background:rgba(14,26,22,.84);backdrop-filter:blur(4px);border:1px solid rgba(214,166,64,.35);border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.4);transition:opacity .2s;z-index:2}
- .game .door:hover>.strip{opacity:.12}
- body.dragging .game .door>.strip,body.dragging .game .door:hover>.strip{opacity:1}
- .game .door>.strip .lr{padding:2px 6px}
+ .game .door>.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px;min-height:46px;flex:none}
+ .game .door>.strip .lr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 1px;border-radius:9px;border:2px solid var(--rc,#7a7064);background:rgba(255,255,255,.04);position:relative;min-height:40px}
+ .game .door>.strip .lr .ic{width:16px;height:16px}
+ .game .door>.strip .lr .nm,.game .door>.strip .lr .need{display:none}
+ .game .door>.strip .lr .sh{display:block;font-size:9.5px;letter-spacing:-.1px;font-weight:700;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ .game .door>.strip .lr .st{position:absolute;top:-6px;right:-5px;width:15px;height:15px;border-radius:50%;background:#14241f;font-size:10px;line-height:15px;text-align:center}
+ .game .door>.strip .lr.done{background:var(--fc);color:#fff}
+ .game .door>.strip .lr.now{background:rgba(214,166,64,.28);box-shadow:0 0 0 2px var(--brass);border-color:var(--rc)}
+ .game .door>.strip .emptyhint{grid-column:1/-1;padding:4px;font-size:12px;display:block;text-align:center;line-height:1.3}.game .door>.strip .emptyhint .ic{width:15px;height:15px}
+ .game .door>.strip.donebar{grid-template-columns:1fr}
+ .game .lower{margin-top:6px}
+ .game .tray{padding:1.6% 6.6% 1.8%}
+ .game .hand .ocard{width:92px}
 }
+@media(min-width:900px) and (max-height:760px) and (min-height:560px){.game .hand .ocard{width:80px}.game .tray{grid-template-columns:repeat(8,minmax(0,56px))}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -572,11 +582,12 @@ function stripHTML(d,slot,inModal){const nx=d?nextIdx(d):0;return `<div class="s
  const tIc=p?p.t:(k===2?(req?k3of(req):"glass"):TYPES[k]);const now=d&&!isDone(d)&&k===nx;const m=p&&req&&p.s===req;
  const st=p?(req?(m?'<span class="st y">✓</span>':`<span class="st n" title="Інший стиль: ${STY[p.s].n}">≈</span>`):'<span class="st y">✓</span>'):(now?'<span class="st" style="color:var(--brass)">◀</span>':'<span class="st" style="opacity:.4">·</span>');
  const need=req?`<span class="need" style="--c:${STY[req].c}">${ic(req)}${STY[req].n}</span>`:`<span class="need" style="--c:#7a7064">будь-який</span>`;
- return `<div class="lr ${now?"now":""} ${p?"done":""}" ${inModal?"":`data-drop="pip:${slot}:${k}"`} title="${LN[k]}: ${LH[k]}${now?" — зараз потрібно це":""}">${ic(tIc)}<span class="nm">${LN[k]}</span>${need}${st}</div>`;}).join("")+`</div>`;}
+ return `<div class="lr ${now?"now":""} ${p?"done":""}" style="--rc:${req?STY[req].c:"#7a7064"};--fc:${p?STY[p.s].c:"transparent"}" ${inModal?"":`data-drop="pip:${slot}:${k}"`} title="${LN[k]}${req?" — потрібно: "+STY[req].n:""}${p?" · покладено: "+STY[p.s].n:""}${now?" · зараз потрібно це":""}">${ic(tIc)}<span class="nm">${LN[k]}</span><span class="sh">${SHN[k]}</span>${need}${st}</div>`;}).join("")+`</div>`;}
+const SHN=["Основа","Філенки","Фрамуга","Фурніт.","Оздоб."];
 function doorHTML(P,i){const d=P.doors[i];
  if(!d)return `<div class="door"><div class="otitle">Вільне місце <small>Місце ${i+1}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG("","rect",[null,null,null,null,null],true)}</div><div class="strip"><div class="emptyhint">${ic("base")} Покладіть сюди <b>Основу</b> — і оберіть замовлення з руки</div></div></div>`;
  const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>id!=null?PT(id):null);
- return `<div class="door"><div class="otitle">${o?esc(o.name):"Вільна реставрація"}<small>${isDone(d)?"готово":matches(d)+"/5 у стилі"}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}${isDone(d)?`<div class="badge">${ic("star")}${doorScore(d)}</div>`:""}</div>${isDone(d)?"":stripHTML(d,i)}</div>`;}
+ return `<div class="door"><div class="otitle">${o?esc(o.name):"Вільна реставрація"}<small>${isDone(d)?"готово":matches(d)+"/5 у стилі"}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}${isDone(d)?`<div class="badge">${ic("star")}${doorScore(d)}</div>`:""}</div>${stripHTML(d,i)}</div>`;}
 function warnText(){if(!canAct()||VIEW!==G.cur)return "";const P=G.pl[G.cur],fr=free(G,G.cur);
  if(G.phase==="take"){const min=Math.min(...G.market.flatMap(id=>[takeSet(G,id,"s").length,takeSet(G,id,"t").length]));if(G.market.length&&min>fr)return `Лоток майже повний (вільно ${fr}) — жоден набір не влізе. Скиньте зайве в кошик (−1★) або візьміть підробіток.`;if(!G.market.length)return "Крамниця порожня — візьміть підробіток.";}
  if(G.phase==="place"&&G.placed<2&&!P.st.some(id=>targets(G,G.cur,id).length))return P.doors.some(d=>!d)&&!P.st.some(id=>PT(id).t==="base")?"Немає що ставити: для нових дверей потрібна Основа. Завершуйте хід.":"Немає що ставити — завершуйте хід.";
