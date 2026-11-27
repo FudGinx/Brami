@@ -1,0 +1,21 @@
+{
+ "parts": [
+  "base_mod",
+  "dec_mod",
+  "fit_mod",
+  "glass_mod",
+  "panel_mod"
+ ],
+ "walls": {
+  "odesa": {
+   "x": 0.2021,
+   "y": 0.143,
+   "w": 0.583,
+   "h": 0.7344
+  }
+ },
+ "cards": [
+  "card_00"
+ ],
+ "ui": []
+}

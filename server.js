@@ -8,8 +8,20 @@ const { WebSocketServer } = require("ws");
 const PORT = process.env.PORT || 3000;
 const INDEX = fs.readFileSync(path.join(__dirname, "public", "index.html"));
 
+const ART = path.join(__dirname, "public", "art");
+const MIME = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg", ".json": "application/json; charset=utf-8" };
 const server = http.createServer((req, res) => {
   if (req.url === "/health") { res.writeHead(200); return res.end("ok"); }
+  if (req.url.startsWith("/art/")) {
+    const rel = decodeURIComponent(req.url.split("?")[0].slice(5));
+    const file = path.normalize(path.join(ART, rel));
+    if (!file.startsWith(ART + path.sep)) { res.writeHead(403); return res.end(); }
+    return fs.readFile(file, (err, buf) => {
+      if (err) { res.writeHead(404); return res.end(); }
+      res.writeHead(200, { "Content-Type": MIME[path.extname(file)] || "application/octet-stream", "Cache-Control": rel === "manifest.json" ? "no-cache" : "public, max-age=86400" });
+      res.end(buf);
+    });
+  }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
   res.end(INDEX);
 });
