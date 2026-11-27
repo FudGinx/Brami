@@ -498,7 +498,7 @@ function warnText(){if(!canAct()||VIEW!==G.cur)return "";const P=G.pl[G.cur],fr=
  if(!P.hand.length&&P.doors.some(d=>!d)&&!G.otook)return "Візьміть замовлення з трьох відкритих — без нього двері будуть «вільною реставрацією».";return "";}
 function hint(){const s=G.seats[G.cur];if(!canAct())return s.k==="bot"?esc(s.n)+" думає…":"Хід: "+esc(s.n);
  if(VIEW!==G.cur)return "Ви дивитеся чужий альбом";
- if(G.phase==="take")return "Перетягніть деталь з крамниці в лоток: ліва половина — увесь колір, права — весь тип. Або підробіток.";
+ if(G.phase==="take")return "Крок 1: перетягніть деталь з крамниці — візьміть увесь колір або весь тип. Або підробіток. Ставити з лотка можна після цього.";
  return G.placed<2?"Перетягніть деталь з лотка на двері або на рядок шару, щоб замінити":"Можна завершувати хід";}
 function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  const before=snap();const n=G.seats.length;if(VIEW>=n)VIEW=G.cur;const P=G.pl[VIEW],my=canAct(),isCur=VIEW===G.cur;
@@ -536,7 +536,14 @@ let DR=null;
 document.addEventListener("pointerdown",e=>{const el=e.target.closest("[data-drag]");if(!el||!canAct()||el.classList.contains("off"))return;if(VIEW!==G.cur){VIEW=G.cur;render();return;}e.preventDefault();DR={el,src:el.dataset.drag,x:e.clientX,y:e.clientY,on:false,hot:null};});
 document.addEventListener("pointermove",e=>{if(!DR)return;if(!DR.on){if(Math.hypot(e.clientX-DR.x,e.clientY-DR.y)<7)return;startDrag();}
  if(e.clientY<70)window.scrollBy(0,-16);else if(e.clientY>innerHeight-30)window.scrollBy(0,16);DR.g.style.left=(e.clientX-DR.ox)+"px";DR.g.style.top=(e.clientY-DR.oy)+"px";const t=dropAt(e.clientX,e.clientY);if(t!==DR.hot){if(DR.hot)DR.hot.classList.remove("hot");DR.hot=t;if(t)t.classList.add("hot");markWill(t);}});
-document.addEventListener("pointerup",e=>{if(!DR)return;const d=DR;if(!d.on){DR=null;clickSrc(d.src);return;}let t=dropAt(e.clientX,e.clientY)||d.hot;const raw=document.elementFromPoint(e.clientX,e.clientY);const z=raw&&raw.closest(".zone.full");DR=null;endDrag(d);if(z&&!t){const[,pid]=d.src.split(":");warnFull(takeSet(G,+pid,z.dataset.drop.slice(5)).length);return;}if(t)drop(d.src,t.dataset.drop);});
+document.addEventListener("pointerup",e=>{if(!DR)return;const d=DR;if(!d.on){DR=null;clickSrc(d.src);return;}let t=dropAt(e.clientX,e.clientY)||d.hot;const raw=document.elementFromPoint(e.clientX,e.clientY);const z=raw&&raw.closest(".zone.full");DR=null;endDrag(d);if(z&&!t){const[,pid]=d.src.split(":");warnFull(takeSet(G,+pid,z.dataset.drop.slice(5)).length);return;}if(t)return drop(d.src,t.dataset.drop);
+ const over=raw&&raw.closest("[data-drop]");if(over&&d.src[0]==="s"&&/^(door|pip):/.test(over.dataset.drop))toast(whyNot(+d.src.split(":")[1],over.dataset.drop),1);});
+function whyNot(pid,key){if(G.phase==="take")return "Спочатку крок 1: візьміть деталі з крамниці або підробіток — тоді можна ставити з лотка.";
+ if(G.placed>=2)return "Цього ходу вже поставлено 2 деталі. Завершуйте хід — решта почекає в лотку.";
+ const slot=+key.split(":")[1],d=G.pl[G.cur].doors[slot],p=PT(pid);
+ if(!d)return p.t==="base"?"Немає вільного місця для нових дверей.":"Нові двері починаються з Основи.";
+ if(isDone(d))return "Ці двері вже завершено.";
+ return `Зараз цим дверям потрібен шар «${LN[nextIdx(d)]}». ${TN[p.t]} кладеться пізніше — шари йдуть по черзі.`;}
 document.addEventListener("pointercancel",()=>{if(DR&&DR.on)endDrag(DR);DR=null;});
 function startDrag(){DR.on=true;const r=DR.el.getBoundingClientRect();DR.ox=DR.x-r.left;DR.oy=DR.y-r.top;const g=DR.el.cloneNode(true);g.classList.add("ghost");g.style.width=r.width+"px";g.style.height=r.height+"px";document.body.appendChild(g);DR.g=g;DR.el.classList.add("lift");
  const [k,v]=DR.src.split(":");DR.valid=validDrops(k,+v);document.querySelectorAll("[data-drop]").forEach(z=>{if(DR.valid.has(z.dataset.drop))z.classList.add("ok");});
@@ -567,7 +574,7 @@ function clickSrc(src){const [k,ps]=src.split(":"),v=+ps;
   const ch=(mode,n,inner,label)=>`<div class="choice ${n>fr?"dis":""}" onclick="${n>fr?`warnFull(${n})`:`mclose(-1);act({a:'take',pid:${v},mode:'${mode}'})`}">${inner}×${n}<small>${n>fr?"не влізе (вільно "+fr+")":label}</small></div>`;
   modal(`<h2>Що берете?</h2><div class="choices">${ch("s",ns,`<span style="color:${STY[p.s].c}">${ic(p.s)}</span>`,"увесь колір: "+STY[p.s].n)}${ch("t",nt,ic(p.t),"усі: "+TN[p.t])}${G.mdisc?"":`<div class="choice" onclick="mclose(-1);act({a:'mdisc',pid:${v}})">${ic("bin")}<small>скинути цю одну (безкоштовно)</small></div>`}</div>`,[["Скасувати",null]]);return;}
  SELP=SELP===v?null:v;render();if(SELP!=null){const s=validDrops("s",v);document.querySelectorAll("[data-drop]").forEach(z=>{if(s.has(z.dataset.drop))z.classList.add("ok");});}}
-function clickDoor(i){if(SELP==null)return;const t=targets(G,G.cur,SELP).filter(x=>x.slot===i);if(!t.length||G.phase!=="place"||G.placed>=2)return toast("Сюди ця деталь зараз не підходить",1);const nr=t.find(x=>!x.rep);const pid=SELP;SELP=null;placeTo(pid,i,nr?nr.layer:t[0].layer);}
+function clickDoor(i){if(SELP==null)return;const t=targets(G,G.cur,SELP).filter(x=>x.slot===i);if(!t.length||G.phase!=="place"||G.placed>=2)return toast(whyNot(SELP,"door:"+i),1);const nr=t.find(x=>!x.rep);const pid=SELP;SELP=null;placeTo(pid,i,nr?nr.layer:t[0].layer);}
 document.addEventListener("click",e=>{if(SELP==null)return;const r=e.target.closest("[data-drop^='pip:']");if(r){e.stopPropagation();const [,s,l]=r.dataset.drop.split(":");const pid=SELP;if(targets(G,G.cur,pid).some(t=>t.slot===+s&&t.layer===+l)){SELP=null;placeTo(pid,+s,+l);}else toast("Сюди ця деталь не підходить",1);}},true);
 function binClick(){if(SELP!=null){const pid=SELP;SELP=null;act({a:"sdisc",pid});}}
 
