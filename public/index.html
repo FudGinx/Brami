@@ -243,9 +243,9 @@ img.ws{aspect-ratio:4/5;width:100%;object-fit:cover}
 .card img,.ws img,img.ws{pointer-events:none;-webkit-user-drag:none;user-select:none}
 .game .wall .wa,.game .wall img.ws{height:100%;width:auto;max-width:100%}
 /* ===== арт інтерфейсу ===== */
-body.art-ui{background:linear-gradient(rgba(14,28,24,.25),rgba(14,28,24,.45)),url(/art/ui/table.webp) center/cover fixed #1c362f}
-body.art-ui .shelf{background:url(/art/ui/shelf.webp) center/100% 100% no-repeat;box-shadow:none;padding:8.5% 7% 4.2%;row-gap:calc(3% + 14px);border-radius:0}
-body.art-ui .tray{background:url(/art/ui/tray.webp) center/100% 100% no-repeat;box-shadow:none;padding:2.2% 6.6% 2.4%;gap:1.2%;border-radius:0}
+body.art-ui{background:linear-gradient(rgba(14,28,24,.25),rgba(14,28,24,.45)),url(art/ui/table.webp) center/cover fixed #1c362f}
+body.art-ui .shelf{background:url(art/ui/shelf.webp) center/100% 100% no-repeat;box-shadow:none;padding:8.5% 7% 4.2%;row-gap:calc(3% + 14px);border-radius:0}
+body.art-ui .tray{background:url(art/ui/tray.webp) center/100% 100% no-repeat;box-shadow:none;padding:2.2% 6.6% 2.4%;gap:1.2%;border-radius:0}
 body.art-ui .tray .cell{border:none}
 .ava.img{background:none!important;padding:0;overflow:hidden}.ava.img img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .coverhero{position:relative;border-radius:20px;overflow:hidden;margin:8px 0 18px;box-shadow:0 14px 34px rgba(0,0,0,.45)}
@@ -255,7 +255,7 @@ body.art-ui .tray .cell{border:none}
 /* ===== компактний рядок шарів під стіною ===== */
 .lr .sh{display:none}
 @media(min-width:900px) and (min-height:560px){
- .game .door>.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px;min-height:46px;flex:none}
+ .game .door>.strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:4px;min-height:46px;flex:none}
  .game .door>.strip .lr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 1px;border-radius:9px;border:2px solid var(--rc,#7a7064);background:rgba(255,255,255,.04);position:relative;min-height:40px}
  .game .door>.strip .lr .ic{width:16px;height:16px}
  .game .door>.strip .lr .nm,.game .door>.strip .lr .need{display:none}
@@ -270,6 +270,8 @@ body.art-ui .tray .cell{border:none}
  .game .hand .ocard{width:92px}
 }
 @media(min-width:900px) and (max-height:760px) and (min-height:560px){.game .hand .ocard{width:80px}.game .tray{grid-template-columns:repeat(8,minmax(0,56px))}}
+.wa.v2{aspect-ratio:2/3}.wa.v2 .wbg{inset:auto;left:-16.667%;top:-18.519%;width:133.333%;height:118.519%;max-width:none}.v2d{position:absolute;left:5.556%;top:7.407%;width:88.889%;height:88.889%}.v2d img{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.v2hole{position:absolute;left:15.28%;top:22.1%;width:69.44%;height:74.1%;background:linear-gradient(#2a1f17,#3a2a1e);border-radius:6px 6px 0 0;box-shadow:inset 0 0 30px rgba(0,0,0,.6)}
 .wa .wplq{position:absolute;left:4%;top:3%;z-index:3;font-size:clamp(9px,1.1vw,13px);padding:2px 8px}
 .galrow{margin:10px 0 14px}.galname{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px}.galname .sc{color:#a87b22}
 .galdoors{display:flex;gap:10px;flex-wrap:wrap}
@@ -287,7 +289,7 @@ body.art-ui .tray .cell{border:none}
 @media(max-width:899px){
  .walls{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}
  .walls .door{flex:0 0 76%;scroll-snap-align:center}
- .door>.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px;min-height:46px}
+ .door>.strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:4px;min-height:46px}
  .door>.strip .lr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 1px;border-radius:9px;border:2px solid var(--rc,#7a7064);background:rgba(255,255,255,.04);position:relative;min-height:40px}
  .door>.strip .lr .ic{width:16px;height:16px}
  .door>.strip .lr .nm,.door>.strip .lr .need{display:none}
@@ -353,38 +355,58 @@ body.art-ui .tray .cell{border:none}
 <div id="modal" class="hidden"></div>
 <script>
 /* ================= ДАНІ ================= */
-const STY={mod:{n:"Модерн",c:"#4f8a55"},cls:{n:"Класицизм",c:"#4f709a"},bar:{n:"Бароко",c:"#a5413b"},nar:{n:"Народне",c:"#c0832f"}};
-const SK=["mod","cls","bar","nar"],TYPES=["base","panel","glass","fit","dec"];
-const TN={base:"Основа",panel:"Філенки",glass:"Фрамуга",fit:"Фурнітура",dec:"Оздоблення"};
-const LN=["Основа","Філенки","Фрамуга","Фурнітура","Оздоблення"];
-const LH=["полотно й рама","панелі на стулках","засклене вікно над дверима","ручки, калатала","декор над входом"];
-const ACC=[["base"],["panel"],["glass"],["fit"],["dec"]];
-const CP={base:3,panel:4,glass:4,fit:4,dec:4};
-const PARTS=[];SK.forEach(s=>TYPES.forEach(t=>{for(let c=0;c<CP[t];c++)PARTS.push({id:PARTS.length,t,s});}));
+const STY={got:{n:"Готика",c:"#3e4a5c"},ren:{n:"Ренесанс",c:"#7a4f9a"},bar:{n:"Бароко",c:"#a5413b"},cls:{n:"Класицизм",c:"#4f709a"},mod:{n:"Модерн",c:"#4f8a55"},nar:{n:"Народне",c:"#c0832f"}};
+const SK=["got","ren","bar","cls","mod","nar"],TYPES=["base","glass","portal","panel","fit","dec"],NL=TYPES.length,LI=TYPES.map((_,i)=>i),EMPTYL=()=>TYPES.map(()=>null);
+const TN={base:"Полотно",glass:"Фрамуга",portal:"Портал",panel:"Філенки",fit:"Фурнітура",dec:"Оздоблення"};
+const LN=TYPES.map(t=>TN[t]);
+const LH=["стулки дверей","засклене вікно над дверима","рама й арка навколо","панелі на стулках","ручки, калатала","декор над входом"];
+const ACC=TYPES.map(t=>[t]);
+/* колода: 6 стилів × 6 типів; копій — за кількістю гравців (2 гравці: 2, інакше 3) */
+const COPIES=3,copiesFor=n=>n<=2?2:3;
+const PARTS=[];SK.forEach(s=>TYPES.forEach(t=>{for(let c=0;c<COPIES;c++)PARTS.push({id:PARTS.length,t,s,c});}));
 const MK=10,STMAX=8,OM=3,HMAX=3;
 const SEATC=["#d6a640","#5fb3d6","#e07a6a","#97c873"];
 const ORD=[
-{city:"Одеса",name:"Брама прибуткового будинку",shape:"arch",req:["cls","cls","cls","bar","cls"],desc:"Висока арка веде з вулиці в тінистий двір: важкі стулки, віялова фрамуга, левове калатало, а біля входу — чавунні колесовідбійники.",fact:"Значну частину старої Одеси збудовано з місцевого вапняку-черепашнику. Його видобували просто під містом — так з’явилися одеські катакомби."},
-{city:"Одеса",name:"Еклектичний під’їзд",shape:"seg",req:["bar","cls","mod","cls","mod"],desc:"Бароковий декор поруч із класичними філенками й модерновим вітражем — почерк одеського центру.",fact:"У другій половині ХІХ ст. одеські архітектори вільно поєднували елементи різних епох — еклектика стала обличчям історичного центру."},
-{city:"Одеса",name:"Двері Пасажу",shape:"arch",req:["bar","bar","mod","bar","bar"],desc:"Пишні двері торговельної галереї: скульптура, позолота і скло.",fact:"Одеський Пасаж на розі Дерибасівської та Преображенської збудували наприкінці ХІХ ст.; його фасади й криту галерею щедро прикрашено скульптурою."},
-{city:"Львів",name:"Сецесійний портал",shape:"arch",req:["mod","mod","mod","mod","mod"],desc:"Плавні лінії, рослинні мотиви, кольорове скло й кована «лоза» над входом.",fact:"Розквіт сецесії у Львові припав приблизно на 1900–1914 роки. Іван Левинський заснував фабрику будівельної кераміки, вироби якої прикрасили чимало фасадів міста."},
-{city:"Львів",name:"Двері кам’яниці",shape:"rect",req:["cls","cls","cls","cls","bar"],desc:"Строга симетрія, віялова фрамуга — а над входом маскарон, що пильнує вулицю.",fact:"Лев — символ Львова; кам’яні леви й левові маски трапляються на фасадах і біля входів по всьому старому місту."},
-{city:"Київ",name:"У дусі Городецького",shape:"seg",req:["mod","mod","mod","bar","mod"],desc:"Модерн із характером: вітраж, кована решітка і скульптурна деталь біля входу.",fact:"Будинок з химерами (1901–1903) Владислав Городецький звів для себе; фасади вкриті скульптурами звірів і мисливськими сюжетами."},
-{city:"Київ",name:"Класицизм Подолу",shape:"rect",req:["cls","cls","cls","cls","cls"],desc:"Бездоганно пропорційні двері купецького будинку з фронтоном і замковим каменем.",fact:"Після великої пожежі 1811 року Поділ відбудовували за новим регулярним планом, і багато споруд постали в стилі класицизму."},
-{city:"Чернігів",name:"Будинок з пропильною різьбою",shape:"rect",req:["nar","nar","nar","nar","nar"],desc:"Дерев’яні двері під ажурною лиштвою: ромби, розетки, зубчасті карнизи.",fact:"Для старого Чернігова характерні дерев’яні будинки кінця ХІХ — початку ХХ ст. з пропильним різьбленням на лиштвах і фронтонах."},
-{city:"Чернігів",name:"Бароковий вхід",shape:"arch",req:["bar","bar","bar","bar","bar"],desc:"Фігурні філенки, кольорове скло, калатало з левовою головою й маскарон.",fact:"Чернігів зберіг визначні пам’ятки козацького бароко, зокрема Катерининську церкву початку XVIII ст. з фігурними фронтонами."},
-{city:"Полтава",name:"Український модерн",shape:"trap",req:["mod","mod","mod","nar","nar"],desc:"Трапецієподібний отвір, народна різьба й стримані модернові лінії.",fact:"Будинок Полтавського губернського земства (1903–1908, арх. Василь Кричевський) — маніфест українського модерну: трапецієподібні вікна й двері, кераміка з народними орнаментами."},
-{city:"Чернівці",name:"Маленький Відень",shape:"arch",req:["cls","mod","mod","mod","mod"],desc:"Віденська елегантність: класична основа, модернові філенки й кована квітка.",fact:"На початку ХХ ст. Чернівці через тісні зв’язки з Віднем часто називали «маленьким Віднем»."},
-{city:"Гуцульщина",name:"Ворота гражди",shape:"rect",req:["nar","nar","nar","nar","nar"],desc:"Масивні дерев’яні ворота з ромбами, сонячними розетками й кованою клямкою.",fact:"Гражда — гуцульська садиба, де хата й господарські будівлі утворюють замкнений двір з одними воротами."},
-{city:"Харків",name:"Будинок Бекетова",shape:"seg",req:["cls","cls","cls","cls","bar"],desc:"Монументальний вхід із чіткою симетрією, віяловою фрамугою і маскароном.",fact:"Архітектор Олексій Бекетов спроєктував у Харкові десятки будівель; на його честь названо станцію метро «Архітектора Бекетова»."},
-{city:"Кам’янець",name:"Брама Старого міста",shape:"arch",req:["bar","nar","bar","bar","bar"],desc:"Кам’яна арка, важкі стулки й ковані цвяхи — двері міста-фортеці.",fact:"Старе місто Кам’янця-Подільського стоїть на скелястому «острові», який майже з усіх боків оточує каньйон річки Смотрич."},
-{city:"Луцьк",name:"Біля замку Любарта",shape:"arch",req:["bar","bar","cls","nar","bar"],desc:"Цегляна стіна, низька арка й ковані деталі старого міста.",fact:"Верхній замок у Луцьку називають замком Любарта: мурований замок тут почав зводити в XIV ст. князь Любарт, син Гедиміна. Замок зображено на банкноті 200 гривень."},
-{city:"Ужгород",name:"Двері Ґалаґова",shape:"rect",req:["cls","cls","cls","mod","cls"],desc:"Лаконічні двері міжвоєнної забудови: чисті лінії, скло і метал. Навесні над ними цвіте сакура.",fact:"У 1920–30-х роках, коли Ужгород був столицею Підкарпатської Русі у складі Чехословаччини, тут постав модерністський урядовий квартал Малий Ґалаґов. Місто також славиться алеями сакур."}
+{"city": "Одеса", "name": "Брама прибуткового будинку", "req": ["cls", "cls", "cls", "cls", "bar", "cls"], "desc": "Висока арка веде з вулиці в тінистий двір: важкі стулки, віялова фрамуга, левове калатало, а біля входу — чавунні колесовідбійники.", "fact": "Значну частину старої Одеси збудовано з місцевого вапняку-черепашнику. Його видобували просто під містом — так з’явилися одеські катакомби."},
+{"city": "Одеса", "name": "Еклектичний під’їзд", "req": ["cls", "mod", "bar", "cls", "cls", "mod"], "desc": "Бароковий декор поруч із класичними філенками й модерновим вітражем — почерк одеського центру.", "fact": "У другій половині ХІХ ст. одеські архітектори вільно поєднували елементи різних епох — еклектика стала обличчям історичного центру."},
+{"city": "Одеса", "name": "Двері Пасажу", "req": ["bar", "bar", "bar", "ren", "ren", "bar"], "desc": "Пишні двері торговельної галереї: скульптура, позолота і скло.", "fact": "Одеський Пасаж на розі Дерибасівської та Преображенської збудували наприкінці ХІХ ст.; його фасади й криту галерею щедро прикрашено скульптурою."},
+{"city": "Одеса", "name": "Воронцовський палац", "req": ["cls", "ren", "cls", "cls", "bar", "ren"], "desc": "Колонада над морем, леви біля входу й стримана класична брама генерал-губернатора.", "fact": "Палац звів архітектор Франц Боффо у 1827–1830 роках на місці турецької фортеці Хаджибей. Воронцову так сподобалася робота, що Боффо згодом доручили й Потьомкінські сходи."},
+{"city": "Львів", "name": "Сецесійний портал", "req": ["mod", "mod", "mod", "mod", "mod", "mod"], "desc": "Плавні лінії, рослинні мотиви, кольорове скло й кована «лоза» над входом.", "fact": "Розквіт сецесії у Львові припав приблизно на 1900–1914 роки. Іван Левинський заснував фабрику будівельної кераміки, вироби якої прикрасили чимало фасадів міста."},
+{"city": "Львів", "name": "Двері кам’яниці", "req": ["bar", "cls", "ren", "cls", "ren", "bar"], "desc": "Строга симетрія, віялова фрамуга — а над входом маскарон, що пильнує вулицю.", "fact": "Лев — символ Львова; кам’яні леви й левові маски трапляються на фасадах і біля входів по всьому старому місту."},
+{"city": "Львів", "name": "Каплиця Боїмів", "req": ["ren", "got", "ren", "ren", "bar", "ren"], "desc": "Темний різьблений фасад, що читається як кам’яна книга: святі, леви й орнамент.", "fact": "Каплицю збудували в 1609–1615 роках як родинну усипальницю купців Боїмів. Фасад вкрили кам’яною різьбою майстри Йоганн Пфістер і Гануш Шольц."},
+{"city": "Львів", "name": "Чорна кам’яниця", "req": ["ren", "cls", "ren", "ren", "ren", "ren"], "desc": "Потемнілий пісковик, діамантовий руст і ренесансні обеліски на аттику.", "fact": "Кам’яницю на площі Ринок, 4 звели в 1588–1589 роках. Тут відкрили одну з перших аптек Львова, а від 1926 року працює історичний музей."},
+{"city": "Львів", "name": "Латинський собор", "req": ["bar", "got", "got", "got", "bar", "got"], "desc": "Готичний портал і стрільчасті вікна, за якими ховаються пізніші барокові двері.", "fact": "Перший камінь заклав король Казимир Великий у 1360 році. Після перебудови 1760–1778 років готичні форми частково поступилися бароковим."},
+{"city": "Київ", "name": "У дусі Городецького", "req": ["mod", "mod", "mod", "mod", "bar", "mod"], "desc": "Модерн із характером: вітраж, кована решітка і скульптурна деталь біля входу.", "fact": "Будинок з химерами (1901–1903) Владислав Городецький звів для себе; фасади вкриті скульптурами звірів і мисливськими сюжетами."},
+{"city": "Київ", "name": "Класицизм Подолу", "req": ["cls", "cls", "cls", "cls", "cls", "cls"], "desc": "Бездоганно пропорційні двері купецького будинку з фронтоном і замковим каменем.", "fact": "Після великої пожежі 1811 року Поділ відбудовували за новим регулярним планом, і багато споруд постали в стилі класицизму."},
+{"city": "Київ", "name": "Андріївська церква", "req": ["bar", "bar", "bar", "mod", "ren", "cls"], "desc": "Блакитно-золотий храм над Андріївським узвозом: пишні двері, ліпнина й позолота.", "fact": "Проєкт Бартоломео Растреллі 1748 року; будували церкву в 1749–1754 роках, а освятили лише 1767-го."},
+{"city": "Київ", "name": "Будинок з химерами", "req": ["mod", "mod", "mod", "bar", "nar", "mod"], "desc": "Двері дому на крутому схилі, де замість химер — бетонні звірі й мисливські трофеї.", "fact": "Владислав Городецький звів будинок у 1901–1902 роках. Назву дали скульптури Еліо Саля; за легендою, архітектор побився об заклад, що збудує дім на кручі."},
+{"city": "Київ", "name": "Миколаївський костел", "req": ["got", "got", "got", "mod", "got", "got"], "desc": "Неоготичний портал зі стрільчастою аркою, вітражем і гострими фіалами.", "fact": "Костел будували в 1899–1909 роках. Городецький доопрацював проєкт: додав кругле вікно-розу і третю вежу."},
+{"city": "Чернігів", "name": "Будинок з пропильною різьбою", "req": ["nar", "nar", "nar", "nar", "nar", "nar"], "desc": "Дерев’яні двері під ажурною лиштвою: ромби, розетки, зубчасті карнизи.", "fact": "Для старого Чернігова характерні дерев’яні будинки кінця ХІХ — початку ХХ ст. з пропильним різьбленням на лиштвах і фронтонах."},
+{"city": "Чернігів", "name": "Бароковий вхід", "req": ["bar", "bar", "bar", "bar", "bar", "bar"], "desc": "Фігурні філенки, кольорове скло, калатало з левовою головою й маскарон.", "fact": "Чернігів зберіг визначні пам’ятки козацького бароко, зокрема Катерининську церкву початку XVIII ст. з фігурними фронтонами."},
+{"city": "Батурин", "name": "Палац Розумовського", "req": ["cls", "cls", "cls", "ren", "mod", "cls"], "desc": "Парадний вхід гетьманської резиденції над Сеймом: колони, фронтон і стримана розкіш.", "fact": "Палац для гетьмана Кирила Розумовського збудував шотландський архітектор Чарльз Камерон у 1799–1803 роках. Це єдина його споруда в Україні."},
+{"city": "Полтава", "name": "Український модерн", "req": ["nar", "mod", "mod", "mod", "nar", "nar"], "desc": "Трапецієподібний отвір, народна різьба й стримані модернові лінії.", "fact": "Будинок Полтавського губернського земства (1903–1908, арх. Василь Кричевський) — маніфест українського модерну: трапецієподібні вікна й двері, кераміка з народними орнаментами."},
+{"city": "Полтава", "name": "Будинок земства", "req": ["nar", "nar", "nar", "mod", "nar", "mod"], "desc": "Майолікові вставки, народний орнамент і трапецієподібні прорізи.", "fact": "Будинок Полтавського губернського земства звели в 1903–1908 роках за проєктом Василя Кричевського. З нього ведуть відлік українського архітектурного модерну."},
+{"city": "Харків", "name": "Будинок Бекетова", "req": ["cls", "cls", "cls", "ren", "cls", "bar"], "desc": "Монументальний вхід із чіткою симетрією, віяловою фрамугою і маскароном.", "fact": "Архітектор Олексій Бекетов спроєктував у Харкові десятки будівель; на його честь названо станцію метро «Архітектора Бекетова»."},
+{"city": "Харків", "name": "Будинок «Саламандра»", "req": ["mod", "mod", "mod", "cls", "cls", "mod"], "desc": "Модерновий вхід страхового товариства: латунь, скло і мотив вогню.", "fact": "Товариство страхувало від пожеж, тому обрало символом саламандру, що живе у вогні. Будинок від початку мав ліфти, сміттєпроводи й внутрішні водостоки."},
+{"city": "Чернівці", "name": "Маленький Відень", "req": ["mod", "mod", "cls", "mod", "mod", "mod"], "desc": "Віденська елегантність: класична основа, модернові філенки й кована квітка.", "fact": "На початку ХХ ст. Чернівці через тісні зв’язки з Віднем часто називали «маленьким Віднем»."},
+{"city": "Чернівці", "name": "Резиденція митрополитів", "req": ["ren", "nar", "nar", "got", "ren", "got"], "desc": "Цегляний портал із візерунчастою черепицею, де сходяться Візантія, готика й Буковина.", "fact": "Резиденцію звели в 1864–1882 роках за проєктом чеського архітектора Йозефа Главки; з 2011 року вона в списку ЮНЕСКО. Черепицю викладено орнаментом вишивки й писанок."},
+{"city": "Гуцульщина", "name": "Ворота гражди", "req": ["nar", "nar", "nar", "nar", "got", "nar"], "desc": "Масивні дерев’яні ворота з ромбами, сонячними розетками й кованою клямкою.", "fact": "Гражда — гуцульська садиба, де хата й господарські будівлі утворюють замкнений двір з одними воротами."},
+{"city": "Ужгород", "name": "Двері Ґалаґова", "req": ["mod", "cls", "cls", "cls", "mod", "cls"], "desc": "Лаконічні двері міжвоєнної забудови: чисті лінії, скло і метал. Навесні над ними цвіте сакура.", "fact": "У 1920–30-х роках, коли Ужгород був столицею Підкарпатської Русі у складі Чехословаччини, тут постав модерністський урядовий квартал Малий Ґалаґов. Місто також славиться алеями сакур."},
+{"city": "Мукачево", "name": "Брама Паланку", "req": ["nar", "got", "got", "got", "nar", "ren"], "desc": "Важка брама замку на вулканічній горі, окута залізом.", "fact": "Замок стоїть на вулканічному пагорбі заввишки 68 метрів. Назва «Паланок» означає дерев’яний частокіл за ровом, що колись оточував підніжжя."},
+{"city": "Кам’янець", "name": "Брама Старого міста", "req": ["got", "nar", "got", "got", "got", "bar"], "desc": "Кам’яна арка, важкі стулки й ковані цвяхи — двері міста-фортеці.", "fact": "Старе місто Кам’янця-Подільського стоїть на скелястому «острові», який майже з усіх боків оточує каньйон річки Смотрич."},
+{"city": "Хотин", "name": "Брама Хотинської фортеці", "req": ["got", "nar", "got", "got", "nar", "got"], "desc": "Сувора кам’яна брама над Дністром із темними стулками.", "fact": "Кам’яну фортецю почали зводити в 1375 році, а молдавські князі Олександр Добрий і Штефан Великий значно її посилили."},
+{"city": "Луцьк", "name": "Біля замку Любарта", "req": ["got", "got", "got", "bar", "nar", "got"], "desc": "Цегляна стіна, низька арка й ковані деталі старого міста.", "fact": "Верхній замок у Луцьку називають замком Любарта: мурований замок тут почав зводити в XIV ст. князь Любарт, син Гедиміна. Замок зображено на банкноті 200 гривень."},
+{"city": "Олесько", "name": "Брама Олеського замку", "req": ["bar", "ren", "ren", "nar", "got", "bar"], "desc": "Брама замку на пагорбі серед боліт, з ренесансною аркою і давньою кладкою.", "fact": "Замок вперше згадується в джерелах 1390 року. Разом із Золочівським і Підгорецьким замками він утворює «Золоту підкову»."},
+{"city": "Підгірці", "name": "Брама Підгорецького замку", "req": ["ren", "ren", "bar", "bar", "cls", "bar"], "desc": "Портал із рустованими колонами, гербами й латинським написом над брамою.", "fact": "Замок збудували в 1635–1640 роках для гетьмана Станіслава Конєцпольського. Над брамою — напис про те, що вінець ратної праці — перемога, а перемоги — мир."},
+{"city": "Жовква", "name": "Замкова брама", "req": ["got", "ren", "ren", "bar", "bar", "cls"], "desc": "В’їзна арка «ідеального міста» з бароковими дверима й класичним фронтоном.", "fact": "Замок будували в 1594–1606 роках; він мав типово серліанську в’їзну арку. Тут король Ян III Собеський святкував перемогу під Віднем."},
+{"city": "Свірж", "name": "Брама Свірзького замку", "req": ["bar", "got", "ren", "nar", "nar", "ren"], "desc": "Міст через рів веде до брами замку, що віддзеркалюється в озері.", "fact": "Замок уперше згадується в 1530 році. До в’їзної брами через рів веде міст, колись підйомний."},
+{"city": "Меджибіж", "name": "Брама Меджибізької фортеці", "req": ["ren", "ren", "ren", "nar", "got", "got"], "desc": "Рожевий камінь фортеці над злиттям двох річок і важка брама.", "fact": "Фортеця стоїть на злитті Південного Бугу й Бужка. У західній стіні XVI століття — укріплена брама з арковим мостом через сухий рів."},
+{"city": "Самар", "name": "Троїцький собор", "req": ["nar", "bar", "nar", "nar", "mod", "nar"], "desc": "Дерев’яні двері козацького собору, різьба і світла сосна.", "fact": "Собор збудували в 1775–1778 роках без жодного цвяха. Це єдиний у світі дев’ятибанний дерев’яний собор; його спорудив зодчий-самоук Яким Погрібняк."}
 ];
 const WALLS={"Одеса":{bg:"#e8d29d",k:"rust",l:"#c7a868"},"Львів":{bg:"#d8a05a",k:"plaster",l:"#b8843f",c2:"#efe1c1",c3:"#9c8f7c"},"Київ":{bg:"#efdfae",k:"pilaster",l:"#d1bd86"},"Чернігів":{bg:"#7096b8",k:"planks",l:"#557c9f"},"Гуцульщина":{bg:"#8a5a32",k:"logs",l:"#5a3820"},"Полтава":{bg:"#f4f0e5",k:"tiles",l:"#dad3c1"},"Чернівці":{bg:"#e9c2b6",k:"stucco",l:"#cfa395"},"Харків":{bg:"#cfcac0",k:"rust",l:"#a8a296"},"Кам’янець":{bg:"#d6c6a2",k:"stone",l:"#a8987a"},"Луцьк":{bg:"#b8613f",k:"brick",l:"#8e4529"},"Ужгород":{bg:"#efe9dc",k:"plaster",l:"#d3cab8",c2:"#ffffff",c3:"#b9b2a4"},_:{bg:"#d7cdbb",k:"shabby",l:"#b9ad97"}};
 
 /* ================= ІКОНКИ ================= */
-const IC={base:'<path d="M6 21V7a6 6 0 0 1 12 0v14M4 21h16"/>',panel:'<rect x="6" y="3" width="12" height="18" rx="1"/><rect x="8.5" y="6" width="7" height="5"/><rect x="8.5" y="13" width="7" height="5"/>',glass:'<path d="M3 17a9 9 0 0 1 18 0Z"/><path d="M12 17V8M12 17 6 11.5M12 17l6-5.5"/>',fit:'<circle cx="12" cy="7" r="3"/><circle cx="12" cy="15" r="4.5"/>',dec:'<circle cx="12" cy="12" r="4"/><path d="M4 9c1-4 4-6 8-6s7 2 8 6M8 19l4 2.5 4-2.5"/>',
+const IC={portal:'<path d="M4 21V9a8 8 0 0 1 16 0v12"/><path d="M8 21v-9a4 4 0 0 1 8 0v9"/><path d="M3 21h18"/>',got:'<path d="M6 21V10l6-7 6 7v11"/><path d="M9 21v-7l3-4 3 4v7"/>',ren:'<circle cx="12" cy="12" r="3"/><path d="M4 20V9a8 8 0 0 1 16 0v11M2 20h20"/>',base:'<path d="M6 21V7a6 6 0 0 1 12 0v14M4 21h16"/>',panel:'<rect x="6" y="3" width="12" height="18" rx="1"/><rect x="8.5" y="6" width="7" height="5"/><rect x="8.5" y="13" width="7" height="5"/>',glass:'<path d="M3 17a9 9 0 0 1 18 0Z"/><path d="M12 17V8M12 17 6 11.5M12 17l6-5.5"/>',fit:'<circle cx="12" cy="7" r="3"/><circle cx="12" cy="15" r="4.5"/>',dec:'<circle cx="12" cy="12" r="4"/><path d="M4 9c1-4 4-6 8-6s7 2 8 6M8 19l4 2.5 4-2.5"/>',
 mod:'<path d="M6 20C6 10 10 5 19 4c-1 9-6 13-13 16Z"/><path d="M6 20l8-9"/>',cls:'<path d="M4 7h16M5 7l7-4 7 4M7 7v11M12 7v11M17 7v11M4 20h16"/>',bar:'<path d="M12 20c-5 0-8-3-8-7s3-7 7-7 6 2 6 5-2 4-4 4-3-1-3-3"/>',nar:'<path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/><circle cx="12" cy="12" r="3"/>',
 star:'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7Z" fill="currentColor"/>',hammer:'<path d="M13 4l7 7-2.5 2.5-7-7zM10.5 6.5 3 14l3.5 3.5L14 10"/>',bin:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',deck:'<rect x="5" y="3" width="12" height="16" rx="2"/><path d="M8 21h11V7"/>',recycle:'<path d="M7 19h10l-2-3M17 19l3-5M4 14l3-6 3 2M7 8l-2 4M14 5l3 5-3 1M17 10h-6"/>',end:'<path d="M5 12h13M13 6l6 6-6 6"/>',bot:'<rect x="5" y="8" width="14" height="11" rx="3"/><circle cx="9.5" cy="13.5" r="1.3" fill="currentColor"/><circle cx="14.5" cy="13.5" r="1.3" fill="currentColor"/><path d="M12 8V4M9 4h6"/>',net:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4.5-7 8-7s7 2 8 7"/>',book:'<path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1zM12 6v14"/>',menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',palette:'<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4C21 6.5 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10" cy="7" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/>',scroll:'<path d="M7 4h11a2 2 0 0 1 2 2v1h-4M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7M7 4a2 2 0 0 1 2 2v12M11 9h4M11 13h4"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',tray:'<path d="M3 13h5l2 3h4l2-3h5M3 13l3-8h12l3 8v6H3z"/>'};
 const ic=(n,c)=>`<svg class="ic ${c||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
@@ -436,12 +458,12 @@ const doorSVG=(shape,L,cls)=>`<svg viewBox="-12 -20 124 180" class="${cls||""}" 
 
 
 const PVB={base:"-14 -22 128 184",panel:"8 48 84 100",glass:"0 0 100 48",fit:"14 66 72 56",dec:"-14 -22 128 72"};
-function partSVG(p){const L=[null,null,null,null,null];L[TYPES.indexOf(p.t)]=p;let back="";
+function partSVG(p){const L=EMPTYL();L[TYPES.indexOf(p.t)]=p;let back="";
  if(p.t==="panel"||p.t==="fit")back='<rect x="0" y="0" width="100" height="150" fill="#b08a5e"/>';if(p.t==="dec")back='<rect x="-14" y="-22" width="128" height="72" fill="#e6dbc4"/>';if(p.t==="glass")back='<rect width="100" height="48" fill="#b08a5e"/>';
  let inner=doorInner("rect",L,false);if(p.t!=="base")inner=inner.replace(/<path d="M10 150V10H90V150Z" fill="#ece3d1"[^>]*\/>/,"");
  return `<svg viewBox="${PVB[p.t]}" class="part" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${back}${inner}</svg>`;}
 const k3of=s=>"glass";
-const ideal=o=>o.req.map((s,i)=>({t:i===2?k3of(s):TYPES[i],s}));
+const ideal=o=>o.req.map((s,i)=>({t:TYPES[i],s}));
 
 /* ================= СТІНИ ================= */
 function wallPat(W){let o="";const L=W.l;
@@ -486,24 +508,17 @@ function wallSVG0(city,shape,L,ghost){const W=WALLS[city]||WALLS._;
 /* ================= АРТ (картинки з /art, якщо є) ================= */
 let ARTM={parts:[],walls:{},cards:[],ps:new Set(),cs:new Set(),ui:new Set()};
 const CITYKEY={"Одеса":"odesa","Львів":"lviv","Київ":"kyiv","Чернігів":"chernihiv","Гуцульщина":"hutsul","Полтава":"poltava","Чернівці":"chernivtsi","Харків":"kharkiv","Кам’янець":"kamianets","Луцьк":"lutsk","Ужгород":"uzhhorod"};
-try{fetch("/art/manifest.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(m=>{if(!m)return;ARTM=m;ARTM.ps=new Set(m.parts||[]);ARTM.cs=new Set(m.cards||[]);ARTM.ui=new Set(m.ui||[]);document.body.classList.toggle("art-ui",ARTM.ui.has("table"));if(location.hash==="#compare")compareTool();else if(G)render();else if(!NET.role)lobbyRender();}).catch(()=>{});}catch(e){}
+try{fetch("art/manifest.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(m=>{if(!m)return;ARTM=m;ARTM.ps=new Set(m.parts||[]);ARTM.cs=new Set(m.cards||[]);ARTM.ui=new Set(m.ui||[]);document.body.classList.toggle("art-ui",ARTM.ui.has("table"));if(location.hash==="#compare")compareTool();else if(G)render();else if(!NET.role)lobbyRender();}).catch(()=>{});}catch(e){}
 const AK=p=>p.t+"_"+p.s;
 const LAYOUT={0:[0,0,100,100],2:[0,0,100,21],1:[8,24,84,72],3:[36,46,28,22],4:[4,-19,92,21]};
 let CMPLAY=null;/* правки розташування зі сторінки звірки (лише там) */
 function layQ(p,i){const k=AK(p);return (CMPLAY&&CMPLAY[k])||(ARTM.layout&&ARTM.layout[k])||LAYOUT[i];}
-function partImg(p){return ARTM.ps.has(AK(p))?`<img class="part" src="/art/parts/${AK(p)}.webp" alt="" draggable="false">`:partSVG(p);}
-function wallSVG(city,shape,L,ghost){const key=city?CITYKEY[city]:"empty",box=ARTM.walls&&ARTM.walls[key];if(!box)return wallSVG0(city,shape,L,ghost);
- const all=L[0]&&L.every(x=>!x||ARTM.ps.has(AK(x)));
- const img=i=>{const q=layQ(L[i],i);return `<img class="${i?"":"b"}" data-ly="${i}" src="/art/parts/${AK(L[i])}.webp" alt="" draggable="false" style="left:${q[0]}%;top:${q[1]}%;width:${q[2]}%;height:${q[3]}%">`;};
- let door="",over="";
- if(all){door=[0,2,1,3].filter(i=>L[i]).map(img).join("");if(L[4])over=img(4);}
- else if(L.some(x=>x))door=`<svg viewBox="10 10 80 140" preserveAspectRatio="none" aria-hidden="true">${doorInner(shape,L,ghost)}</svg>`;
- const pos=`left:${box.x*100}%;top:${box.y*100}%;width:${box.w*100}%;height:${box.h*100}%`;
- const R=((box.rise!=null?box.rise:box.w*.4/box.h)*100).toFixed(1),C=((box.cut||0)*100).toFixed(1);
- const rad=!all?"":box.shape==="trap"?`clip-path:polygon(${C}% 0,${100-C}% 0,100% ${R}%,100% 100%,0 100%,0 ${R}%);`:(box.shape==="arch"||(box.shape==null&&box.arch))?`border-radius:50% 50% 0 0 / ${R}% ${R}% 0 0;overflow:hidden;`:"";
- return `<div class="ws wa"><img class="wbg" src="/art/walls/${key}.webp" alt="" draggable="false">${city?`<span class="plq wplq">${city}</span>`:""}<div class="dw" style="${pos};${rad}">${door}</div>${over?`<div class="dw" style="${pos}">${over}</div>`:""}</div>`;}
-function orderPic(oid){const o=ORD[oid];return wallSVG(o.city,o.shape,ideal(o));}
-function protoPic(oid){const k="card_"+String(oid).padStart(2,"0");return ARTM.cs.has(k)?`<img class="ws" src="/art/cards/${k}.webp" alt="Листівка-прототип" draggable="false">`:"";}
+function partImg(p){return `<img class="part" src="art/v2/T/${p.t}_${p.s}.webp" alt="" draggable="false">`;}
+/* v2: «прозорі карти» — 6 шарів 1024×1536 в одній точці на стіні 1536×2048 (карта дверей у 256,448) */
+function wallSVG(city,shape,L){const lay=LI.filter(i=>L[i]).map(i=>`<img src="art/v2/L/${L[i].t}_${L[i].s}.webp" alt="" draggable="false">`).join("");
+ return `<div class="ws wa v2"><img class="wbg" src="art/v2/wall.webp" alt="" draggable="false">${city?`<span class="plq wplq">${city}</span>`:""}${L.some(x=>x)?"":'<div class="v2hole"></div>'}<div class="v2d">${lay}</div></div>`;}
+function orderPic(oid){const o=ORD[oid];return wallSVG(o.city,"",ideal(o));}
+function protoPic(oid){return "";}
 function pairHTML(left,lcap,right,rcap){return right?`<div class="pair"><figure>${left}<figcaption>${lcap}</figcaption></figure><figure>${right}<figcaption>${rcap}</figcaption></figure></div>`:`<div class="big">${left}</div>`;}
 /* ================= РУШІЙ ================= */
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
@@ -512,8 +527,8 @@ const isDone=d=>!!d&&d.L.every(x=>x!=null);
 const nextIdx=d=>d.L.findIndex(x=>x==null);
 const cnt=v=>typeof v==="number"?v:v.length;
 const reqOf=(d,k)=>d&&d.o>=0?ORD[d.o].req[k]:null;
-function mkGame(seats){const g={seats,cur:0,phase:"take",placed:0,mdisc:false,otook:false,market:[],deck:shuffle(PARTS.map(p=>p.id)),disc:[],od:shuffle(ORD.map((_,i)=>i)),om:[],
- pl:seats.map(()=>({doors:[null,null,null],st:[],hand:[],work:0,brak:0})),endBy:-1,left:-1,trig:false,over:false,seq:0,fx:null,round:1,rs:0,first:null,goals:shuffle([0,1,2,3,4,5,6,7,8]).slice(0,3)};
+function mkGame(seats){const g={seats,cur:0,phase:"take",placed:0,mdisc:false,otook:false,market:[],deck:shuffle(PARTS.filter(p=>p.c<copiesFor(seats.length)).map(p=>p.id)),disc:[],od:shuffle(ORD.map((_,i)=>i)),om:[],
+ pl:seats.map(()=>({doors:[null,null,null],st:[],hand:[],work:0,brak:0})),endBy:-1,left:-1,trig:false,over:false,seq:0,fx:null,round:1,rs:0,first:null,goals:shuffle(GOALS.map((_,i)=>i)).slice(0,3)};
  g.pl.forEach(p=>{if(g.od.length)p.hand.push(g.od.pop());});
  /* компенсація за чергу ходу: пізнішим гравцям — Основа під їхнє замовлення та зірки */
  const n=seats.length;g.pl.forEach((P,i)=>{P.hc=0;if(!i)return;const want=P.hand.length?ORD[P.hand[0]].req[0]:null;let k=g.deck.findIndex(id=>PT(id).t==="base"&&(!want||PT(id).s===want));if(k<0)k=g.deck.findIndex(id=>PT(id).t==="base");if(k>=0){P.st.push(g.deck.splice(k,1)[0]);P.hcBase=P.st[P.st.length-1];}P.hc=n===2?1:Math.max(0,i-1);});
@@ -524,9 +539,9 @@ function refillO(g){while(g.om.length<OM&&Array.isArray(g.od)&&g.od.length)g.om.
 function takeSet(g,pid,mode){const p=PT(pid);return g.market.filter(id=>mode==="s"?PT(id).s===p.s:PT(id).t===p.t);}
 const free=(g,seat)=>STMAX-g.pl[seat].st.length;
 function targets(g,seat,pid){const P=g.pl[seat],p=PT(pid),res=[];
- P.doors.forEach((d,i)=>{if(!d){if(p.t==="base")res.push({slot:i,layer:0});return;}if(isDone(d))return;const n=nextIdx(d);
+ P.doors.forEach((d,i)=>{if(!d){if(p.t==="base"&&P.hand.length)res.push({slot:i,layer:0});return;}if(isDone(d))return;const n=nextIdx(d);
   if(ACC[n].includes(p.t))res.push({slot:i,layer:n});for(let k=0;k<n;k++)if(ACC[k].includes(p.t))res.push({slot:i,layer:k,rep:true});});return res;}
-function doorScore(d){if(!isDone(d))return 0;let s=0,m=0;d.L.forEach((id,i)=>{s++;if(d.o>=0&&PT(id).s===ORD[d.o].req[i]){s++;m++;}});return s+(m===5?3:0);}
+function doorScore(d){if(!isDone(d))return 0;let s=0,m=0;d.L.forEach((id,i)=>{s++;if(d.o>=0&&PT(id).s===ORD[d.o].req[i]){s++;m++;}});return s+(m===NL?3:0);}
 function matches(d){return d.o<0?0:d.L.filter((id,i)=>id!=null&&PT(id).s===ORD[d.o].req[i]).length;}
 function score(g,i){const P=g.pl[i];return P.doors.reduce((a,d)=>a+doorScore(d),0)+P.work+(P.hc||0)-P.brak-(g.over?P.st.length:0)+(g.over&&typeof extras==="function"?extras(g,i).tot:0);}
 function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.pl[seat];
@@ -539,7 +554,7 @@ function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.
  case "sdisc":{const i=P.st.indexOf(m.pid);if(i<0)return false;P.st.splice(i,1);g.disc.push(m.pid);P.brak++;g.fx={k:"sdisc",pid:m.pid,seat};return true;}
  case "place":{if(g.phase!=="place"||g.placed>=2||!P.st.includes(m.pid))return false;
   const t=targets(g,seat,m.pid).find(x=>x.slot===m.slot&&(m.layer==null?!x.rep:x.layer===m.layer));if(!t)return false;
-  let d=P.doors[m.slot];if(!d){let o=-1;if(P.hand.length){o=P.hand.includes(m.o)?m.o:P.hand[0];P.hand.splice(P.hand.indexOf(o),1);}d=P.doors[m.slot]={o,L:[null,null,null,null,null]};}
+  let d=P.doors[m.slot];if(!d){if(!P.hand.length)return false;const o=P.hand.includes(m.o)?m.o:P.hand[0];P.hand.splice(P.hand.indexOf(o),1);d=P.doors[m.slot]={o,L:EMPTYL()};}
   const old=d.L[t.layer];if(old!=null)g.disc.push(old);d.L[t.layer]=m.pid;P.st.splice(P.st.indexOf(m.pid),1);g.placed++;
   g.fx={k:"place",pid:m.pid,seat,slot:m.slot,layer:t.layer,rep:old!=null};
   if(isDone(d)){g.fx.done=true;g.fx.pts=doorScore(d);if(g.first==null)g.first=seat;if(g.endBy<0&&P.doors.every(isDone)){g.endBy=seat;g.left=g.seats.length-1;}}return true;}
@@ -551,7 +566,7 @@ function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.
 /* підказки для підсвітки: "perfect" — тип і колір, "fit" — лише тип */
 function hintMarket(g,seat,pid){const P=g.pl[seat],p=PT(pid);let r="";
  for(const d of P.doors){if(!d){if(p.t==="base"){r=r||"fit";if(P.hand.some(o=>ORD[o].req[0]===p.s))return "perfect";}continue;}if(isDone(d))continue;const n=nextIdx(d);
-  for(let k=n;k<5;k++)if(ACC[k].includes(p.t)){r=r||"fit";if(reqOf(d,k)===p.s)return "perfect";}}return r;}
+  for(let k=n;k<NL;k++)if(ACC[k].includes(p.t)){r=r||"fit";if(reqOf(d,k)===p.s)return "perfect";}}return r;}
 function hintStore(g,seat,pid){const T=targets(g,seat,pid).filter(t=>!t.rep);if(!T.length)return "";const P=g.pl[seat],p=PT(pid);
  for(const t of T){const d=P.doors[t.slot];if(!d){if(P.hand.some(o=>ORD[o].req[0]===p.s))return "perfect";}else if(reqOf(d,t.layer)===p.s)return "perfect";}return "fit";}
 
@@ -561,23 +576,25 @@ const finD=P=>P.doors.filter(isDone);
 const cntS=(P,s)=>finD(P).reduce((a,d)=>a+d.L.filter(id=>PT(id).s===s).length,0);
 const domS=d=>{const c={};d.L.forEach(id=>{const s=PT(id).s;c[s]=(c[s]||0)+1;});return Object.keys(c).sort((a,b)=>c[b]-c[a])[0];};
 const GOALS=[
- {n:"Шанувальники сецесії",ic:"mod",d:"Найбільше деталей Модерну в завершених дверях: +5",maj:P=>cntS(P,"mod"),v:5},
- {n:"Класична школа",ic:"cls",d:"Найбільше деталей Класицизму в завершених дверях: +5",maj:P=>cntS(P,"cls"),v:5},
- {n:"Бароковий смак",ic:"bar",d:"Найбільше деталей Бароко в завершених дверях: +5",maj:P=>cntS(P,"bar"),v:5},
- {n:"Народні майстри",ic:"nar",d:"Найбільше народних деталей у завершених дверях: +5",maj:P=>cntS(P,"nar"),v:5},
+ {n:"Шанувальники сецесії",ic:"mod",sty:"mod",d:"Найбільше деталей Модерну в завершених дверях: +5",maj:P=>cntS(P,"mod"),v:5},
+ {n:"Класична школа",ic:"cls",sty:"cls",d:"Найбільше деталей Класицизму в завершених дверях: +5",maj:P=>cntS(P,"cls"),v:5},
+ {n:"Бароковий смак",ic:"bar",sty:"bar",d:"Найбільше деталей Бароко в завершених дверях: +5",maj:P=>cntS(P,"bar"),v:5},
+ {n:"Народні майстри",ic:"nar",sty:"nar",d:"Найбільше народних деталей у завершених дверях: +5",maj:P=>cntS(P,"nar"),v:5},
  {n:"Мандрівник",ic:"scroll",d:"Завершені двері з 3 різних міст: +4",f:P=>new Set(finD(P).filter(d=>d.o>=0).map(d=>ORD[d.o].city)).size>=3?4:0},
  {n:"Еклектик",ic:"palette",d:"+3 за кожні завершені двері, де 3 і більше різних стилів",f:P=>finD(P).filter(d=>new Set(d.L.map(id=>PT(id).s)).size>=3).length*3},
  {n:"Пурист",ic:"star",d:"+3 за кожні завершені двері в одному стилі",f:P=>finD(P).filter(d=>new Set(d.L.map(id=>PT(id).s)).size===1).length*3},
  {n:"Перші в місті",ic:"base",d:"Хто першим завершив двері: +3",f:(P,i,g)=>g.first===i?3:0},
- {n:"Охайна майстерня",ic:"tray",d:"Без жодного браку й з порожнім лотком наприкінці: +3",f:P=>!P.brak&&!P.st.length?3:0}];
+ {n:"Охайна майстерня",ic:"tray",d:"Без жодного браку й з порожнім лотком наприкінці: +3",f:P=>!P.brak&&!P.st.length?3:0},
+ {n:"Готичні мандри",ic:"got",sty:"got",d:"Найбільше готичних деталей у завершених дверях: +5",maj:P=>cntS(P,"got"),v:5},
+ {n:"Ренесансні майстри",ic:"ren",sty:"ren",d:"Найбільше деталей Ренесансу в завершених дверях: +5",maj:P=>cntS(P,"ren"),v:5}];
 const GFM=[s=>`${ic(s)}${ic(s)}${ic(s)}<i>найбільше</i>`];
-function goalFm(gi){const G2=GOALS[gi];if(gi<4)return GFM[0](G2.ic);return [null,null,null,null,
+function goalFm(gi){const G2=GOALS[gi];if(G2.sty)return GFM[0](G2.ic);return [null,null,null,null,
  `${ic("base")}${ic("base")}${ic("base")}<i>3 міста</i>`,
  `${ic("mod")}${ic("cls")}${ic("bar")}<i>на дверях</i>`,
- `${ic("cls")}${ic("cls")}${ic("cls")}${ic("cls")}${ic("cls")}<i>один стиль</i>`,
+ `${ic("cls")}${ic("cls")}${ic("cls")}${ic("cls")}<i>один стиль</i>`,
  `${ic("base")}<i>№1</i>`,
  `${ic("bin")}<i>0</i>${ic("tray")}<i>0</i>`][gi];}
-const GVAL=[5,5,5,5,4,3,3,3,3],GEACH=[0,0,0,0,0,1,1,0,0];
+const GVAL=[5,5,5,5,4,3,3,3,3,5,5],GEACH=[0,0,0,0,0,1,1,0,0,0,0];
 function goalCards(){if(!G||!G.goals)return "";return `<div class="gcards">${G.goals.map(gi=>{const G2=GOALS[gi],who=G.seats.map((s,i)=>goalPts(G,gi,i)?seatAva(s,i):"").join("");
  return `<div class="gcard" tabindex="0" onclick="goalsModal()" title="${G2.n}: ${G2.d}"><span class="gic">${ic(G2.ic)}</span><span class="gtx"><b>${G2.n}</b><span class="gfm">${goalFm(gi)}</span></span><span class="gv">+${GVAL[gi]}${GEACH[gi]?"<small>кожні</small>":""}</span>${who?`<span class="gwho" title="Зараз отримали б">${who}</span>`:""}<span class="gtip">${G2.d}</span></div>`;}).join("")}</div>`;}
 function goalPts(g,gi,i){const G2=GOALS[gi],P=g.pl[i];if(G2.f)return G2.f(P,i,g);const vals=g.pl.map(G2.maj),mx=Math.max(...vals);return mx>0&&G2.maj(P)===mx?G2.v:0;}
@@ -588,9 +605,9 @@ function goalsModal(){const rows=G.goals.map(gi=>`<div class="grow"><b>${ic(GOAL
  modal(`<h2>Цілі партії</h2><p class="waitb" style="color:#6b5f50">Очки за цілі й ансамбль нараховуються в кінці гри. Нижче — скільки кожен отримав би зараз.</p>${rows}<div class="grow"><b>${ic("base")} Ансамбль дворика</b><small>+2 за кожну пару сусідніх завершених дверей з однаковим переважаючим стилем (місця 1–2 і 2–3).</small><div class="gnow">${G.seats.map((s,i)=>`<span>${seatAva(s,i)} ${ensemble(G.pl[i])?"+"+ensemble(G.pl[i]):"0"}</span>`).join("")}</div></div>`,[["Зрозуміло",null]]);}
 /* ================= БОТ ================= */
 function useVal(g,P,id,have){const p=PT(id);let best=-1.0;
- P.doors.forEach(d=>{if(!d){if(p.t==="base"){const ok=P.hand.some(o=>ORD[o].req[0]===p.s),al=have.some(h=>PT(h).t==="base");best=Math.max(best,al?0.1:(ok?3:1.6));}return;}if(isDone(d))return;const n=nextIdx(d);
-  for(let k=n;k<5;k++){if(!ACC[k].includes(p.t))continue;const req=reqOf(d,k);const al=have.some(h=>{const q=PT(h);return ACC[k].includes(q.t)&&(!req||q.s===req);});let v=req===p.s?3:1;if(k>n)v*=.8;if(al)v=v*.15-.3;best=Math.max(best,v);}
-  for(let k=0;k<n;k++)if(ACC[k].includes(p.t)&&d.o>=0&&PT(d.L[k]).s!==ORD[d.o].req[k]&&p.s===ORD[d.o].req[k])best=Math.max(best,1.5);});if(best>0&&g.goals){const si=["mod","cls","bar","nar"].indexOf(p.s);if(g.goals.includes(si))best+=.4;if(g.goals.includes(6)&&P.doors.some(d=>d&&!isDone(d)&&d.L[0]!=null&&PT(d.L[0]).s===p.s))best+=.3;}return best;}
+ P.doors.forEach(d=>{if(!d){if(p.t==="base"){const ok=P.hand.some(o=>ORD[o].req[0]===p.s),al=have.some(h=>PT(h).t==="base");best=Math.max(best,al?0.1:(ok?3:(P.hand.length||g.om.length?1.6:0.2)));}return;}if(isDone(d))return;const n=nextIdx(d);
+  for(let k=n;k<NL;k++){if(!ACC[k].includes(p.t))continue;const req=reqOf(d,k);const al=have.some(h=>{const q=PT(h);return ACC[k].includes(q.t)&&(!req||q.s===req);});let v=req===p.s?3:1;if(k>n)v*=.8;if(al)v=v*.15-.3;best=Math.max(best,v);}
+  for(let k=0;k<n;k++)if(ACC[k].includes(p.t)&&d.o>=0&&PT(d.L[k]).s!==ORD[d.o].req[k]&&p.s===ORD[d.o].req[k])best=Math.max(best,1.5);});if(best>0&&g.goals){if(g.goals.some(gi=>GOALS[gi].sty===p.s))best+=.4;if(g.goals.includes(6)&&P.doors.some(d=>d&&!isDone(d)&&d.L[0]!=null&&PT(d.L[0]).s===p.s))best+=.3;}return best;}
 function botOrder(g,seat){const P=g.pl[seat];if(g.otook||P.hand.length>=2||!g.om.length)return null;const empty=P.doors.some(d=>!d);if(!empty)return null;
  let best=g.om[0],bv=-1;for(const o of g.om){let v=0;ORD[o].req.forEach((s,k)=>{if(P.st.some(id=>PT(id).s===s&&ACC[k].includes(PT(id).t)))v++;});if(v>bv){bv=v;best=o;}}return {a:"order",o:best};}
 function botTake(g,seat){const P=g.pl[seat];let best={a:"work"},bv=0.9;const seen=new Set(),fr=free(g,seat);
@@ -631,7 +648,7 @@ function warnFull(n){toast(`Не влізе: береш ${n}, а в лотку �
 function doMove(seat,m){if(!apply(G,seat,m))return false;G.seq++;SELP=null;save();const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();afterFx(fx);bcast();schedule();return true;}
 function afterFx(fx){scoreBumps();if(!fx)return;if(fx.k==="turn"&&TUT.step===3)TUT.step=4;
  if(fx.k==="take")play("take");if(fx.k==="work")play("star");if(fx.k==="mdisc"||fx.k==="sdisc")setTimeout(()=>play("bin"),350);
- if(fx.k==="place"){setTimeout(()=>play("place"),380);if(fx.done){const dd=G.pl[fx.seat].doors[fx.slot];setTimeout(()=>play(dd&&matches(dd)===5?"perfect":"done"),650);}}
+ if(fx.k==="place"){setTimeout(()=>play("place"),380);if(fx.done){const dd=G.pl[fx.seat].doors[fx.slot];setTimeout(()=>play(dd&&matches(dd)===NL?"perfect":"done"),650);}}
  if(fx.k==="turn")setTimeout(()=>play("turn"),250);if(fx.k==="over")setTimeout(()=>play("fanfare"),300);
  if(fx.k==="take"){const t=document.getElementById("tray");if(t){const [x,y]=center(t);setTimeout(()=>stars(x,y,18),450);}}
  if(fx.k==="work"){const [x,y]=center(document.getElementById("work"));stars(x,y,22);}
@@ -701,22 +718,22 @@ async function joinRoom(code,name){code=String(code).toLowerCase().replace(/[^a-
 
 /* ================= ВІДОБРАЖЕННЯ ================= */
 function cardHTML(pid,src,extra){const p=PT(pid);return `<div class="card tilt ${extra||""}" style="--c:${STY[p.s].c}" data-pid="${pid}" data-drag="${src}:${pid}" tabindex="0" title="${TN[p.t]} · ${STY[p.s].n}"><div class="top">${ic(p.s)}${STY[p.s].n}</div><div class="shine"></div>${partImg(p)}<div class="lab">${ic(p.t)}${TN[p.t]}</div></div>`;}
-function seatAva(s,i){if(ARTM.ui&&ARTM.ui.has("ava"))return `<span class="ava img" style="background:${SEATC[i]}"><img src="/art/ui/${s.k==="bot"?"bot":"ava"+(i%4)}.webp" alt="" draggable="false"></span>`;return `<span class="ava" style="background:${SEATC[i]}">${s.k==="bot"?ic("bot"):s.k==="net"?ic("net"):ic("user")}</span>`;}
+function seatAva(s,i){if(ARTM.ui&&ARTM.ui.has("ava"))return `<span class="ava img" style="background:${SEATC[i]}"><img src="art/ui/${s.k==="bot"?"bot":"ava"+(i%4)}.webp" alt="" draggable="false"></span>`;return `<span class="ava" style="background:${SEATC[i]}">${s.k==="bot"?ic("bot"):s.k==="net"?ic("net"):ic("user")}</span>`;}
 function chipsOf(o){return `<div class="chips">${o.req.map(s=>`<i style="background:${STY[s].c}"></i>`).join("")}</div>`;}
 function ocardHTML(oid,src){const o=ORD[oid];return `<div class="ocard" ${src?`data-drag="${src}:${oid}" data-oid="${oid}"`:""} onclick="${src?"":`showOrder(${oid})`}" tabindex="0" title="${esc(o.city+" · "+o.name)}">${orderPic(oid)}<div class="on">${esc(o.name)}${chipsOf(o)}</div></div>`;}
-function stripHTML(d,slot,inModal){const nx=d?nextIdx(d):0;return `<div class="strip">`+[0,1,2,3,4].map(k=>{const id=d?d.L[k]:null,p=id!=null?PT(id):null,req=reqOf(d,k);
+function stripHTML(d,slot,inModal){const nx=d?nextIdx(d):0;return `<div class="strip">`+LI.map(k=>{const id=d?d.L[k]:null,p=id!=null?PT(id):null,req=reqOf(d,k);
  const tIc=p?p.t:(k===2?(req?k3of(req):"glass"):TYPES[k]);const now=d&&!isDone(d)&&k===nx;const m=p&&req&&p.s===req;
  const st=p?(req?(m?'<span class="st y">✓</span>':`<span class="st n" title="Інший стиль: ${STY[p.s].n}">≈</span>`):'<span class="st y">✓</span>'):(now?'<span class="st" style="color:var(--brass)">◀</span>':'<span class="st" style="opacity:.4">·</span>');
  const need=req?`<span class="need" style="--c:${STY[req].c}">${ic(req)}${STY[req].n}</span>`:`<span class="need" style="--c:#7a7064">будь-який</span>`;
  return `<div class="lr ${now?"now":""} ${p?"done":""}" style="--rc:${req?STY[req].c:"#7a7064"};--fc:${p?STY[p.s].c:"transparent"}" ${inModal?"":`data-drop="pip:${slot}:${k}"`} title="${LN[k]}${req?" — потрібно: "+STY[req].n:""}${p?" · покладено: "+STY[p.s].n:""}${now?" · зараз потрібно це":""}">${ic(tIc)}<span class="nm">${LN[k]}</span><span class="sh">${SHN[k]}</span>${need}${st}</div>`;}).join("")+`</div>`;}
-const SHN=["Основа","Філенки","Фрамуга","Фурніт.","Оздоб."];
+const SHN=["Полот.","Фрам.","Портал","Філен.","Фурн.","Оздоб."];
 function doorHTML(P,i){const d=P.doors[i];
- if(!d)return `<div class="door"><div class="otitle">Вільне місце <small>Місце ${i+1}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG("","rect",[null,null,null,null,null],true)}</div><div class="strip"><div class="emptyhint">${ic("base")} Покладіть сюди <b>Основу</b> — і оберіть замовлення з руки</div></div></div>`;
+ if(!d)return `<div class="door"><div class="otitle">Вільне місце <small>Місце ${i+1}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG("","rect",[null,null,null,null,null],true)}</div><div class="strip"><div class="emptyhint">${ic("base")} Покладіть сюди <b>Полотно</b> — і оберіть замовлення з руки</div></div></div>`;
  const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>id!=null?PT(id):null);
- return `<div class="door"><div class="otitle">${o?esc(o.name):"Вільна реставрація"}<small>${isDone(d)?"готово":matches(d)+"/5 у стилі"}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}${isDone(d)?`<div class="badge">${ic("star")}${doorScore(d)}</div>`:""}</div>${stripHTML(d,i)}</div>`;}
+ return `<div class="door"><div class="otitle">${o?esc(o.name):"Вільна реставрація"}<small>${isDone(d)?"готово":matches(d)+"/"+NL+" у стилі"}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}${isDone(d)?`<div class="badge">${ic("star")}${doorScore(d)}</div>`:""}</div>${stripHTML(d,i)}</div>`;}
 function warnText(){if(!canAct()||VIEW!==G.cur)return "";const P=G.pl[G.cur],fr=free(G,G.cur);
  if(G.phase==="take"){const min=Math.min(...G.market.flatMap(id=>[takeSet(G,id,"s").length,takeSet(G,id,"t").length]));if(G.market.length&&min>fr)return `Лоток майже повний (вільно ${fr}) — жоден набір не влізе. Скиньте зайве в кошик (−1★) або візьміть підробіток.`;if(!G.market.length)return "Крамниця порожня — візьміть підробіток.";}
- if(G.phase==="place"&&G.placed<2&&!P.st.some(id=>targets(G,G.cur,id).length))return P.doors.some(d=>!d)&&!P.st.some(id=>PT(id).t==="base")?"Немає що ставити: для нових дверей потрібна Основа. Завершуйте хід.":"Немає що ставити — завершуйте хід.";
+ if(G.phase==="place"&&G.placed<2&&!P.st.some(id=>targets(G,G.cur,id).length))return P.doors.some(d=>!d)&&!P.st.some(id=>PT(id).t==="base")?"Немає що ставити: для нових дверей потрібні Полотно й замовлення в руці. Завершуйте хід.":"Немає що ставити — завершуйте хід.";
  if(!P.hand.length&&P.doors.some(d=>!d)&&!G.otook)return "Візьміть замовлення з трьох відкритих — без нього двері будуть «вільною реставрацією».";return "";}
 function hint(){const s=G.seats[G.cur];if(!canAct())return s.k==="bot"?esc(s.n)+" думає…":"Хід: "+esc(s.n);
  if(VIEW!==G.cur)return "Ви дивитеся чужий альбом";
@@ -764,7 +781,7 @@ document.addEventListener("pointerup",e=>{if(!DR)return;const d=DR;if(!d.on){DR=
 function whyNot(pid,key){if(G.phase==="take")return "Спочатку крок 1: візьміть деталі з крамниці або підробіток — тоді можна ставити з лотка.";
  if(G.placed>=2)return "Цього ходу вже поставлено 2 деталі. Завершуйте хід — решта почекає в лотку.";
  const slot=+key.split(":")[1],d=G.pl[G.cur].doors[slot],p=PT(pid);
- if(!d)return p.t==="base"?"Немає вільного місця для нових дверей.":"Нові двері починаються з Основи.";
+ if(!d)return p.t!=="base"?"Нові двері починаються з Полотна.":!G.pl[G.cur].hand.length?"Спершу візьміть замовлення — без нього нові двері не почати.":"Немає вільного місця для нових дверей.";
  if(isDone(d))return "Ці двері вже завершено.";
  return `Зараз цим дверям потрібен шар «${LN[nextIdx(d)]}». ${TN[p.t]} кладеться пізніше — шари йдуть по черзі.`;}
 document.addEventListener("pointercancel",()=>{if(DR&&DR.on)endDrag(DR);DR=null;});
@@ -808,18 +825,18 @@ function passScreen(){const s=G.seats[G.cur];modal(`<div style="text-align:cente
 function chooseOrder(P,cb){PICK=cb;modal(`<h2>Яке замовлення починаєте?</h2><div class="choices">`+P.hand.map(o=>`<div class="choice" onclick="pickOrder(${o})">${orderPic(o)}<small><b>${esc(ORD[o].name)}</b></small>${chipsOf(ORD[o])}</div>`).join("")+`</div>`,[["Скасувати",null]]);}
 function pickOrder(o){const f=PICK;PICK=null;mclose(-1);if(f)f(o);}
 function showOrder(oid,fromMkt){const o=ORD[oid];const can=fromMkt&&canAct()&&!G.otook&&G.pl[G.cur].hand.length<HMAX&&G.om.includes(oid);
- modal(`<h2>${esc(o.name)}</h2>${pairHTML(orderPic(oid),"Що треба зібрати",protoPic(oid),"Листівка-прототип")}${stripHTML({o:oid,L:[null,null,null,null,null]},0,true)}<p>${esc(o.desc)}</p><p class="waitb" style="color:#6b5f50">За готові двері: 1★ за кожну деталь, +1★ за деталь у потрібному стилі, +3★ якщо всі п’ять — максимум 13★.</p>`,
+ modal(`<h2>${esc(o.name)}</h2>${pairHTML(orderPic(oid),"Що треба зібрати",protoPic(oid),"Листівка-прототип")}${stripHTML({o:oid,L:EMPTYL()},0,true)}<p>${esc(o.desc)}</p><p class="waitb" style="color:#6b5f50">За готові двері: 1★ за кожну деталь, +1★ за деталь у потрібному стилі, +3★ якщо всі шість — максимум 15★.</p>`,
  can?[["Взяти замовлення",()=>act({a:"order",o:oid})],["Закрити",null]]:[["Закрити",null]]);
  if(fromMkt&&!can&&canAct())toast(G.otook?"Замовлення вже взято цього ходу":G.pl[G.cur].hand.length>=HMAX?"У руці вже "+HMAX+" замовлення":"",1);}
-const VERD=[["Еклектика — теж стиль!","Від прототипу лишилася хіба адреса, але двері стоять і радують двір."],["Еклектика — теж стиль!","Сміливо й по-своєму: архітектори ХІХ століття оцінили б."],["Сміливе поєднання","Двоє деталей впізнають оригінал, решта — ваша фантазія."],["Добра робота","Більшість рис прототипу збережено."],["Майже влучили!","Лише одна деталь не з того стилю — ще трохи, і було б ідеально."],["Ідеально!","Автентична реставрація: усі п’ять шарів як у прототипі."]];
+const VERD=[["Еклектика — теж стиль!","Від прототипу лишилася хіба адреса, але двері стоять і радують двір."],["Еклектика — теж стиль!","Одна деталь упізнає оригінал, решта — свобода реставратора."],["Сміливе поєднання","Дві деталі впізнають оригінал, решта — ваша фантазія."],["Добра робота","Половину рис прототипу збережено."],["Добра робота","Більшість рис прототипу збережено."],["Майже влучили!","Лише одна деталь не з того стилю — ще трохи, і було б ідеально."],["Ідеально!","Автентична реставрація: усі шість шарів як у прототипі."]];
 function verdictHTML(d){if(d.o<0)return `<div class="verd"><b>Вільна фантазія</b><small>Без замовлення — двері зібрано на власний смак.</small></div>`;const m=matches(d),v=VERD[m];
- return `<div class="verd v${m}"><div class="vst">${[0,1,2,3,4].map(i=>`<span class="${i<m?"on":""}" style="animation-delay:${.35+i*.12}s">${ic("star")}</span>`).join("")}</div><b>${v[0]}</b><small>${v[1]}</small></div>`;}
+ return `<div class="verd v${m}"><div class="vst">${LI.map(i=>`<span class="${i<m?"on":""}" style="animation-delay:${.35+i*.12}s">${ic("star")}</span>`).join("")}</div><b>${v[0]}</b><small>${v[1]}</small></div>`;}
 function postcard(seat,slot,browse){const d=G.pl[seat].doors[slot];if(!d)return;const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>PT(id)),m=matches(d),pts=doorScore(d);
  modal(`<div class="pcin">${verdictHTML(d)}<h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2>${pairHTML(wallSVG(o?o.city:"",o?o.shape:"rect",L),"Ваша реставрація",o?protoPic(d.o):"","Листівка-прототип")}
- <div class="sline"><span>${ic("base")}деталі 5 × 1★</span><span style="color:#2f7d4f">${ic("palette")}у стилі ${m} × 1★</span>${m===5?`<span style="color:#a87b22">${ic("star")}автентично +3★</span>`:""}<span>= ${pts}★</span></div>
+ <div class="sline"><span>${ic("base")}деталі ${NL} × 1★</span><span style="color:#2f7d4f">${ic("palette")}у стилі ${m} × 1★</span>${m===NL?`<span style="color:#a87b22">${ic("star")}автентично +3★</span>`:""}<span>= ${pts}★</span></div>
  ${o?`<p class="fact">${esc(o.fact)}</p>`:""}</div>`,browse==="gal"?[["До альбому",gallery],["Закрити",null]]:[[browse?"Закрити":"До колекції",null]]);}
 function gallery(){let any=false;const rows=G.seats.map((s,i)=>{const ds=G.pl[i].doors.map((d,k)=>[d,k]).filter(([d])=>isDone(d));if(ds.length)any=true;
- return `<div class="galrow"><div class="galname">${seatAva(s,i)} ${esc(s.n)} <span class="sc">${ic("star")}${score(G,i)}</span></div><div class="galdoors">${ds.length?ds.map(([d,k])=>{const o=d.o>=0?ORD[d.o]:null;return `<button class="galdoor" onclick="mclose(-1);postcard(${i},${k},'gal')" title="${o?esc(o.city+" · "+o.name):"Вільна реставрація"}">${wallSVG(o?o.city:"",o?o.shape:"rect",d.L.map(id=>PT(id)))}<span class="galst">${"★".repeat(matches(d))}${"☆".repeat(5-matches(d))}</span></button>`;}).join(""):'<span class="waitb" style="color:#6b5f50">жодних завершених дверей</span>'}</div></div>`;}).join("");
+ return `<div class="galrow"><div class="galname">${seatAva(s,i)} ${esc(s.n)} <span class="sc">${ic("star")}${score(G,i)}</span></div><div class="galdoors">${ds.length?ds.map(([d,k])=>{const o=d.o>=0?ORD[d.o]:null;return `<button class="galdoor" onclick="mclose(-1);postcard(${i},${k},'gal')" title="${o?esc(o.city+" · "+o.name):"Вільна реставрація"}">${wallSVG(o?o.city:"",o?o.shape:"rect",d.L.map(id=>PT(id)))}<span class="galst">${"★".repeat(matches(d))}${"☆".repeat(NL-matches(d))}</span></button>`;}).join(""):'<span class="waitb" style="color:#6b5f50">жодних завершених дверей</span>'}</div></div>`;}).join("");
  modal(`<h2>Альбоми реставраторів</h2>${rows}${any?`<p class="waitb" style="color:#6b5f50">Натисніть на двері, щоб відкрити листівку.</p>`:""}`,G.over?[["Підсумки",finalScreen],["Закрити",null]]:[["Закрити",null]]);}
 function finalScreen(){const rows=G.seats.map((s,i)=>{const P=G.pl[i];return {i,s,doors:P.doors.reduce((a,d)=>a+doorScore(d),0),work:P.work,brak:P.brak,left:P.st.length,tot:score(G,i)};}).sort((a,b)=>b.tot-a.tot);
  modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Цілі</th><th class="n">Ансамбль</th><th class="n">Підробіток</th><th class="n">Старт</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
@@ -831,17 +848,17 @@ function rematch(){const old=G,sc=old.seats.map((_,i)=>score(old,i)),mx=Math.max
 function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("scroll")} <b>Замовлення.</b> На старті у вас одне. Відкриті три — беріть одне за хід у будь-який момент (у руці до ${HMAX}).</p>
 <p>${ic("palette")} <b>1 · Взяти.</b> Перетягніть картку з крамниці в лоток: ліва половина — <b>усі деталі цього кольору</b>, права — <b>усі деталі цього типу</b>. Якщо не влізе в лоток — гра попередить. Або ${ic("hammer")} <b>підробіток</b>: +1★.</p>
-<p>${ic("base")} <b>2 · Поставити до 2 деталей</b> з лотка на двері. Шари по черзі: Основа → Філенки → Фрамуга → Фурнітура → Оздоблення. Рядок, що підсвічений ◀, — те, що потрібно зараз. Перетягніть деталь на вже заповнений рядок, щоб <b>замінити</b> її (стара йде у скид).</p>
+<p>${ic("base")} <b>2 · Поставити до 2 деталей</b> з лотка на двері. Шари по черзі: Полотно → Фрамуга → Портал → Філенки → Фурнітура → Оздоблення. Рядок, що підсвічений ◀, — те, що потрібно зараз. Перетягніть деталь на вже заповнений рядок, щоб <b>замінити</b> її (стара йде у скид).</p>
 <p><b>Підсвітка:</b> зелена рамка — деталь підходить за типом; золота з ★ — і за типом, і за кольором замовлення.</p>
 <p>${ic("bin")} <b>Кошик.</b> Замість кроку 1 можна безкоштовно скинути одну картку з крамниці — і переходити до кроку 2. Скинуте з лотка — −1★. Коли колода скінчиться, скинуте перемішується назад.</p>
-<p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі п’ять правильні.</p>
+<p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі шість правильні.</p>
 <p>${ic("palette")} <b>Цілі партії.</b> Щогри відкриваються 3 спільні цілі (зверху екрана) — бонуси в кінці. <b>Ансамбль дворика:</b> +2 за кожну пару сусідніх завершених дверей з однаковим переважаючим стилем.</p>
 <p><b>Кінець:</b> коли хтось завершує треті двері, інші ходять ще по разу. Кожна деталь у лотку — −1★.</p>`,[["Зрозуміло",null]]);}
 function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Показати навчання",tutRestart],["Звірка листівок",()=>window.open(location.pathname+"#compare","_blank")],["Вийти в лобі",leave]]);}
 function leave(){clearTimeout(BOTT);clearInterval(NET.timer);clearTimeout(NET.rt);if(NET.role==="host")wsSend({t:"close"});const w=NET.ws;NET.leaving=true;try{if(w)w.close();}catch(e){}netBanner(null);lsSet("brami-host",null);lsSet("brami-guest",null);lsSet("brami-lobby",null);NET={role:null,code:"",myPeer:null,lobby:null,timer:null,ws:null,live:[]};G=null;try{localStorage.removeItem("brami3");history.replaceState(null,"",location.pathname);}catch(e){}lobbyRender();}
 
 /* ================= ЛОБІ ================= */
-function heroHTML(){if(ARTM.ui&&ARTM.ui.has("cover"))return `<div class="coverhero"><img src="/art/ui/cover.webp" alt="Старий дворик із трьома відреставрованими дверима"><h1>Брами та дворики</h1><p>Реставруйте двері українських міст</p></div>`;return `<div class="hero">${[0,3,9].map(i=>`<div class="wall">${orderPic(i)}</div>`).join("")}</div>`;}
+function heroHTML(){if(ARTM.ui&&ARTM.ui.has("cover"))return `<div class="coverhero"><img src="art/ui/cover.webp" alt="Старий дворик із трьома відреставрованими дверима"><h1>Брами та дворики</h1><p>Реставруйте двері українських міст</p></div>`;return `<div class="hero">${[0,3,9].map(i=>`<div class="wall">${orderPic(i)}</div>`).join("")}</div>`;}
 function lobbyRender(){document.body.classList.remove('ingame');if(NET.role==="guest")return guestWait();const sv=load(),hosting=NET.role==="host",seats=hosting?NET.lobby:SETUP.seats;const hash=(location.hash||"").match(/^#g-([a-z0-9]{4,6})$/);
  let h=`<div class="bar"><div class="logo">Брами та дворики</div><div class="seats"></div>${sndBtn()}<button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button></div><div class="lobby">${heroHTML()}<div class="lgrid">`;
  h+=`<section class="panel"><div class="ptitle">${hosting?"Кімната відкрита":"Нова гра"}</div>`;
@@ -859,8 +876,8 @@ async function startGame(){if(NET.role==="host"){beginGame(NET.lobby.map(s=>s.k=
  if(seats.some(s=>s.k==="net")){if(await hostRoom()){NET.lobby=seats.map(s=>({...s,peer:null}));lobbyRender();bcast();return;}seats.forEach(s=>{if(s.k==="net")s.k="bot";});}
  beginGame(seats);}
 function beginGame(seats){G=mkGame(seats.map(s=>({n:s.n,k:s.k,peer:s.peer||null})));VIEW=0;save();render();bcast();if(G.seats.length>1)compModal(()=>{if(G.seats[0].k==="local"&&G.seats.filter(s=>s.k==="local").length>1)passScreen();});else if(G.seats[0].k==="local"&&G.seats.filter(s=>s.k==="local").length>1)passScreen();schedule();}
-function compModal(cb){const rows=G.seats.map((s,i)=>{const P=G.pl[i];const b=P.hcBase!=null?PT(P.hcBase):null;return `<tr><td><span style="display:flex;align-items:center;gap:8px;white-space:nowrap">${seatAva(s,i)} ${esc(s.n)}</span></td><td>${i===0?"ходить першим":(b?`${ic("base")} Основа · ${STY[b.s].n}`:"")}</td><td class="n">${P.hc?"+"+P.hc+"★":""}</td></tr>`;}).join("");
- modal(`<h2>Черга ходу</h2><p class="waitb" style="color:#6b5f50">Хто ходить пізніше, отримує на старті Основу під своє замовлення (вже в лотку) і, за потреби, зірки — так шанси перемогти вирівнюються.</p><div class="scroll"><table>${rows}</table></div>`,[["Почати",cb]]);}
+function compModal(cb){const rows=G.seats.map((s,i)=>{const P=G.pl[i];const b=P.hcBase!=null?PT(P.hcBase):null;return `<tr><td><span style="display:flex;align-items:center;gap:8px;white-space:nowrap">${seatAva(s,i)} ${esc(s.n)}</span></td><td>${i===0?"ходить першим":(b?`${ic("base")} Полотно · ${STY[b.s].n}`:"")}</td><td class="n">${P.hc?"+"+P.hc+"★":""}</td></tr>`;}).join("");
+ modal(`<h2>Черга ходу</h2><p class="waitb" style="color:#6b5f50">Хто ходить пізніше, отримує на старті Полотно під своє замовлення (вже в лотку) і, за потреби, зірки — так шанси перемогти вирівнюються.</p><div class="scroll"><table>${rows}</table></div>`,[["Почати",cb]]);}
 function resume(){G=load();if(!G)return;G.seats.forEach(s=>{if(s.k==="net")s.k="bot";});VIEW=G.cur;render();schedule();}
 function guestWait(){if(G)return render();document.body.classList.remove('ingame');const ls=NET.lobby||[];app.innerHTML=`<div class="bar"><div class="logo">Брами та дворики</div></div><div class="lobby">${heroHTML()}<section class="panel"><div class="ptitle">${ic("net")} Кімната ${esc(NET.code.toUpperCase())}</div>${ls.length?ls.map((s,i)=>`<div class="lrow">${seatAva(s,i)}<span class="sn">${esc(s.n)}${s.peer&&s.peer===NET.myPeer?" — ви":""}</span></div>`).join(""):`<p class="waitb">Під’єднуємося до господаря кімнати…</p>`}<p class="waitb">Гра почнеться, коли господар натисне «Почати гру».</p><button class="btn alt" onclick="leave()">Вийти</button></section></div>`;}
 
@@ -895,8 +912,8 @@ document.addEventListener("pointerdown",()=>{if(SND.mode!=="off"&&!SND.ctx){actx
 const TUT={step:(()=>{try{return localStorage.getItem("brami-tut")==="done"?-1:0;}catch(e){return 0;}})(),shownFor:null};
 const TSTEPS=[
  {sel:".shelf",t:"Крок 1 — візьміть деталі",b:"Перетягніть картку з крамниці вниз: з’являться зони «увесь колір» і «весь тип». Зелена рамка — деталь підходить вашим дверям, золота ★ — ідеально за типом і кольором.",when:()=>G.phase==="take"},
- {sel:".walls",t:"Крок 2 — поставте на двері",b:"Тягніть деталі з лотка на стіну. Першою завжди йде Основа — тоді оберете замовлення. За хід можна поставити до 2 деталей.",when:()=>G.phase==="place"&&G.placed===0},
- {sel:".door .strip",t:"Шари дверей",b:"Під кожною стіною — 5 шарів по черзі. ◀ показує, що потрібно зараз, колір рамки — потрібний стиль. ✓ — влучили. Перетягніть деталь на вже заповнений шар, щоб замінити.",when:()=>G.phase==="place"&&G.placed>=1,next:true},
+ {sel:".walls",t:"Крок 2 — поставте на двері",b:"Тягніть деталі з лотка на стіну. Першим завжди йде Полотно — тоді оберете замовлення (без замовлення в руці нові двері не почати). За хід можна поставити до 2 деталей.",when:()=>G.phase==="place"&&G.placed===0},
+ {sel:".door .strip",t:"Шари дверей",b:"Під кожною стіною — 6 шарів по черзі. ◀ показує, що потрібно зараз, колір рамки — потрібний стиль. ✓ — влучили. Перетягніть деталь на вже заповнений шар, щоб замінити.",when:()=>G.phase==="place"&&G.placed>=1,next:true},
  {sel:".turn .btn",t:"Завершіть хід",b:"Коли поставили, що хотіли, — завершуйте хід. Деталі, що лишились у лотку, почекають.",when:()=>G.phase==="place",next:true},
  {sel:".omkt",t:"Замовлення",b:"Раз за хід можна взяти одне з трьох відкритих замовлень у руку (до 3). Наведіть, щоб збільшити. Вгорі — спільні цілі партії: натисніть на них, щоб побачити бонуси.",when:()=>true,next:true}];
 function tutEnd(){TUT.step=-1;try{localStorage.setItem("brami-tut","done");}catch(e){}coachHide();}
@@ -917,7 +934,7 @@ const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FX={c:document.getElementById("fxc"),p:[],amb:[],run:false};
 FX.x=FX.c.getContext("2d");
 /* малі екрани ноутбуків: гра зменшується цілком, щоб усе (разом з цілями) влазило без прокрутки */
-function fitZoom(){const w=innerWidth,hh=innerHeight;let z=1;if(w>=900&&hh>=480)z=Math.max(.6,Math.min(1,hh/900,w/1400));document.documentElement.style.setProperty("--appz",z.toFixed(3));}
+function fitZoom(){const w=innerWidth,hh=innerHeight;let z=1;if(w>=900&&hh>=480)z=Math.max(.6,Math.min(1,hh/940,w/1400));document.documentElement.style.setProperty("--appz",z.toFixed(3));}
 addEventListener("resize",fitZoom);fitZoom();
 function fxSize(){const d=devicePixelRatio||1;FX.c.width=innerWidth*d;FX.c.height=innerHeight*d;FX.x.setTransform(d,0,0,d,0,0);}
 addEventListener("resize",fxSize);fxSize();
@@ -963,7 +980,7 @@ function compareTool(){document.body.classList.remove('ingame');CMPLAY=lsGet("br
 const CMPSEL={};
 function cmpReq(o){const f=(lsGet("brami-cmp")||{})[o];return (f&&f.req)||ORD[o].req;}
 function cmpDraw(o){const rowEl=document.querySelector(`.cmprow[data-o="${o}"]`);if(!rowEl)return;const box=rowEl.querySelector(".cmpres"),L=cmpReq(o).map((s,k)=>({t:TYPES[k],s})),k=CMPSEL[o],on=rowEl.querySelector(".onion"),op=on?on.style.opacity:0;
- box.innerHTML=wallSVG(ORD[o].city,ORD[o].shape,L)+`<img class="onion" src="/art/cards/card_${String(o).padStart(2,"0")}.webp" alt="" style="opacity:${op||0}">`;
+ box.innerHTML=wallSVG(ORD[o].city,ORD[o].shape,L)+`<img class="onion" src="art/cards/card_${String(o).padStart(2,"0")}.webp" alt="" style="opacity:${op||0}">`;
  box.querySelectorAll("img[data-ly]").forEach(im=>{const i=+im.dataset.ly;im.classList.toggle("cmpon",i===k);im.onpointerdown=ev=>cmpDrag(ev,o,i,im);im.onwheel=ev=>{ev.preventDefault();cmpScale(o,i,ev.deltaY<0?1.03:1/1.03);};});
  rowEl.querySelectorAll(".cmplys button").forEach(b=>b.classList.toggle("on",+b.dataset.k===k));
  const q=layQ(L[k],k);rowEl.querySelectorAll(".cmpbar input[data-f]").forEach(inp=>{inp.value=+(+q[+inp.dataset.f]).toFixed(1);inp.onchange=()=>cmpSetQ(o,k,+inp.dataset.f,+inp.value);});}
