@@ -321,7 +321,10 @@ body.art-ui .tray .cell{border:none}
 .gcard .gtip{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#2a2119;color:#f3e6c8;font-size:12.5px;line-height:1.35;padding:8px 10px;border-radius:9px;box-shadow:0 8px 20px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .15s;z-index:40}
 .gcard:hover .gtip,.gcard:focus-visible .gtip{opacity:1}.gcard:hover{transform:translateY(-1px)}
 .cmp{max-width:1100px;margin:16px auto}.cmprow{border-top:1px solid rgba(255,255,255,.12);padding:14px 0}.cmph{margin-bottom:8px}
-.cmp .pair figure{max-width:420px}.cmpsel{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.cmpsel label{display:flex;flex-direction:column;font-size:12px;gap:3px}.cmpsel select,.cmpsel input{font:inherit;padding:5px 7px;border-radius:7px;border:1px solid #8a7752;background:#f6ead0;color:#2a2119}
+.cmp .pair figure{max-width:440px}.cmpres{position:relative}.cmpres .onion{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;border-radius:14px}
+.cmpres .dw,.cmpres .ws{pointer-events:none}.cmpres img[data-ly]{cursor:grab;touch-action:none;pointer-events:auto}.cbtn{font:600 13px system-ui;padding:7px 12px;border-radius:8px;border:1px solid #8a7752;background:#f6ead0;color:#2a2119;cursor:pointer}.cbtn.on,.cbtn.main{background:#d6a640;border-color:#d6a640}.cmpres img.cmpon{outline:2px dashed #ffd36b;outline-offset:-2px;filter:drop-shadow(0 0 6px rgba(255,211,107,.9))}
+.cmpbar{display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin-top:8px}.cmpbar label{display:flex;flex-direction:column;font-size:12px;gap:3px}.cmpbar input[type=number]{width:70px;font:inherit;padding:5px;border-radius:7px;border:1px solid #8a7752;background:#f6ead0;color:#2a2119}
+.cmplys{display:flex;gap:4px;flex-wrap:wrap}.btn.sm{padding:6px 10px;font-size:13px}.cmplys .btn.on{background:var(--brass);color:#2a2119}.onl{min-width:160px}.cmpsel{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.cmpsel label{display:flex;flex-direction:column;font-size:12px;gap:3px}.cmpsel select,.cmpsel input{font:inherit;padding:5px 7px;border-radius:7px;border:1px solid #8a7752;background:#f6ead0;color:#2a2119}
 .goalbar{display:flex;gap:6px;cursor:pointer;flex-wrap:wrap}
 .gchip{display:flex;align-items:center;gap:5px;background:rgba(214,166,64,.14);border:1px solid rgba(214,166,64,.45);border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:700;white-space:nowrap}
 .gchip .ic{width:15px;height:15px}
@@ -486,10 +489,12 @@ const CITYKEY={"Одеса":"odesa","Львів":"lviv","Київ":"kyiv","Че�
 try{fetch("/art/manifest.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(m=>{if(!m)return;ARTM=m;ARTM.ps=new Set(m.parts||[]);ARTM.cs=new Set(m.cards||[]);ARTM.ui=new Set(m.ui||[]);document.body.classList.toggle("art-ui",ARTM.ui.has("table"));if(location.hash==="#compare")compareTool();else if(G)render();else if(!NET.role)lobbyRender();}).catch(()=>{});}catch(e){}
 const AK=p=>p.t+"_"+p.s;
 const LAYOUT={0:[0,0,100,100],2:[0,0,100,21],1:[8,24,84,72],3:[36,46,28,22],4:[4,-19,92,21]};
+let CMPLAY=null;/* правки розташування зі сторінки звірки (лише там) */
+function layQ(p,i){const k=AK(p);return (CMPLAY&&CMPLAY[k])||(ARTM.layout&&ARTM.layout[k])||LAYOUT[i];}
 function partImg(p){return ARTM.ps.has(AK(p))?`<img class="part" src="/art/parts/${AK(p)}.webp" alt="" draggable="false">`:partSVG(p);}
 function wallSVG(city,shape,L,ghost){const key=city?CITYKEY[city]:"empty",box=ARTM.walls&&ARTM.walls[key];if(!box)return wallSVG0(city,shape,L,ghost);
  const all=L[0]&&L.every(x=>!x||ARTM.ps.has(AK(x)));
- const img=i=>{const q=LAYOUT[i];return `<img class="${i?"":"b"}" src="/art/parts/${AK(L[i])}.webp" alt="" draggable="false" style="left:${q[0]}%;top:${q[1]}%;width:${q[2]}%;height:${q[3]}%">`;};
+ const img=i=>{const q=layQ(L[i],i);return `<img class="${i?"":"b"}" data-ly="${i}" src="/art/parts/${AK(L[i])}.webp" alt="" draggable="false" style="left:${q[0]}%;top:${q[1]}%;width:${q[2]}%;height:${q[3]}%">`;};
  let door="",over="";
  if(all){door=[0,2,1,3].filter(i=>L[i]).map(img).join("");if(L[4])over=img(4);}
  else if(L.some(x=>x))door=`<svg viewBox="10 10 80 140" preserveAspectRatio="none" aria-hidden="true">${doorInner(shape,L,ghost)}</svg>`;
@@ -942,15 +947,36 @@ document.addEventListener("pointermove",e=>{if(DR||RM)return;const c=e.target.cl
 
 lobbyRender();
 /* ===== #compare — звірка листівки-прототипу з дверима, що збираються з деталей ===== */
-function compareTool(){document.body.classList.remove('ingame');const fix=lsGet("brami-cmp")||{};
- const row=o=>{const f=fix[o]||{},req=f.req||ORD[o].req;return `<div class="cmprow" data-o="${o}"><div class="cmph"><b>${o} · ${esc(ORD[o].city)} · ${esc(ORD[o].name)}</b></div><div class="pair"><figure>${protoPic(o)}<figcaption>Листівка-прототип</figcaption></figure><figure class="cmpres">${wallSVG(ORD[o].city,ORD[o].shape,req.map((s,k)=>({t:TYPES[k],s})))}<figcaption>Що збирається з деталей</figcaption></figure></div>
-  <div class="cmpsel">${LN.map((n,k)=>`<label>${n}<select onchange="cmpSet(${o},${k},this.value)">${SK.map(s=>`<option value="${s}" ${req[k]===s?"selected":""}>${STY[s].n}</option>`).join("")}</select></label>`).join("")}<label style="flex:1 1 100%">Що не так (для мене)<input value="${esc(f.note||"")}" oninput="cmpNote(${o},this.value)" placeholder="напр. рамка темніша, на листівці немає маскарона…"></label></div></div>`;};
- app.innerHTML=`<section class="panel cmp"><div class="ptitle">Звірка листівок і дверей<span style="margin-left:auto;display:flex;gap:8px"><button class="btn" onclick="cmpExport()">${ic("copy")}Вивантажити JSON</button><button class="btn ghost" onclick="location.hash='';location.reload()">До гри</button></span></div><p class="waitb">Змініть стиль шару — праворуч одразу видно результат. Можна дописати коментар. Потім «Вивантажити JSON» і надішліть файл мені.</p>${ORD.map((_,o)=>row(o)).join("")}</section>`;}
-function cmpSet(o,k,s){const fix=lsGet("brami-cmp")||{};const f=fix[o]||(fix[o]={});f.req=(f.req||ORD[o].req.slice());f.req[k]=s;lsSet("brami-cmp",fix);
- const el=document.querySelector(`.cmprow[data-o="${o}"] .cmpres`);el.innerHTML=wallSVG(ORD[o].city,ORD[o].shape,f.req.map((x,i)=>({t:TYPES[i],s:x})))+"<figcaption>Що збирається з деталей</figcaption>";}
+function compareTool(){document.body.classList.remove('ingame');CMPLAY=lsGet("brami-cmp-lay")||{};const fix=lsGet("brami-cmp")||{};
+ const row=o=>{const f=fix[o]||{};return `<div class="cmprow" data-o="${o}"><div class="cmph"><b>${o} · ${esc(ORD[o].city)} · ${esc(ORD[o].name)}</b></div>
+  <div class="pair"><figure>${protoPic(o)}<figcaption>Листівка-прототип</figcaption></figure><figure><div class="cmpres" data-o="${o}"></div><figcaption>Що збирається · тягніть деталь мишкою, колесо — розмір</figcaption></figure></div>
+  <div class="cmpbar"><span class="cmplys">${LN.map((n,k)=>`<button class="cbtn" data-k="${k}" onclick="cmpPick(${o},${k})">${n}</button>`).join("")}</span>
+  <label>x<input type="number" step="0.5" data-f="0"></label><label>y<input type="number" step="0.5" data-f="1"></label><label>ширина<input type="number" step="0.5" data-f="2"></label><label>висота<input type="number" step="0.5" data-f="3"></label>
+  <button class="cbtn" onclick="cmpReset(${o})">Скинути</button><label class="onl">Накласти листівку<input type="range" min="0" max="90" value="0" oninput="this.closest('.cmprow').querySelector('.onion').style.opacity=this.value/100"></label></div>
+  <div class="cmpsel">${LN.map((n,k)=>`<label>${n} — стиль<select onchange="cmpSet(${o},${k},this.value)">${SK.map(s=>`<option value="${s}" ${(f.req||ORD[o].req)[k]===s?"selected":""}>${STY[s].n}</option>`).join("")}</select></label>`).join("")}<label style="flex:1 1 100%">Що не так (для мене)<input value="${esc(f.note||"")}" oninput="cmpNote(${o},this.value)" placeholder="напр. ручки мають бути нижче й ближче до центру…"></label></div></div>`;};
+ app.innerHTML=`<section class="panel cmp"><div class="ptitle">Звірка листівок і дверей<span style="margin-left:auto;display:flex;gap:8px"><button class="cbtn main" onclick="cmpExport()">${ic("copy")}Вивантажити JSON</button><button class="cbtn" onclick="location.hash='';location.reload()">До гри</button></span></div>
+ <p class="waitb">Оберіть шар (Фурнітура, Оздоблення…) і перетягніть деталь мишкою, колесом змініть розмір, або впишіть числа. «Накласти листівку» показує прототип напівпрозоро поверх дверей. Одна й та сама деталь (напр. барокові калатала) стоїть у всіх дверях, де вона є, — правка діє на всі. Потім «Вивантажити JSON» і надішліть файл мені.</p>${ORD.map((_,o)=>row(o)).join("")}</section>`;
+ ORD.forEach((_,o)=>{CMPSEL[o]=3;cmpDraw(o);});}
+const CMPSEL={};
+function cmpReq(o){const f=(lsGet("brami-cmp")||{})[o];return (f&&f.req)||ORD[o].req;}
+function cmpDraw(o){const rowEl=document.querySelector(`.cmprow[data-o="${o}"]`);if(!rowEl)return;const box=rowEl.querySelector(".cmpres"),L=cmpReq(o).map((s,k)=>({t:TYPES[k],s})),k=CMPSEL[o],on=rowEl.querySelector(".onion"),op=on?on.style.opacity:0;
+ box.innerHTML=wallSVG(ORD[o].city,ORD[o].shape,L)+`<img class="onion" src="/art/cards/card_${String(o).padStart(2,"0")}.webp" alt="" style="opacity:${op||0}">`;
+ box.querySelectorAll("img[data-ly]").forEach(im=>{const i=+im.dataset.ly;im.classList.toggle("cmpon",i===k);im.onpointerdown=ev=>cmpDrag(ev,o,i,im);im.onwheel=ev=>{ev.preventDefault();cmpScale(o,i,ev.deltaY<0?1.03:1/1.03);};});
+ rowEl.querySelectorAll(".cmplys button").forEach(b=>b.classList.toggle("on",+b.dataset.k===k));
+ const q=layQ(L[k],k);rowEl.querySelectorAll(".cmpbar input[data-f]").forEach(inp=>{inp.value=+(+q[+inp.dataset.f]).toFixed(1);inp.onchange=()=>cmpSetQ(o,k,+inp.dataset.f,+inp.value);});}
+function cmpPick(o,k){CMPSEL[o]=k;cmpDraw(o);}
+function cmpPut(o,i,q){const p={t:TYPES[i],s:cmpReq(o)[i]};CMPLAY[AK(p)]=q.map(v=>Math.round(v*10)/10);lsSet("brami-cmp-lay",CMPLAY);ORD.forEach((_,x)=>{if(x===o||cmpReq(x)[i]===p.s)cmpDraw(x);});}
+function cmpSetQ(o,i,f,v){const q=layQ({t:TYPES[i],s:cmpReq(o)[i]},i).slice();q[f]=v;cmpPut(o,i,q);}
+function cmpScale(o,i,m){CMPSEL[o]=i;const q=layQ({t:TYPES[i],s:cmpReq(o)[i]},i).slice(),cx=q[0]+q[2]/2,cy=q[1]+q[3]/2;q[2]*=m;q[3]*=m;q[0]=cx-q[2]/2;q[1]=cy-q[3]/2;cmpPut(o,i,q);}
+function cmpDrag(ev,o,i,im){ev.preventDefault();CMPSEL[o]=i;const dw=im.parentElement.getBoundingClientRect(),q0=layQ({t:TYPES[i],s:cmpReq(o)[i]},i).slice(),x0=ev.clientX,y0=ev.clientY;let raf=0;
+ const mv=e=>{const q=q0.slice();q[0]+=(e.clientX-x0)/dw.width*100;q[1]+=(e.clientY-y0)/dw.height*100;cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>cmpPut(o,i,q));};
+ const up=()=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);cmpDraw(o);};addEventListener("pointermove",mv);addEventListener("pointerup",up);cmpDraw(o);}
+function cmpReset(o){const i=CMPSEL[o];delete CMPLAY[AK({t:TYPES[i],s:cmpReq(o)[i]})];lsSet("brami-cmp-lay",CMPLAY);ORD.forEach((_,x)=>cmpDraw(x));}
+function cmpSet(o,k,s){const fix=lsGet("brami-cmp")||{};const f=fix[o]||(fix[o]={});f.req=(f.req||ORD[o].req.slice());f.req[k]=s;lsSet("brami-cmp",fix);cmpDraw(o);}
 function cmpNote(o,v){const fix=lsGet("brami-cmp")||{};(fix[o]||(fix[o]={})).note=v;lsSet("brami-cmp",fix);}
-function cmpExport(){const fix=lsGet("brami-cmp")||{};const out=ORD.map((o,i)=>({id:i,city:o.city,name:o.name,card:"/art/cards/card_"+String(i).padStart(2,"0")+".webp",req_now:o.req,req_new:(fix[i]&&fix[i].req)||o.req,changed:!!(fix[i]&&fix[i].req&&fix[i].req.join()!==o.req.join()),note:(fix[i]&&fix[i].note)||""}));
- const b=new Blob([JSON.stringify({game:"brami",layers:LN,styles:SK,orders:out},null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="brami-zvirka.json";document.body.appendChild(a);a.click();a.remove();toast("Файл brami-zvirka.json збережено");}
+function cmpExport(){const fix=lsGet("brami-cmp")||{},lay=lsGet("brami-cmp-lay")||{};const out=ORD.map((o,i)=>({id:i,city:o.city,name:o.name,card:"card_"+String(i).padStart(2,"0"),req_now:o.req,req_new:(fix[i]&&fix[i].req)||o.req,note:(fix[i]&&fix[i].note)||""}));
+ const lays={};Object.keys(lay).forEach(k=>{const i=TYPES.indexOf(k.split("_")[0]);lays[k]={now:(ARTM.layout&&ARTM.layout[k])||LAYOUT[i],new:lay[k]};});
+ const b=new Blob([JSON.stringify({game:"brami",hint:"layout = [x%, y%, ширина%, висота%] від прорізу дверей",layers:LN,layout:lays,orders:out},null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="brami-zvirka.json";document.body.appendChild(a);a.click();a.remove();toast("Файл brami-zvirka.json збережено");}
 if(location.hash==="#compare")compareTool();
 (function autoResume(){const m=(location.hash||"").match(/^#g-([a-z0-9]{4,6})$/);if(!m)return;const hh=lsGet("brami-host"),gg=lsGet("brami-guest");
  if(hh&&hh.code===m[1])resumeHost(hh.code);else if(gg&&gg.code===m[1])joinRoom(gg.code,gg.name);})();
