@@ -270,6 +270,11 @@ body.art-ui .tray .cell{border:none}
 }
 @media(min-width:900px) and (max-height:760px) and (min-height:560px){.game .hand .ocard{width:80px}.game .tray{grid-template-columns:repeat(8,minmax(0,56px))}}
 .wa .wplq{position:absolute;left:4%;top:3%;z-index:3;font-size:clamp(9px,1.1vw,13px);padding:2px 8px}
+.galrow{margin:10px 0 14px}.galname{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px}.galname .sc{color:#a87b22}
+.galdoors{display:flex;gap:10px;flex-wrap:wrap}
+.galdoor{border:0;padding:0;background:none;cursor:pointer;width:120px;text-align:center;border-radius:12px;transition:transform .15s}
+.galdoor:hover{transform:translateY(-4px)}.galdoor .ws{border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.galst{display:block;color:#d6a640;font-size:14px;letter-spacing:1px;margin-top:3px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -600,7 +605,7 @@ function hint(){const s=G.seats[G.cur];if(!canAct())return s.k==="bot"?esc(s.n)+
 function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  const before=snap();const n=G.seats.length;if(VIEW>=n)VIEW=G.cur;const P=G.pl[VIEW],my=canAct(),isCur=VIEW===G.cur;
  let h=`<div class="bar"><div class="logo">Брами та дворики</div><div class="seats">`+G.seats.map((s,i)=>`<div class="seat ${i===G.cur?"cur":""} ${i===VIEW?"view":""}" onclick="VIEW=${i};render()" title="${esc(s.n)}">${seatAva(s,i)}<span class="sn">${esc(s.n)}</span><span class="sc">${ic("star")}${score(G,i)}</span><span class="dd">${G.pl[i].doors.map(d=>`<i class="${isDone(d)?"on":""}"></i>`).join("")}</span></div>`).join("")+`</div>
- ${NET.role?`<span class="plq" title="Код кімнати">${esc(NET.code.toUpperCase())}</span>`:""}<button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button><button class="ibtn" onclick="menu()" title="Меню">${ic("menu")}</button></div><div class="wrap game">`;
+ ${NET.role?`<span class="plq" title="Код кімнати">${esc(NET.code.toUpperCase())}</span>`:""}${G.over?`<button class="btn" onclick="finalScreen()">${ic("star")}Підсумки</button>`:""}<button class="ibtn" onclick="gallery()" title="Альбоми: усі завершені двері">${ic("scroll")}</button><button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button><button class="ibtn" onclick="menu()" title="Меню">${ic("menu")}</button></div><div class="wrap game">`;
  const hm=id=>my&&G.phase==="take"?hintMarket(G,G.cur,id):"";
  h+=`<section class="panel"><div class="ptitle">Крамниця<span class="meta"><span title="Деталей у колоді">${ic("deck")}колода ${cnt(G.deck)}</span><span title="Скинуті деталі повернуться в колоду, коли вона скінчиться">${ic("recycle")}скинуто ${cnt(G.disc)}</span></span></div>
  <div class="shop"><div><div class="shelf">${G.market.map(id=>cardHTML(id,"m",(my&&G.phase==="take"?"":"off ")+hm(id)+(SELP===id?" sel":""))).join("")}</div>
@@ -671,7 +676,7 @@ function clickSrc(src){const [k,ps]=src.split(":"),v=+ps;
   const ch=(mode,n,inner,label)=>`<div class="choice ${n>fr?"dis":""}" onclick="${n>fr?`warnFull(${n})`:`mclose(-1);act({a:'take',pid:${v},mode:'${mode}'})`}">${inner}×${n}<small>${n>fr?"не влізе (вільно "+fr+")":label}</small></div>`;
   modal(`<h2>Що берете?</h2><div class="choices">${ch("s",ns,`<span style="color:${STY[p.s].c}">${ic(p.s)}</span>`,"увесь колір: "+STY[p.s].n)}${ch("t",nt,ic(p.t),"усі: "+TN[p.t])}<div class="choice" onclick="mclose(-1);act({a:'mdisc',pid:${v}})">${ic("bin")}<small>скинути цю одну замість «взяти» — без штрафу</small></div></div>`,[["Скасувати",null]]);return;}
  SELP=SELP===v?null:v;render();if(SELP!=null){const s=validDrops("s",v);document.querySelectorAll("[data-drop]").forEach(z=>{if(s.has(z.dataset.drop))z.classList.add("ok");});}}
-function clickDoor(i){if(SELP==null)return;const t=targets(G,G.cur,SELP).filter(x=>x.slot===i);if(!t.length||G.phase!=="place"||G.placed>=2)return toast(whyNot(SELP,"door:"+i),1);const nr=t.find(x=>!x.rep);const pid=SELP;SELP=null;placeTo(pid,i,nr?nr.layer:t[0].layer);}
+function clickDoor(i){if(SELP==null){const d=G.pl[VIEW].doors[i];if(d&&isDone(d))return postcard(VIEW,i,true);if(d&&d.o>=0)return showOrder(d.o);return;}const t=targets(G,G.cur,SELP).filter(x=>x.slot===i);if(!t.length||G.phase!=="place"||G.placed>=2)return toast(whyNot(SELP,"door:"+i),1);const nr=t.find(x=>!x.rep);const pid=SELP;SELP=null;placeTo(pid,i,nr?nr.layer:t[0].layer);}
 document.addEventListener("click",e=>{if(SELP==null)return;const r=e.target.closest("[data-drop^='pip:']");if(r){e.stopPropagation();const [,s,l]=r.dataset.drop.split(":");const pid=SELP;if(targets(G,G.cur,pid).some(t=>t.slot===+s&&t.layer===+l)){SELP=null;placeTo(pid,+s,+l);}else toast("Сюди ця деталь не підходить",1);}},true);
 function binClick(){if(SELP!=null){const pid=SELP;SELP=null;act({a:"sdisc",pid});}}
 
@@ -688,13 +693,16 @@ function showOrder(oid,fromMkt){const o=ORD[oid];const can=fromMkt&&canAct()&&!G
 const VERD=[["Еклектика — теж стиль!","Від прототипу лишилася хіба адреса, але двері стоять і радують двір."],["Еклектика — теж стиль!","Сміливо й по-своєму: архітектори ХІХ століття оцінили б."],["Сміливе поєднання","Двоє деталей впізнають оригінал, решта — ваша фантазія."],["Добра робота","Більшість рис прототипу збережено."],["Майже влучили!","Лише одна деталь не з того стилю — ще трохи, і було б ідеально."],["Ідеально!","Автентична реставрація: усі п’ять шарів як у прототипі."]];
 function verdictHTML(d){if(d.o<0)return `<div class="verd"><b>Вільна фантазія</b><small>Без замовлення — двері зібрано на власний смак.</small></div>`;const m=matches(d),v=VERD[m];
  return `<div class="verd v${m}"><div class="vst">${[0,1,2,3,4].map(i=>`<span class="${i<m?"on":""}" style="animation-delay:${.35+i*.12}s">${ic("star")}</span>`).join("")}</div><b>${v[0]}</b><small>${v[1]}</small></div>`;}
-function postcard(seat,slot){const d=G.pl[seat].doors[slot];if(!d)return;const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>PT(id)),m=matches(d),pts=doorScore(d);
+function postcard(seat,slot,browse){const d=G.pl[seat].doors[slot];if(!d)return;const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>PT(id)),m=matches(d),pts=doorScore(d);
  modal(`<div class="pcin">${verdictHTML(d)}<h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2><div class="big">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}</div>
  <div class="sline"><span>${ic("base")}деталі 5 × 1★</span><span style="color:#2f7d4f">${ic("palette")}у стилі ${m} × 1★</span>${m===5?`<span style="color:#a87b22">${ic("star")}автентично +3★</span>`:""}<span>= ${pts}★</span></div>
- ${o?`<p class="fact">${esc(o.fact)}</p>`:""}</div>`,[["До колекції",null]]);}
+ ${o?`<p class="fact">${esc(o.fact)}</p>`:""}</div>`,browse==="gal"?[["До альбому",gallery],["Закрити",null]]:[[browse?"Закрити":"До колекції",null]]);}
+function gallery(){let any=false;const rows=G.seats.map((s,i)=>{const ds=G.pl[i].doors.map((d,k)=>[d,k]).filter(([d])=>isDone(d));if(ds.length)any=true;
+ return `<div class="galrow"><div class="galname">${seatAva(s,i)} ${esc(s.n)} <span class="sc">${ic("star")}${score(G,i)}</span></div><div class="galdoors">${ds.length?ds.map(([d,k])=>{const o=d.o>=0?ORD[d.o]:null;return `<button class="galdoor" onclick="mclose(-1);postcard(${i},${k},'gal')" title="${o?esc(o.city+" · "+o.name):"Вільна реставрація"}">${wallSVG(o?o.city:"",o?o.shape:"rect",d.L.map(id=>PT(id)))}<span class="galst">${"★".repeat(matches(d))}${"☆".repeat(5-matches(d))}</span></button>`;}).join(""):'<span class="waitb" style="color:#6b5f50">жодних завершених дверей</span>'}</div></div>`;}).join("");
+ modal(`<h2>Альбоми реставраторів</h2>${rows}${any?`<p class="waitb" style="color:#6b5f50">Натисніть на двері, щоб відкрити листівку.</p>`:""}`,G.over?[["Підсумки",finalScreen],["Закрити",null]]:[["Закрити",null]]);}
 function finalScreen(){const rows=G.seats.map((s,i)=>{const P=G.pl[i];return {i,s,doors:P.doors.reduce((a,d)=>a+doorScore(d),0),work:P.work,brak:P.brak,left:P.st.length,tot:score(G,i)};}).sort((a,b)=>b.tot-a.tot);
  modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Підробіток</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
- ${rows.map(r=>`<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${r.work}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`).join("")}</table></div>`,[["Нова гра",()=>{leave();}],["Подивитися альбоми",null]]);}
+ ${rows.map(r=>`<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${r.work}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`).join("")}</table></div>`,[["Альбоми",gallery],["Нова гра",()=>{leave();}],["Закрити",null]]);}
 function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("scroll")} <b>Замовлення.</b> На старті у вас одне. Відкриті три — беріть одне за хід у будь-який момент (у руці до ${HMAX}).</p>
 <p>${ic("palette")} <b>1 · Взяти.</b> Перетягніть картку з крамниці в лоток: ліва половина — <b>усі деталі цього кольору</b>, права — <b>усі деталі цього типу</b>. Якщо не влізе в лоток — гра попередить. Або ${ic("hammer")} <b>підробіток</b>: +1★.</p>
