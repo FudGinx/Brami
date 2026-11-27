@@ -833,7 +833,7 @@ const VERD=[["Еклектика — теж стиль!","Від прототи�
 function verdictHTML(d){if(d.o<0)return `<div class="verd"><b>Вільна фантазія</b><small>Без замовлення — двері зібрано на власний смак.</small></div>`;const m=matches(d),v=VERD[m];
  return `<div class="verd v${m}"><div class="vst">${LI.map(i=>`<span class="${i<m?"on":""}" style="animation-delay:${.35+i*.12}s">${ic("star")}</span>`).join("")}</div><b>${v[0]}</b><small>${v[1]}</small></div>`;}
 function postcard(seat,slot,browse){const d=G.pl[seat].doors[slot];if(!d)return;const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>PT(id)),m=matches(d),pts=doorScore(d);
- modal(`<div class="pcin">${verdictHTML(d)}<h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2>${pairHTML(wallSVG(o?o.city:"",o?o.shape:"rect",L),"Ваша реставрація",o?protoPic(d.o):"","Листівка-прототип")}
+ modal(`<div class="pcin">${verdictHTML(d)}<h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2>${pairHTML(wallSVG(o?o.city:"",o?o.shape:"rect",L),"Ваша реставрація",o?orderPic(d.o):"","Зразок замовлення")}
  <div class="sline"><span>${ic("base")}деталі ${NL} × 1★</span><span style="color:#2f7d4f">${ic("palette")}у стилі ${m} × 1★</span>${m===NL?`<span style="color:#a87b22">${ic("star")}автентично +3★</span>`:""}<span>= ${pts}★</span></div>
  ${o?`<p class="fact">${esc(o.fact)}</p>`:""}</div>`,browse==="gal"?[["До альбому",gallery],["Закрити",null]]:[[browse?"Закрити":"До колекції",null]]);}
 function gallery(){let any=false;const rows=G.seats.map((s,i)=>{const ds=G.pl[i].doors.map((d,k)=>[d,k]).filter(([d])=>isDone(d));if(ds.length)any=true;
