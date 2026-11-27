@@ -281,6 +281,7 @@ body.art-ui .tray .cell{border:none}
 .card.dim{filter:grayscale(.9) brightness(.82);opacity:.62;transition:filter .25s,opacity .25s}
 .card.dim:hover{filter:grayscale(.4) brightness(.95);opacity:.9}
 .legend .dimkey{display:inline-block;width:16px;height:12px;border-radius:3px;background:#9a948a;opacity:.6}
+.netban{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:80;background:#3a2a10;color:#ffe3a6;border:1px solid var(--brass);padding:9px 16px;border-radius:12px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.4)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -553,41 +554,56 @@ function afterFx(fx){scoreBumps();if(!fx)return;
 function schedule(){clearTimeout(BOTT);if(!G||G.over||NET.role==="guest")return;if(G.seats[G.cur].k!=="bot")return;
  BOTT=setTimeout(()=>{if(!G||G.over||G.seats[G.cur].k!=="bot")return;const seat=G.cur;const m=botStep(G,seat);if(!doMove(seat,m))doMove(seat,{a:"end"});},G.phase==="take"?950:800);}
 
-/* ---- мережа: WebSocket-сервер кімнат ---- */
-const PID=null;
+/* ---- мережа: WebSocket-сервер кімнат (з перепідключенням) ---- */
+function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
+function myTok(){try{let t=localStorage.getItem("brami-tok");if(!t){t=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("brami-tok",t);}return t;}catch(e){return NET.tmpTok||(NET.tmpTok=Math.random().toString(36).slice(2)+Date.now().toString(36));}}
 function wsURL(){return (location.protocol==="https:"?"wss://":"ws://")+location.host+"/ws";}
-function openWS(onmsg){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket(wsURL());}catch(e){return rej(e);}
- const t=setTimeout(()=>{try{ws.close();}catch(_){}rej(new Error("timeout"));},15000);
- ws.onopen=()=>{clearTimeout(t);res(ws);};ws.onerror=()=>{clearTimeout(t);rej(new Error("ws"));};
- ws.onmessage=e=>{let d;try{d=JSON.parse(e.data);}catch(_){return;}onmsg(d);};});}
-function wsSend(m){try{if(NET.ws&&NET.ws.readyState===1)NET.ws.send(JSON.stringify(m));return NET.ws&&NET.ws.readyState===1;}catch(e){return false;}}
-function bcast(){if(NET.role!=="host")return;wsSend({t:"state",data:G?{g:pack(G)}:{lobby:NET.lobby}});}
+function netBanner(txt){let b=document.getElementById("netban");if(!txt){if(b)b.remove();return;}if(!b){b=document.createElement("div");b.id="netban";b.className="netban";document.body.appendChild(b);}b.textContent=txt;}
+function connect(){return new Promise((res,rej)=>{let ws,done=false;try{ws=new WebSocket(wsURL());}catch(e){return rej(e);}
+ const t=setTimeout(()=>{if(!done){done=true;try{ws.close();}catch(_){}rej(new Error("timeout"));}},20000);
+ ws.onopen=()=>{clearTimeout(t);done=true;NET.ws=ws;NET.retry=0;netBanner(null);res(ws);};
+ ws.onclose=()=>{clearTimeout(t);if(!done){done=true;rej(new Error("closed"));}if(NET.ws===ws)NET.ws=null;if(NET.role&&!NET.leaving&&NET.ws==null)reconnectLater();};
+ ws.onmessage=e=>{let d;try{d=JSON.parse(e.data);}catch(_){return;}onNet(d);};});}
+function reconnectLater(){if(NET.rt||!NET.role)return;const ms=Math.min(15000,1000*Math.pow(2,NET.retry||0));NET.retry=(NET.retry||0)+1;netBanner("Зв’язок перервано — перепідключаємося…");
+ NET.rt=setTimeout(async()=>{NET.rt=null;if(!NET.role)return;try{await connect();hello();}catch(e){reconnectLater();}},ms);}
+function hello(){if(NET.role==="host")wsSend({t:"host",code:NET.code||null,tok:myTok()});else if(NET.role==="guest")wsSend({t:"join",code:NET.code,name:NET.name,tok:myTok()});}
+function wsSend(m){try{if(NET.ws&&NET.ws.readyState===1){NET.ws.send(JSON.stringify(m));return true;}}catch(e){}return false;}
+function bcast(){if(NET.role!=="host")return;if(!G)lsSet("brami-lobby",NET.lobby);wsSend({t:"state",data:G?{g:pack(G)}:{lobby:NET.lobby},full:G||null});}
 function netSend(m){return wsSend({t:"move",m});}
-async function hostRoom(){let codeP;const got=new Promise(r=>codeP=r);
- try{NET.ws=await openWS(d=>{
-  if(d.t==="hosted"){codeP(d.code);return;}
-  if(d.t==="hello"){const name=clean(d.name)||"Гість";const seats=G?G.seats:NET.lobby;if(!seats)return;if(!seats.some(s=>s.peer===d.from)){const live=new Set(NET.live||[]);
-    let i=seats.findIndex(s=>s.k==="net"&&!s.peer);if(i<0)i=seats.findIndex(s=>s.k==="net"&&s.n===name&&!live.has(s.peer));if(i<0)i=seats.findIndex(s=>s.k==="net"&&!live.has(s.peer));
-    if(i>=0){seats[i].peer=d.from;seats[i].n=name;save();}else wsSend({t:"to",to:d.from,data:{t:"full"}});}
-   NET.live=(NET.live||[]).concat(d.from);if(G)render();else lobbyRender();bcast();return;}
+function seatGuest(from,name){const seats=G?G.seats:NET.lobby;if(!seats)return;name=clean(name)||"Гість";
+ if(!seats.some(s=>s.peer===from)){const live=new Set(NET.live||[]);let i=seats.findIndex(s=>s.k==="net"&&!s.peer);if(i<0)i=seats.findIndex(s=>s.k==="net"&&s.n===name&&!live.has(s.peer));if(i<0)i=seats.findIndex(s=>s.k==="net"&&!live.has(s.peer));
+  if(i>=0){seats[i].peer=from;seats[i].n=name;save();}else wsSend({t:"to",to:from,data:{t:"full"}});}
+ NET.live=[...new Set((NET.live||[]).concat(from))];}
+function onNet(d){
+ if(NET.role==="host"){
+  if(d.t==="hosted"){NET.code=d.code;lsSet("brami-host",{code:d.code});try{location.hash="g-"+d.code;}catch(e){}
+   if(d.resume){if(!G&&d.full&&!d.full.over){G=d.full;VIEW=G.cur;}if(!G&&!NET.lobby&&d.lobby)NET.lobby=d.lobby;}
+   if(NET.codeP){NET.codeP(d.code);NET.codeP=null;}if(G){render();schedule();}else if(NET.lobby)lobbyRender();bcast();return;}
+  if(d.t==="hello"){seatGuest(d.from,d.name);if(G)render();else lobbyRender();bcast();return;}
   if(d.t==="left"){NET.live=(NET.live||[]).filter(x=>x!==d.from);if(!G)lobbyRender();return;}
   if(d.t==="move"&&G){const seat=G.seats.findIndex(s=>s.k==="net"&&s.peer===d.from);const m=d.m;if(seat<0||seat!==G.cur||!m||typeof m!=="object")return;
-   doMove(seat,{a:String(m.a),pid:+m.pid,mode:m.mode,slot:+m.slot,layer:m.layer==null?null:+m.layer,o:m.o==null?null:+m.o});}});}
- catch(e){toast("Не вдалося з’єднатися із сервером гри. Якщо сервер щойно прокинувся — спробуйте ще раз за хвилину.",1);return false;}
- NET.ws.onclose=()=>{if(NET.role==="host")toast("З’єднання із сервером втрачено",1);};
- wsSend({t:"host"});NET.code=await Promise.race([got,new Promise(r=>setTimeout(()=>r(null),10000))]);if(!NET.code){toast("Сервер не відповів",1);return false;}
- NET.role="host";try{location.hash="g-"+NET.code;}catch(e){}NET.timer=setInterval(bcast,5000);return true;}
-async function joinRoom(code,name){code=String(code).toLowerCase().replace(/[^a-z0-9]/g,"");if(code.length<4)return toast("Введіть код кімнати",1);
- NET.role="guest";NET.code=code;G=null;guestWait();
- try{NET.ws=await openWS(d=>{
-  if(d.t==="joined"){NET.myPeer=d.id;return;}
-  if(d.t==="nf"){toast("Кімнату "+code.toUpperCase()+" не знайдено. Перевірте код і чи відкрита гра в господаря.",1);leave();return;}
-  if(d.t==="hostgone"){toast("Господар вийшов із гри",1);return;}
+   doMove(seat,{a:String(m.a),pid:+m.pid,mode:m.mode,slot:+m.slot,layer:m.layer==null?null:+m.layer,o:m.o==null?null:+m.o});}
+  return;}
+ if(NET.role==="guest"){
+  if(d.t==="joined"){NET.myPeer=d.id;lsSet("brami-guest",{code:NET.code,name:NET.name});try{location.hash="g-"+NET.code;}catch(e){}return;}
+  if(d.t==="nf"){toast("Кімнату "+NET.code.toUpperCase()+" не знайдено. Перевірте код і чи відкрита гра в господаря.",1);lsSet("brami-guest",null);leave();return;}
+  if(d.t==="hostaway"){netBanner("Господар перепідключається… Гра продовжиться, щойно він повернеться.");return;}
+  if(d.t==="hostback"){netBanner(null);return;}
+  if(d.t==="hostgone"){netBanner(null);toast("Господар закрив кімнату",1);lsSet("brami-guest",null);return;}
   if(d.t==="full"){toast("У кімнаті немає вільних онлайн-місць",1);return;}
-  if(d.t==="state"&&d.data){if(d.data.g){const prev=G?G.seq:-1;G=d.data.g;if(G.seq!==prev){const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();if(prev>=0)afterFx(fx);}}else if(d.data.lobby){NET.lobby=d.data.lobby;guestWait();}}});}
- catch(e){toast("Не вдалося з’єднатися із сервером гри",1);NET.role=null;lobbyRender();return;}
- NET.ws.onclose=()=>{if(NET.role==="guest")toast("З’єднання розірвано",1);};
- wsSend({t:"join",code,name:clean(name)||"Гість"});}
+  if(d.t==="state"&&d.data){if(d.data.g){const prev=G?G.seq:-1;G=d.data.g;if(G.seq!==prev){const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();if(prev>=0)afterFx(fx);}}else if(d.data.lobby){NET.lobby=d.data.lobby;guestWait();}}}}
+async function hostRoom(){NET.role="host";NET.code=null;NET.leaving=false;const got=new Promise(r=>NET.codeP=r);
+ try{await connect();}catch(e){NET.role=null;toast("Не вдалося з’єднатися із сервером гри. Якщо сервер щойно прокинувся — спробуйте ще раз за хвилину.",1);return false;}
+ hello();const code=await Promise.race([got,new Promise(r=>setTimeout(()=>r(null),10000))]);if(!code){toast("Сервер не відповів",1);NET.role=null;return false;}
+ clearInterval(NET.timer);NET.timer=setInterval(bcast,5000);return true;}
+async function resumeHost(code){NET.role="host";NET.code=code;NET.leaving=false;const loc=load();if(loc&&!loc.over)G=loc;if(!G)NET.lobby=lsGet("brami-lobby");
+ if(G){VIEW=G.cur;render();}else lobbyRender();try{await connect();hello();}catch(e){reconnectLater();}clearInterval(NET.timer);NET.timer=setInterval(bcast,5000);if(G)schedule();}
+async function joinRoom(code,name){code=String(code).toLowerCase().replace(/[^a-z0-9]/g,"");if(code.length<4)return toast("Введіть код кімнати",1);
+ NET.role="guest";NET.code=code;NET.name=clean(name)||"Гість";NET.myPeer=myTok();NET.leaving=false;G=null;guestWait();
+ try{await connect();}catch(e){toast("Не вдалося з’єднатися із сервером гри. Якщо сервер щойно прокинувся — спробуйте ще раз за хвилину.",1);NET.role=null;lobbyRender();return;}
+ hello();}
+
 /* ================= ВІДОБРАЖЕННЯ ================= */
 function cardHTML(pid,src,extra){const p=PT(pid);return `<div class="card tilt ${extra||""}" style="--c:${STY[p.s].c}" data-pid="${pid}" data-drag="${src}:${pid}" tabindex="0" title="${TN[p.t]} · ${STY[p.s].n}"><div class="top">${ic(p.s)}${STY[p.s].n}</div><div class="shine"></div>${partImg(p)}<div class="lab">${ic(p.t)}${TN[p.t]}</div></div>`;}
 function seatAva(s,i){if(ARTM.ui&&ARTM.ui.has("ava"))return `<span class="ava img" style="background:${SEATC[i]}"><img src="/art/ui/${s.k==="bot"?"bot":"ava"+(i%4)}.webp" alt="" draggable="false"></span>`;return `<span class="ava" style="background:${SEATC[i]}">${s.k==="bot"?ic("bot"):s.k==="net"?ic("net"):ic("user")}</span>`;}
@@ -721,7 +737,7 @@ function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі п’ять правильні.</p>
 <p><b>Кінець:</b> коли хтось завершує треті двері, інші ходять ще по разу. Кожна деталь у лотку — −1★.</p>`,[["Зрозуміло",null]]);}
 function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Вийти в лобі",leave]]);}
-function leave(){clearTimeout(BOTT);clearInterval(NET.timer);const w=NET.ws;NET.role=null;try{if(w)w.close();}catch(e){}NET={role:null,r:null,code:"",myPeer:null,peers:[],lobby:null,hostPeer:null,timer:null};G=null;try{localStorage.removeItem("brami3");history.replaceState(null,"",location.pathname);}catch(e){}lobbyRender();}
+function leave(){clearTimeout(BOTT);clearInterval(NET.timer);clearTimeout(NET.rt);if(NET.role==="host")wsSend({t:"close"});const w=NET.ws;NET.leaving=true;try{if(w)w.close();}catch(e){}netBanner(null);lsSet("brami-host",null);lsSet("brami-guest",null);lsSet("brami-lobby",null);NET={role:null,code:"",myPeer:null,lobby:null,timer:null,ws:null,live:[]};G=null;try{localStorage.removeItem("brami3");history.replaceState(null,"",location.pathname);}catch(e){}lobbyRender();}
 
 /* ================= ЛОБІ ================= */
 function heroHTML(){if(ARTM.ui&&ARTM.ui.has("cover"))return `<div class="coverhero"><img src="/art/ui/cover.webp" alt="Старий дворик із трьома відреставрованими дверима"><h1>Брами та дворики</h1><p>Реставруйте двері українських міст</p></div>`;return `<div class="hero">${[0,3,9].map(i=>`<div class="wall">${orderPic(i)}</div>`).join("")}</div>`;}
@@ -731,7 +747,7 @@ function lobbyRender(){document.body.classList.remove('ingame');if(NET.role==="g
  if(hosting)h+=`<div class="lrow"><span class="code">${esc(NET.code.toUpperCase())}</span><button class="ibtn" onclick="copyCode()" title="Скопіювати код">${ic("copy")}</button></div><p class="waitb">Надішліть код друзям: вони відкривають цю ж сторінку гри й вводять його в «Приєднатися». Не закривайте цю вкладку до кінця гри.</p>`;
  seats.forEach((s,i)=>{h+=`<div class="lrow">${seatAva(s,i)}`+(hosting?`<span class="sn" style="flex:1">${esc(s.n)}${s.k==="net"?(s.peer?" ✓":" · чекаємо…"):""}</span>`:`<input class="inp" id="nm${i}" maxlength="16" value="${esc(s.n)}" oninput="SETUP.seats[${i}].n=this.value"><div class="kind">${["local","bot","net"].map(k=>`<button class="${s.k===k?"on":""}" onclick="SETUP.seats[${i}].k='${k}';lobbyRender()" title="${{local:"Гравець за цим екраном",bot:"Бот",net:"Онлайн-гравець"}[k]}">${ic({local:"user",bot:"bot",net:"net"}[k])}</button>`).join("")}</div>`)+(hosting&&s.k==="local"?`<span class="waitb">ви</span>`:"")+`</div>`;});
  if(!hosting)h+=`<div class="lrow"><button class="ibtn" onclick="if(SETUP.seats.length<4){SETUP.seats.push({n:'Бот '+(SETUP.seats.length+1),k:'bot'});lobbyRender()}" title="Додати гравця">${ic("plus")}</button><button class="ibtn" onclick="if(SETUP.seats.length>1){SETUP.seats.pop();lobbyRender()}" title="Прибрати гравця">${ic("minus")}</button><span class="waitb">${ic("user")} за цим екраном · ${ic("bot")} бот · ${ic("net")} онлайн</span></div>`;
- h+=`<div class="sline"><button class="btn" onclick="startGame()">${ic("end")}${hosting?"Почати гру":"Почати"}</button>${sv&&!sv.over&&!hosting?`<button class="btn alt" onclick="resume()">Продовжити збережену</button>`:""}</div>`;
+ h+=`<div class="sline"><button class="btn" onclick="startGame()">${ic("end")}${hosting?"Почати гру":"Почати"}</button>${sv&&!sv.over&&!hosting&&!lsGet("brami-host")?`<button class="btn alt" onclick="resume()">Продовжити збережену</button>`:""}${!hosting&&lsGet("brami-host")?`<button class="btn alt" onclick="resumeHost(lsGet('brami-host').code)">${ic("net")}Повернутися в кімнату ${esc(lsGet("brami-host").code.toUpperCase())}</button>`:""}${!hosting&&lsGet("brami-guest")?`<button class="btn alt" onclick="joinRoom(lsGet('brami-guest').code,lsGet('brami-guest').name)">${ic("net")}Повернутися до гри ${esc(lsGet("brami-guest").code.toUpperCase())}</button>`:""}</div>`;
  
  h+=`</section><section class="panel"><div class="ptitle">${ic("net")} Приєднатися</div><div class="lrow"><input class="inp" id="jc" placeholder="Код" maxlength="6" value="${hash?esc(hash[1].toUpperCase()):""}" style="text-transform:uppercase;letter-spacing:3px"></div><div class="lrow"><input class="inp" id="jn" placeholder="Ваше ім’я" maxlength="16"></div><button class="btn" onclick="joinRoom(document.getElementById('jc').value,document.getElementById('jn').value)">Увійти</button><p class="waitb">Попросіть господаря створити кімнату й надіслати вам код. Господар має тримати гру відкритою до кінця партії.</p></section></div></div>`;
  app.innerHTML=h;}
@@ -779,6 +795,8 @@ document.addEventListener("pointermove",e=>{if(DR||RM)return;const c=e.target.cl
  const r=c.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;c.classList.add("tilting");c.style.transform=`perspective(500px) rotateY(${(px-.5)*16}deg) rotateX(${(.5-py)*16}deg) translateY(-4px) scale(1.04)`;c.style.setProperty("--mx",px*100+"%");c.style.setProperty("--my",py*100+"%");});
 
 lobbyRender();
+(function autoResume(){const m=(location.hash||"").match(/^#g-([a-z0-9]{4,6})$/);if(!m)return;const hh=lsGet("brami-host"),gg=lsGet("brami-guest");
+ if(hh&&hh.code===m[1])resumeHost(hh.code);else if(gg&&gg.code===m[1])joinRoom(gg.code,gg.name);})();
 </script>
 </body>
 </html>
