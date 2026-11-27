@@ -199,6 +199,15 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:7px 5px;b
  .game .hand .ocard{width:108px}.game .hand .ocard .on{font-size:11.5px;padding:4px 6px 6px}
 }
 @media(min-width:900px) and (max-height:760px) and (min-height:560px){.game .hand .ocard{width:96px}}
+.verd{text-align:center;margin:-4px 0 12px}
+.verd b{display:block;font:800 30px/1.1 Alegreya,serif;color:#7a5a12}
+.verd.v5 b{color:#b8860b;font-size:36px;text-shadow:0 2px 0 #f3dc9a}
+.verd.v4 b{color:#a06a12}.verd.v0 b,.verd.v1 b,.verd.v2 b{color:#6b5f50}
+.verd small{display:block;color:#6b5f50;font-size:14px;margin-top:4px}
+.vst{display:flex;justify-content:center;gap:4px;margin-bottom:6px}
+.vst span{color:#d8ccb4}.vst span .ic{width:30px;height:30px}
+.vst span.on{color:#d6a640;animation:starpop .45s backwards}
+@keyframes starpop{0%{transform:scale(0) rotate(-40deg)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -366,7 +375,7 @@ function score(g,i){const P=g.pl[i];return P.doors.reduce((a,d)=>a+doorScore(d),
 function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.pl[seat];
  switch(m.a){
  case "order":{if(g.otook||P.hand.length>=HMAX||!g.om.includes(m.o))return false;g.om.splice(g.om.indexOf(m.o),1);P.hand.push(m.o);refillO(g);g.otook=true;g.fx={k:"order",o:m.o,seat};return true;}
- case "mdisc":{if(g.phase!=="take"||g.mdisc)return false;const i=g.market.indexOf(m.pid);if(i<0)return false;g.market.splice(i,1);g.disc.push(m.pid);const r0=g.rs;refillM(g);g.mdisc=true;g.fx={k:"mdisc",pid:m.pid,rs:g.rs>r0};return true;}
+ case "mdisc":{if(g.phase!=="take"||g.mdisc)return false;const i=g.market.indexOf(m.pid);if(i<0)return false;g.market.splice(i,1);g.disc.push(m.pid);const r0=g.rs;refillM(g);g.mdisc=true;g.phase="place";g.fx={k:"mdisc",pid:m.pid,rs:g.rs>r0};return true;}
  case "take":{if(g.phase!=="take"||!g.market.includes(m.pid)||(m.mode!=="s"&&m.mode!=="t"))return false;const ids=takeSet(g,m.pid,m.mode);if(ids.length>free(g,seat))return false;
   g.market=g.market.filter(id=>!ids.includes(id));P.st.push(...ids);const r0=g.rs;refillM(g);g.phase="place";g.fx={k:"take",ids,seat,rs:g.rs>r0};return true;}
  case "work":{if(g.phase!=="take")return false;P.work++;g.phase="place";g.fx={k:"work",seat};return true;}
@@ -380,7 +389,7 @@ function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.
  case "end":{if(g.phase!=="place")return false;const n=g.seats.length;
   if(!g.market.length&&!cnt(g.deck)&&!cnt(g.disc)){g.over=true;g.fx={k:"over"};return true;}
   if(g.endBy>=0){if(!g.trig&&g.cur===g.endBy){g.trig=true;if(g.left<=0){g.over=true;g.fx={k:"over"};return true;}}else{g.left--;if(g.left<=0){g.over=true;g.fx={k:"over"};return true;}}}
-  g.cur=(g.cur+1)%n;if(g.cur===0)g.round++;g.phase="take";g.placed=0;g.mdisc=false;g.otook=false;g.fx={k:"turn"};return true;}}
+  g.cur=(g.cur+1)%n;if(g.cur===0){g.round++;if(g.round>30){g.over=true;g.fx={k:"over"};return true;}}g.phase="take";g.placed=0;g.mdisc=false;g.otook=false;g.fx={k:"turn"};return true;}}
  return false;}
 /* підказки для підсвітки: "perfect" — тип і колір, "fit" — лише тип */
 function hintMarket(g,seat,pid){const P=g.pl[seat],p=PT(pid);let r="";
@@ -407,7 +416,7 @@ function botPlace(g,seat){const P=g.pl[seat];let best=null,bv=0;
   if(v>bv){bv=v;best=mv;}}return best;}
 function botStep(g,seat){
  if(g.phase==="take"){const o=botOrder(g,seat);if(o)return o;let m=botTake(g,seat);
-  if(m.a==="work"&&!g.mdisc&&g.market.length){const P=g.pl[seat];let w=g.market[0],wv=99;for(const id of g.market){const v=useVal(g,P,id,P.st);if(v<wv){wv=v;w=id;}}return {a:"mdisc",pid:w};}
+  if(m.a==="work"&&!g.mdisc&&g.market.length&&Math.random()<0.3){const P=g.pl[seat];let w=g.market[0],wv=99;for(const id of g.market){const v=useVal(g,P,id,P.st);if(v<wv){wv=v;w=id;}}return {a:"mdisc",pid:w};}
   if(m.a==="work"&&free(g,seat)<2){const P=g.pl[seat];const junk=P.st.find(id=>useVal(g,P,id,[])<0);if(junk!=null)return {a:"sdisc",pid:junk};}return m;}
  const m=g.placed<2?botPlace(g,seat):null;if(m)return m;const P=g.pl[seat];
  if(P.st.length>=STMAX){const c={};P.st.forEach(id=>c[PT(id).t]=(c[PT(id).t]||0)+1);const top=Object.keys(c).sort((x,y)=>c[y]-c[x])[0];let junk=P.st.find(id=>useVal(g,P,id,[])<0);if(junk==null&&c[top]>=2)junk=P.st.filter(id=>PT(id).t===top).pop();if(junk!=null)return {a:"sdisc",pid:junk};}
@@ -437,7 +446,7 @@ function afterFx(fx){if(!fx)return;
  if(fx.k==="work")floatAt(document.getElementById("work"),"+1★");
  if(fx.k==="sdisc")floatAt(document.getElementById("bin"),"−1★");
  if(fx.k==="place"){const w=document.querySelector(`.wall[data-slot="${fx.slot}"]`);if(w){w.classList.remove("thump");void w.offsetWidth;w.classList.add("thump");}
-  if(fx.done){floatAt(w,"+"+fx.pts+"★");const ctrl=G.seats[fx.seat].k==="local"||(NET.role==="guest"&&fx.seat===mySeat());if(ctrl)setTimeout(()=>postcard(fx.seat,fx.slot),550);else toast(G.seats[fx.seat].n+" завершує двері: +"+fx.pts+"★");}}
+  if(fx.done){floatAt(w,"+"+fx.pts+"★");const ctrl=G.seats[fx.seat].k==="local"||(NET.role==="guest"&&fx.seat===mySeat());if(ctrl)setTimeout(()=>postcard(fx.seat,fx.slot),550);else{const dd=G.pl[fx.seat].doors[fx.slot];toast(G.seats[fx.seat].n+" завершує двері: "+(dd&&dd.o>=0?VERD[matches(dd)][0]+" ":"")+"+"+fx.pts+"★");}}}
  if(fx.k==="turn"){const s=G.seats[G.cur];if(s.k==="local"&&G.seats.filter(x=>x.k==="local").length>1)passScreen();}
  if(fx.k==="over")setTimeout(finalScreen,600);}
 function schedule(){clearTimeout(BOTT);if(!G||G.over||NET.role==="guest")return;if(G.seats[G.cur].k!=="bot")return;
@@ -498,7 +507,7 @@ function warnText(){if(!canAct()||VIEW!==G.cur)return "";const P=G.pl[G.cur],fr=
  if(!P.hand.length&&P.doors.some(d=>!d)&&!G.otook)return "Візьміть замовлення з трьох відкритих — без нього двері будуть «вільною реставрацією».";return "";}
 function hint(){const s=G.seats[G.cur];if(!canAct())return s.k==="bot"?esc(s.n)+" думає…":"Хід: "+esc(s.n);
  if(VIEW!==G.cur)return "Ви дивитеся чужий альбом";
- if(G.phase==="take")return "Крок 1: перетягніть деталь з крамниці — візьміть увесь колір або весь тип. Або підробіток. Ставити з лотка можна після цього.";
+ if(G.phase==="take")return "Крок 1: візьміть з крамниці увесь колір або весь тип, або підробіток, або скиньте одну картку в кошик. Ставити з лотка можна після цього.";
  return G.placed<2?"Перетягніть деталь з лотка на двері або на рядок шару, щоб замінити":"Можна завершувати хід";}
 function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  const before=snap();const n=G.seats.length;if(VIEW>=n)VIEW=G.cur;const P=G.pl[VIEW],my=canAct(),isCur=VIEW===G.cur;
@@ -510,7 +519,7 @@ function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  <div class="legend"><span><i style="box-shadow:0 0 0 3px var(--ok)"></i>підходить за типом</span><span><i style="background:var(--brass)"></i>★ тип і колір як у замовленні</span></div></div>
  <div class="side"><div><div class="ptitle" style="font-size:16px;margin-bottom:8px">${ic("scroll")} Замовлення<span class="meta">${G.otook?"вже взято цього ходу":"1 за хід, у руці до "+HMAX}</span></div><div class="omkt">${G.om.map(o=>ocardHTML(o,"o")).join("")||'<span class="waitb">Замовлення скінчились</span>'}</div></div>
  <div class="tools"><button class="tool" id="work" onclick="act({a:'work'})" ${my&&G.phase==="take"?"":"disabled"}><b>${ic("hammer")}+1${ic("star")}</b>Підробіток<small>допомогти в іншій реставрації замість деталей</small></button>
- <div class="tool" id="bin" data-drop="bin" onclick="binClick()"><b>${ic("bin")}</b>Кошик<small>${G.mdisc?"з крамниці вже скидали":"з крамниці — 1 раз безкоштовно"} · з лотка −1★</small></div></div></div></div></section>`;
+ <div class="tool" id="bin" data-drop="bin" onclick="binClick()"><b>${ic("bin")}</b>Кошик<small>з крамниці — безкоштовно, замість «взяти» · з лотка −1★</small></div></div></div></div></section>`;
  const hs=id=>my&&isCur&&G.phase==="place"&&G.placed<2?hintStore(G,G.cur,id):"";
  h+=`<section class="panel"><div class="ptitle">${seatAva(G.seats[VIEW],VIEW)} Альбом: ${esc(G.seats[VIEW].n)}<span class="meta"><span>коло ${G.round}${G.endBy>=0?" · фінальне":""}</span><span title="Підробіток">${ic("hammer")}+${P.work}</span><span title="Брак">${ic("bin")}−${P.brak}</span></span></div>
  <div class="walls">${[0,1,2].map(i=>doorHTML(P,i)).join("")}</div>
@@ -548,7 +557,7 @@ document.addEventListener("pointercancel",()=>{if(DR&&DR.on)endDrag(DR);DR=null;
 function startDrag(){DR.on=true;const r=DR.el.getBoundingClientRect();DR.ox=DR.x-r.left;DR.oy=DR.y-r.top;const g=DR.el.cloneNode(true);g.classList.add("ghost");g.style.width=r.width+"px";g.style.height=r.height+"px";document.body.appendChild(g);DR.g=g;DR.el.classList.add("lift");
  const [k,v]=DR.src.split(":");DR.valid=validDrops(k,+v);document.querySelectorAll("[data-drop]").forEach(z=>{if(DR.valid.has(z.dataset.drop))z.classList.add("ok");});
  if(k==="m"){document.body.classList.add("dm");const p=PT(+v),fr=free(G,G.cur),ns=takeSet(G,+v,"s").length,nt=takeSet(G,+v,"t").length;
-  dock(`<div class="zone ${ns>fr?"full":""}" data-drop="take:s"><b><span style="background:${STY[p.s].c};width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff">${ic(p.s)}</span>×${ns}</b><small>${ns>fr?"не влізе — у лотку вільно "+fr:"взяти увесь колір «"+STY[p.s].n+"»"}</small></div><div class="zone ${nt>fr?"full":""}" data-drop="take:t"><b>${ic(p.t)}×${nt}</b><small>${nt>fr?"не влізе — у лотку вільно "+fr:"взяти всі «"+TN[p.t]+"»"}</small></div>${G.mdisc?"":`<div class="zone" data-drop="bin"><b>${ic("bin")}</b><small>скинути цю одну (безкоштовно)</small></div>`}`);}
+  dock(`<div class="zone ${ns>fr?"full":""}" data-drop="take:s"><b><span style="background:${STY[p.s].c};width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff">${ic(p.s)}</span>×${ns}</b><small>${ns>fr?"не влізе — у лотку вільно "+fr:"взяти увесь колір «"+STY[p.s].n+"»"}</small></div><div class="zone ${nt>fr?"full":""}" data-drop="take:t"><b>${ic(p.t)}×${nt}</b><small>${nt>fr?"не влізе — у лотку вільно "+fr:"взяти всі «"+TN[p.t]+"»"}</small></div><div class="zone" data-drop="bin"><b>${ic("bin")}</b><small>скинути цю одну замість «взяти» — без штрафу, далі крок 2</small></div>`);}
  else if(k==="o")dock(`<div class="zone" data-drop="hand"><b>${ic("scroll")}</b><small>${DR.valid.has("hand")?"взяти замовлення в руку":(G.otook?"замовлення вже взято цього ходу":"у руці вже "+HMAX)}</small></div>`);
  else dock(`<div class="zone" data-drop="bin" style="max-width:260px;justify-self:center"><b>${ic("bin")}</b><small>у кошик: −1★</small></div>`);
  document.querySelectorAll("#dock [data-drop]").forEach(z=>{if(!DR.valid.has(z.dataset.drop)&&!z.classList.contains("full"))z.style.opacity=".45";});}
@@ -572,7 +581,7 @@ function clickSrc(src){const [k,ps]=src.split(":"),v=+ps;
  if(k==="o")return showOrder(v,true);
  if(k==="m"){if(G.phase!=="take")return;const p=PT(v),ns=takeSet(G,v,"s").length,nt=takeSet(G,v,"t").length,fr=free(G,G.cur);
   const ch=(mode,n,inner,label)=>`<div class="choice ${n>fr?"dis":""}" onclick="${n>fr?`warnFull(${n})`:`mclose(-1);act({a:'take',pid:${v},mode:'${mode}'})`}">${inner}×${n}<small>${n>fr?"не влізе (вільно "+fr+")":label}</small></div>`;
-  modal(`<h2>Що берете?</h2><div class="choices">${ch("s",ns,`<span style="color:${STY[p.s].c}">${ic(p.s)}</span>`,"увесь колір: "+STY[p.s].n)}${ch("t",nt,ic(p.t),"усі: "+TN[p.t])}${G.mdisc?"":`<div class="choice" onclick="mclose(-1);act({a:'mdisc',pid:${v}})">${ic("bin")}<small>скинути цю одну (безкоштовно)</small></div>`}</div>`,[["Скасувати",null]]);return;}
+  modal(`<h2>Що берете?</h2><div class="choices">${ch("s",ns,`<span style="color:${STY[p.s].c}">${ic(p.s)}</span>`,"увесь колір: "+STY[p.s].n)}${ch("t",nt,ic(p.t),"усі: "+TN[p.t])}<div class="choice" onclick="mclose(-1);act({a:'mdisc',pid:${v}})">${ic("bin")}<small>скинути цю одну замість «взяти» — без штрафу</small></div></div>`,[["Скасувати",null]]);return;}
  SELP=SELP===v?null:v;render();if(SELP!=null){const s=validDrops("s",v);document.querySelectorAll("[data-drop]").forEach(z=>{if(s.has(z.dataset.drop))z.classList.add("ok");});}}
 function clickDoor(i){if(SELP==null)return;const t=targets(G,G.cur,SELP).filter(x=>x.slot===i);if(!t.length||G.phase!=="place"||G.placed>=2)return toast(whyNot(SELP,"door:"+i),1);const nr=t.find(x=>!x.rep);const pid=SELP;SELP=null;placeTo(pid,i,nr?nr.layer:t[0].layer);}
 document.addEventListener("click",e=>{if(SELP==null)return;const r=e.target.closest("[data-drop^='pip:']");if(r){e.stopPropagation();const [,s,l]=r.dataset.drop.split(":");const pid=SELP;if(targets(G,G.cur,pid).some(t=>t.slot===+s&&t.layer===+l)){SELP=null;placeTo(pid,+s,+l);}else toast("Сюди ця деталь не підходить",1);}},true);
@@ -588,8 +597,11 @@ function showOrder(oid,fromMkt){const o=ORD[oid];const can=fromMkt&&canAct()&&!G
  modal(`<h2>${esc(o.name)}</h2><div class="big">${wallSVG(o.city,o.shape,ideal(o))}</div>${stripHTML({o:oid,L:[null,null,null,null,null]},0,true)}<p>${esc(o.desc)}</p><p class="waitb" style="color:#6b5f50">За готові двері: 1★ за кожну деталь, +1★ за деталь у потрібному стилі, +3★ якщо всі п’ять — максимум 13★.</p>`,
  can?[["Взяти замовлення",()=>act({a:"order",o:oid})],["Закрити",null]]:[["Закрити",null]]);
  if(fromMkt&&!can&&canAct())toast(G.otook?"Замовлення вже взято цього ходу":G.pl[G.cur].hand.length>=HMAX?"У руці вже "+HMAX+" замовлення":"",1);}
+const VERD=[["Еклектика — теж стиль!","Від прототипу лишилася хіба адреса, але двері стоять і радують двір."],["Еклектика — теж стиль!","Сміливо й по-своєму: архітектори ХІХ століття оцінили б."],["Сміливе поєднання","Двоє деталей впізнають оригінал, решта — ваша фантазія."],["Добра робота","Більшість рис прототипу збережено."],["Майже влучили!","Лише одна деталь не з того стилю — ще трохи, і було б ідеально."],["Ідеально!","Автентична реставрація: усі п’ять шарів як у прототипі."]];
+function verdictHTML(d){if(d.o<0)return `<div class="verd"><b>Вільна фантазія</b><small>Без замовлення — двері зібрано на власний смак.</small></div>`;const m=matches(d),v=VERD[m];
+ return `<div class="verd v${m}"><div class="vst">${[0,1,2,3,4].map(i=>`<span class="${i<m?"on":""}" style="animation-delay:${.35+i*.12}s">${ic("star")}</span>`).join("")}</div><b>${v[0]}</b><small>${v[1]}</small></div>`;}
 function postcard(seat,slot){const d=G.pl[seat].doors[slot];if(!d)return;const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>PT(id)),m=matches(d),pts=doorScore(d);
- modal(`<div class="pcin"><h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2><div class="big">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}</div>
+ modal(`<div class="pcin">${verdictHTML(d)}<h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2><div class="big">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}</div>
  <div class="sline"><span>${ic("base")}деталі 5 × 1★</span><span style="color:#2f7d4f">${ic("palette")}у стилі ${m} × 1★</span>${m===5?`<span style="color:#a87b22">${ic("star")}автентично +3★</span>`:""}<span>= ${pts}★</span></div>
  ${o?`<p class="fact">${esc(o.fact)}</p>`:""}</div>`,[["До колекції",null]]);}
 function finalScreen(){const rows=G.seats.map((s,i)=>{const P=G.pl[i];return {i,s,doors:P.doors.reduce((a,d)=>a+doorScore(d),0),work:P.work,brak:P.brak,left:P.st.length,tot:score(G,i)};}).sort((a,b)=>b.tot-a.tot);
@@ -600,7 +612,7 @@ function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("palette")} <b>1 · Взяти.</b> Перетягніть картку з крамниці в лоток: ліва половина — <b>усі деталі цього кольору</b>, права — <b>усі деталі цього типу</b>. Якщо не влізе в лоток — гра попередить. Або ${ic("hammer")} <b>підробіток</b>: +1★.</p>
 <p>${ic("base")} <b>2 · Поставити до 2 деталей</b> з лотка на двері. Шари по черзі: Основа → Філенки → Фрамуга (скло) → Фурнітура → Оздоблення. Рядок, що підсвічений ◀, — те, що потрібно зараз. Перетягніть деталь на вже заповнений рядок, щоб <b>замінити</b> її (стара йде у скид).</p>
 <p><b>Підсвітка:</b> зелена рамка — деталь підходить за типом; золота з ★ — і за типом, і за кольором замовлення.</p>
-<p>${ic("bin")} <b>Кошик.</b> З крамниці раз за хід можна безкоштовно скинути одну картку. Скинуте з лотка — −1★. Коли колода скінчиться, скинуте перемішується назад.</p>
+<p>${ic("bin")} <b>Кошик.</b> Замість кроку 1 можна безкоштовно скинути одну картку з крамниці — і переходити до кроку 2. Скинуте з лотка — −1★. Коли колода скінчиться, скинуте перемішується назад.</p>
 <p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі п’ять правильні.</p>
 <p><b>Кінець:</b> коли хтось завершує треті двері, інші ходять ще по разу. Кожна деталь у лотку — −1★.</p>`,[["Зрозуміло",null]]);}
 function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Вийти в лобі",leave]]);}
