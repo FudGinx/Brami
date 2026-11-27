@@ -208,6 +208,28 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:7px 5px;b
 .vst span{color:#d8ccb4}.vst span .ic{width:30px;height:30px}
 .vst span.on{color:#d6a640;animation:starpop .45s backwards}
 @keyframes starpop{0%{transform:scale(0) rotate(-40deg)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+/* ===== вау-ефекти ===== */
+#fxc{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:65}
+.lampglow{animation:flick 3.2s infinite}
+@keyframes flick{0%,100%{opacity:1}42%{opacity:.82}44%{opacity:1}47%{opacity:.7}50%{opacity:.95}78%{opacity:.88}}
+.turnban{position:fixed;left:0;right:0;top:38%;z-index:66;pointer-events:none;display:flex;justify-content:center}
+.turnban div{background:linear-gradient(90deg,transparent,rgba(16,32,28,.95) 18%,rgba(16,32,28,.95) 82%,transparent);color:var(--cream);font:800 40px/1 Alegreya,serif;padding:18px 120px;display:flex;align-items:center;gap:16px;border-top:2px solid var(--brass);border-bottom:2px solid var(--brass);animation:ban 1.5s cubic-bezier(.2,.8,.2,1) forwards}
+.turnban .ava{width:46px;height:46px}.turnban .ava .ic{width:26px;height:26px}
+@keyframes ban{0%{transform:translateX(-60vw);opacity:0}22%{transform:none;opacity:1}75%{transform:none;opacity:1}100%{transform:translateX(60vw);opacity:0}}
+.sc.bump{animation:bump .6s}
+@keyframes bump{40%{transform:scale(1.5);color:#fff3c4}}
+.card.tilt{transition:transform .08s,box-shadow .15s}
+.card .shine{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.45),transparent 45%);opacity:0;transition:opacity .2s}
+.card.tilting .shine{opacity:1}
+.wall.glowdone svg.ws{animation:goldglow 1.6s ease-out}
+@keyframes goldglow{0%{filter:brightness(1)}25%{filter:brightness(1.35) drop-shadow(0 0 24px #ffd27a)}100%{filter:none}}
+.sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:14px}
+.sweep::after{content:"";position:absolute;top:-20%;bottom:-20%;width:35%;left:-50%;background:linear-gradient(100deg,transparent,rgba(255,240,200,.75),transparent);animation:sweep 1.1s .15s ease-in-out forwards}
+@keyframes sweep{to{left:120%}}
+.flash{position:fixed;inset:0;background:radial-gradient(circle,rgba(255,226,150,.55),transparent 70%);z-index:64;pointer-events:none;animation:flash .9s forwards}
+@keyframes flash{to{opacity:0}}
+.mbox .verd.v5{animation:shake .5s .2s}
+@keyframes shake{20%{transform:rotate(-2deg) scale(1.05)}40%{transform:rotate(2deg) scale(1.05)}60%{transform:rotate(-1deg)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -218,6 +240,7 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:7px 5px;b
 <linearGradient id="gLog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a06b3c"/><stop offset=".6" stop-color="#7d5130"/><stop offset="1" stop-color="#5a3820"/></linearGradient>
 </defs></svg>
 <div id="app"></div>
+<canvas id="fxc"></canvas>
 <div id="dock" class="dock hidden"></div>
 <div id="modal" class="hidden"></div>
 <script>
@@ -343,7 +366,7 @@ function cityX(c){switch(c){
  default:return c?POT:"";}}
 function wallSVG(city,shape,L,ghost){const W=WALLS[city]||WALLS._;
  let o=`<svg viewBox="0 0 200 250" class="ws" aria-hidden="true"><rect width="200" height="250" fill="${W.bg}"/>${wallPat(W)}`;
- o+=`<path d="M22 58h10" stroke="#2a2a2a" stroke-width="2"/><path d="M30 52v12" stroke="#2a2a2a" stroke-width="2"/><circle cx="26" cy="76" r="18" fill="url(#gGlow)"/><path d="M20 66h12l-2 18h-8z" fill="#ffd98a" stroke="#2a2a2a" stroke-width="1.6"/><path d="M19 66l7-5 7 5" fill="#2a2a2a"/>`;
+ o+=`<path d="M22 58h10" stroke="#2a2a2a" stroke-width="2"/><path d="M30 52v12" stroke="#2a2a2a" stroke-width="2"/><circle class="lampglow" cx="26" cy="76" r="18" fill="url(#gGlow)"/><path d="M20 66h12l-2 18h-8z" fill="#ffd98a" stroke="#2a2a2a" stroke-width="1.6"/><path d="M19 66l7-5 7 5" fill="#2a2a2a"/>`;
  o+=`<rect y="222" width="200" height="28" fill="#7d766b"/>`;for(let r=0;r<2;r++)for(let x=(r?6:0);x<200;x+=13)o+=`<ellipse cx="${x}" cy="${229+r*12}" rx="6" ry="4.5" fill="#968e81" stroke="#5f594f"/>`;
  o+=`<rect x="40" y="216" width="120" height="8" rx="1" fill="#bdb3a1" stroke="#857b6b"/>`+cityX(city);
  o+=`<svg x="36" y="32" width="128" height="186" viewBox="-12 -20 124 180">${doorInner(shape,L,ghost)}</svg>`;
@@ -441,7 +464,13 @@ function act(m){if(!canAct())return;if(m.a==="take"&&takeSet(G,m.pid,m.mode).len
  if(NET.role==="guest"){if(!netSend(m))toast("Немає зв’язку з господарем",1);return;}doMove(G.cur,m);}
 function warnFull(n){toast(`Не влізе: береш ${n}, а в лотку вільно ${free(G,G.cur)}. Скиньте зайве з лотка (−1★ за кожну) або оберіть інший набір чи підробіток.`,1);}
 function doMove(seat,m){if(!apply(G,seat,m))return false;G.seq++;SELP=null;save();const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();afterFx(fx);bcast();schedule();return true;}
-function afterFx(fx){if(!fx)return;
+function afterFx(fx){scoreBumps();if(!fx)return;
+ if(fx.k==="take"){const t=document.getElementById("tray");if(t){const [x,y]=center(t);setTimeout(()=>stars(x,y,18),450);}}
+ if(fx.k==="work"){const [x,y]=center(document.getElementById("work"));stars(x,y,22);}
+ if(fx.k==="mdisc"||fx.k==="sdisc"){const [x,y]=center(document.getElementById("bin"));setTimeout(()=>puff(x,y),450);}
+ if(fx.k==="place"){const w=document.querySelector(`.wall[data-slot="${fx.slot}"]`);if(w){const [x,y]=center(w);setTimeout(()=>{puff(x,y+60);if(fx.done){const d=G.pl[fx.seat].doors[fx.slot];doorWow(fx.slot,d&&matches(d)===5);}},420);}}
+ if(fx.k==="turn")setTimeout(turnBanner,250);
+ if(fx.k==="over")setTimeout(()=>fireworks(4),300);
  if(fx.rs)toast("Колода скінчилась — скинуті деталі перемішано назад");
  if(fx.k==="work")floatAt(document.getElementById("work"),"+1★");
  if(fx.k==="sdisc")floatAt(document.getElementById("bin"),"−1★");
@@ -488,7 +517,7 @@ async function joinRoom(code,name){code=String(code).toLowerCase().replace(/[^a-
  NET.ws.onclose=()=>{if(NET.role==="guest")toast("З’єднання розірвано",1);};
  wsSend({t:"join",code,name:clean(name)||"Гість"});}
 /* ================= ВІДОБРАЖЕННЯ ================= */
-function cardHTML(pid,src,extra){const p=PT(pid);return `<div class="card ${extra||""}" style="--c:${STY[p.s].c}" data-pid="${pid}" data-drag="${src}:${pid}" tabindex="0" title="${TN[p.t]} · ${STY[p.s].n}"><div class="top">${ic(p.s)}${STY[p.s].n}</div>${partSVG(p)}<div class="lab">${ic(p.t)}${TN[p.t]}</div></div>`;}
+function cardHTML(pid,src,extra){const p=PT(pid);return `<div class="card tilt ${extra||""}" style="--c:${STY[p.s].c}" data-pid="${pid}" data-drag="${src}:${pid}" tabindex="0" title="${TN[p.t]} · ${STY[p.s].n}"><div class="top">${ic(p.s)}${STY[p.s].n}</div><div class="shine"></div>${partSVG(p)}<div class="lab">${ic(p.t)}${TN[p.t]}</div></div>`;}
 function seatAva(s,i){return `<span class="ava" style="background:${SEATC[i]}">${s.k==="bot"?ic("bot"):s.k==="net"?ic("net"):ic("user")}</span>`;}
 function chipsOf(o){return `<div class="chips">${o.req.map(s=>`<i style="background:${STY[s].c}"></i>`).join("")}</div>`;}
 function ocardHTML(oid,src){const o=ORD[oid];return `<div class="ocard" ${src?`data-drag="${src}:${oid}" data-oid="${oid}"`:""} onclick="${src?"":`showOrder(${oid})`}" tabindex="0" title="${esc(o.city+" · "+o.name)}">${wallSVG(o.city,o.shape,ideal(o))}<div class="on">${esc(o.name)}${chipsOf(o)}</div></div>`;}
@@ -528,7 +557,7 @@ function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
  const ph=G.phase,w=warnText();
  h+=`<div class="turn"><div class="steps"><span class="step ${ph==="take"?"on":"done"}">${ic("palette")}1 · Взяти</span><span class="step ${ph==="place"?"on":""}">${ic("base")}2 · Поставити ${G.placed}/2</span><span class="step ${G.otook?"done":"on"}" style="${G.otook?"":"opacity:.85"}">${ic("scroll")}Замовлення ${G.otook?"✓":"0/1"}</span></div>
  <div class="hint ${w?"warn":""}">${w||hint()}</div>${my?`<button class="btn" onclick="act({a:'end'})" ${ph==="place"?"":"disabled"}>${ic("end")}Завершити хід</button>`:""}</div></div>`;
- app.innerHTML=h;document.body.classList.add('ingame');animate(before);}
+ app.innerHTML=h;document.body.classList.add('ingame');animate(before);ambient(true);}
 /* ---- FLIP ---- */
 function snap(){const m={};document.querySelectorAll("[data-pid]").forEach(e=>{m[e.dataset.pid]={r:e.getBoundingClientRect(),h:e.outerHTML};});return m;}
 function animate(before){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const now={},had=Object.keys(before).length>0;
@@ -639,6 +668,39 @@ async function startGame(){if(NET.role==="host"){beginGame(NET.lobby.map(s=>s.k=
 function beginGame(seats){G=mkGame(seats.map(s=>({n:s.n,k:s.k,peer:s.peer||null})));VIEW=0;save();render();bcast();if(G.seats[0].k==="local"&&G.seats.filter(s=>s.k==="local").length>1)passScreen();schedule();}
 function resume(){G=load();if(!G)return;G.seats.forEach(s=>{if(s.k==="net")s.k="bot";});VIEW=G.cur;render();schedule();}
 function guestWait(){if(G)return render();document.body.classList.remove('ingame');const ls=NET.lobby||[];app.innerHTML=`<div class="bar"><div class="logo">Брами та дворики</div></div><div class="lobby">${heroHTML()}<section class="panel"><div class="ptitle">${ic("net")} Кімната ${esc(NET.code.toUpperCase())}</div>${ls.length?ls.map((s,i)=>`<div class="lrow">${seatAva(s,i)}<span class="sn">${esc(s.n)}${s.peer&&s.peer===NET.myPeer?" — ви":""}</span></div>`).join(""):`<p class="waitb">Під’єднуємося до господаря кімнати…</p>`}<p class="waitb">Гра почнеться, коли господар натисне «Почати гру».</p><button class="btn alt" onclick="leave()">Вийти</button></section></div>`;}
+
+/* ================= ВАУ-ЕФЕКТИ ================= */
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const FX={c:document.getElementById("fxc"),p:[],amb:[],run:false};
+FX.x=FX.c.getContext("2d");
+function fxSize(){const d=devicePixelRatio||1;FX.c.width=innerWidth*d;FX.c.height=innerHeight*d;FX.x.setTransform(d,0,0,d,0,0);}
+addEventListener("resize",fxSize);fxSize();
+const GOLD=["#ffd27a","#d6a640","#fff3c4","#f2b84b"],CONF=["#4f8a55","#4f709a","#a5413b","#c0832f","#d6a640","#fff3c4"];
+function burst(x,y,o){if(RM)return;o=o||{};const n=o.n||30,cols=o.cols||GOLD;for(let i=0;i<n;i++){const a=(o.a0||0)+Math.random()*(o.spread||Math.PI*2),sp=(o.sp||5)*(.4+Math.random());
+ FX.p.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-(o.up||0),g:o.g==null?.18:o.g,life:1,dec:o.dec||(.012+Math.random()*.012),s:(o.size||5)*(.6+Math.random()*.8),c:cols[Math.floor(Math.random()*cols.length)],k:o.k||"spark",r:Math.random()*6,vr:(Math.random()-.5)*.3});}loop();}
+function confetti(x,y,n){burst(x,y,{n:n||90,sp:9,up:6,g:.22,cols:CONF,k:"conf",size:7,dec:.008});}
+function puff(x,y){burst(x,y,{n:22,sp:2.2,g:-.02,cols:["#e8dcc4","#cfc2a6","#f4ecdc"],k:"dust",size:9,dec:.02});}
+function stars(x,y,n){burst(x,y,{n:n||16,sp:4,up:2,g:.12,cols:GOLD,k:"star",size:7,dec:.016});}
+function fireworks(sec){if(RM)return;const end=Date.now()+sec*1000;(function shot(){if(Date.now()>end)return;const x=innerWidth*(.15+Math.random()*.7),y=innerHeight*(.15+Math.random()*.35);
+ burst(x,y,{n:70,sp:7,g:.08,cols:Math.random()<.5?GOLD:CONF,dec:.011,size:4});setTimeout(shot,260+Math.random()*300);})();}
+function drawStar(c,r){c.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,rr=i%2?r*.45:r;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}c.closePath();c.fill();}
+function loop(){if(FX.run)return;FX.run=true;requestAnimationFrame(step);}
+function step(){const c=FX.x;c.clearRect(0,0,innerWidth,innerHeight);
+ for(const a of FX.amb){a.t+=.01;a.x+=a.vx+Math.sin(a.t*2)*.3;a.y+=a.vy;a.r+=a.vr;if(a.y>innerHeight+20){a.y=-20;a.x=Math.random()*innerWidth;}c.save();c.globalAlpha=.5;c.translate(a.x,a.y);c.rotate(a.r);c.fillStyle=a.c;c.beginPath();c.ellipse(0,0,a.s,a.s*.45,0,0,Math.PI*2);c.fill();c.restore();}
+ FX.p=FX.p.filter(p=>p.life>0);for(const p of FX.p){p.vy+=p.g;p.vx*=.985;p.vy*=.985;p.x+=p.vx;p.y+=p.vy;p.life-=p.dec;p.r+=p.vr;c.save();c.globalAlpha=Math.max(0,Math.min(1,p.life*1.4));c.translate(p.x,p.y);c.rotate(p.r);c.fillStyle=p.c;
+  if(p.k==="conf")c.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);else if(p.k==="star")drawStar(c,p.s);else if(p.k==="dust"){c.globalAlpha*=.5;c.beginPath();c.arc(0,0,p.s*(1.6-p.life),0,Math.PI*2);c.fill();}else{c.beginPath();c.arc(0,0,p.s/2,0,Math.PI*2);c.fill();}c.restore();}
+ if(FX.p.length||FX.amb.length)requestAnimationFrame(step);else{FX.run=false;c.clearRect(0,0,innerWidth,innerHeight);}}
+function ambient(on){if(RM)return;if(!on){FX.amb=[];return;}if(FX.amb.length)return;const cols=["#7aa35c","#9bbf6a","#d9a35a","#f6b8c8"];
+ for(let i=0;i<7;i++)FX.amb.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.3,vy:.25+Math.random()*.35,s:5+Math.random()*4,r:Math.random()*6,vr:(Math.random()-.5)*.02,t:Math.random()*9,c:cols[i%cols.length]});loop();}
+function center(el){if(!el)return [innerWidth/2,innerHeight/2];const r=el.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2];}
+function turnBanner(){if(RM||!G)return;const s=G.seats[G.cur];const b=document.createElement("div");b.className="turnban";b.innerHTML=`<div>${seatAva(s,G.cur)}Хід: ${esc(s.n)}</div>`;document.body.appendChild(b);setTimeout(()=>b.remove(),1600);}
+function doorWow(slot,perfect){const w=document.querySelector(`.wall[data-slot="${slot}"]`);if(!w)return;const [x,y]=center(w);
+ w.classList.remove("glowdone");void w.offsetWidth;w.classList.add("glowdone");const sw=document.createElement("div");sw.className="sweep";w.appendChild(sw);setTimeout(()=>sw.remove(),1500);
+ confetti(x,y-40,perfect?150:80);stars(x,y,perfect?30:14);if(perfect){const f=document.createElement("div");f.className="flash";document.body.appendChild(f);setTimeout(()=>f.remove(),950);setTimeout(()=>fireworks(1.6),300);}}
+let LASTSC=[];
+function scoreBumps(){if(!G)return;const now=G.seats.map((_,i)=>score(G,i));document.querySelectorAll(".seat .sc").forEach((el,i)=>{if(LASTSC.length&&LASTSC[i]!==now[i]){el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");}});LASTSC=now;}
+document.addEventListener("pointermove",e=>{if(DR||RM)return;const c=e.target.closest&&e.target.closest(".card.tilt:not(.off)");document.querySelectorAll(".card.tilting").forEach(x=>{if(x!==c){x.classList.remove("tilting");x.style.transform="";}});if(!c)return;
+ const r=c.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;c.classList.add("tilting");c.style.transform=`perspective(500px) rotateY(${(px-.5)*16}deg) rotateX(${(.5-py)*16}deg) translateY(-4px) scale(1.04)`;c.style.setProperty("--mx",px*100+"%");c.style.setProperty("--my",py*100+"%");});
 
 lobbyRender();
 </script>
