@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Брами та дворики</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700;800&family=Golos+Text:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: тепла сімейна настільна гра — ранок у старому дворику
+   IDEA: стіл реставратора: велика крамниця-полиця, відкриті замовлення, три фасади
+   PICTURE: великі двері, що збираються шарами на тлі стін українських міст
+   COLOUR and TYPE: каштанова зелень столу, вапняк, латунь; Alegreya + Golos Text
+   LAYOUT: смуга гравців; крамниця на всю ширину; альбом з трьома великими стінами; липка панель ходу */
+:root{color-scheme:light dark;--table:#1c362f;--paper:#fbf7ee;--ink:#2a241d;--cream:#f3ecdc;--mute:#b9c7bf;--brass:#d6a640;--wood:#6b4a2e;--wood2:#553923;--ok:#5fd08a;--bad:#e0645a}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;color:var(--cream);font:15px/1.4 "Golos Text",system-ui,sans-serif;overflow-x:clip}
+body{background:radial-gradient(1200px 600px at 20% -10%,#2f5a4e 0,transparent 60%),var(--table);min-height:100vh}
+button{font:inherit;color:inherit}
+.ic{width:22px;height:22px;flex:none;vertical-align:middle}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(0,0,0,.25);border-bottom:2px solid var(--brass);flex-wrap:wrap}
+.logo{font:800 24px/1 Alegreya,Georgia,serif;margin-right:6px;white-space:nowrap}
+.seats{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+.seat{display:flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:999px;background:rgba(255,255,255,.07);border:2px solid transparent;cursor:pointer;min-height:42px}
+.seat.cur{border-color:var(--brass);background:rgba(214,166,64,.16)}
+.seat.view{box-shadow:inset 0 0 0 1px rgba(255,255,255,.45)}
+.ava{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#1c1c1c;flex:none}.ava .ic{width:18px;height:18px}
+.sn{font-weight:700;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc{font-weight:800;color:var(--brass);display:flex;align-items:center;gap:2px}.sc .ic{width:15px;height:15px}
+.dd{display:flex;gap:2px}.dd i{width:8px;height:11px;border-radius:4px 4px 0 0;background:rgba(255,255,255,.2)}.dd i.on{background:var(--brass)}
+.ibtn{width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);display:grid;place-items:center;cursor:pointer}
+.ibtn:focus-visible,.btn:focus-visible,.card:focus-visible,.ocard:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.wrap{max-width:1320px;margin:0 auto;padding:14px 14px 0}
+.panel{background:rgba(0,0,0,.18);border-radius:20px;padding:14px;margin-bottom:14px}
+.ptitle{display:flex;align-items:center;gap:10px;font:800 20px Alegreya,Georgia,serif;margin:0 0 12px;flex-wrap:wrap}
+.ptitle .meta{font:600 13px "Golos Text";color:var(--mute);display:flex;gap:12px;margin-left:auto;align-items:center}
+.ptitle .meta span{display:flex;align-items:center;gap:4px}.ptitle .meta .ic{width:17px;height:17px}
+.shop{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:14px}
+@media(max-width:1000px){.shop{grid-template-columns:minmax(0,1fr)}}
+.shelf{background:linear-gradient(var(--wood),var(--wood2));border-radius:16px;padding:12px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;box-shadow:inset 0 -7px 0 rgba(0,0,0,.25),0 8px 18px rgba(0,0,0,.3)}
+@media(max-width:520px){.shelf{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:8px}}
+.card{position:relative;aspect-ratio:3/4.3;background:var(--paper);color:var(--ink);border-radius:11px;box-shadow:0 2px 0 rgba(0,0,0,.25),0 5px 12px rgba(0,0,0,.28);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.card .top{position:absolute;left:0;right:0;top:0;height:21px;background:var(--c);color:#fff;display:flex;align-items:center;gap:4px;padding:0 6px;font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden}
+.card .top .ic{width:14px;height:14px}
+.card svg.part{position:absolute;left:7%;top:23px;width:86%;height:calc(100% - 50px)}
+.card .lab{position:absolute;left:0;right:0;bottom:0;height:26px;display:flex;align-items:center;gap:4px;padding:0 6px;font-size:12px;font-weight:700;border-top:1px solid #e6dcc8;white-space:nowrap;overflow:hidden}
+.card .lab .ic{width:16px;height:16px}
+.card.fit{box-shadow:0 0 0 3px var(--ok),0 5px 12px rgba(0,0,0,.28)}
+.card.perfect{box-shadow:0 0 0 4px var(--brass),0 0 18px 4px rgba(214,166,64,.7)}
+.card.perfect::after{content:"★";position:absolute;right:5px;top:24px;width:22px;height:22px;border-radius:50%;background:var(--brass);color:#2a241d;display:grid;place-items:center;font-size:13px;font-weight:800}
+.card.sel{transform:translateY(-6px)}
+.card.will{transform:translateY(-6px) scale(1.04);box-shadow:0 0 0 4px #fff,0 0 20px rgba(255,255,255,.6)}
+.card.lift{opacity:.25}.card.off{cursor:default}
+.ghost{position:fixed;z-index:50;pointer-events:none;transform:rotate(-4deg) scale(1.08);box-shadow:0 16px 30px rgba(0,0,0,.5)!important}
+.side{display:flex;flex-direction:column;gap:12px}
+.omkt{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ocard{background:var(--paper);color:var(--ink);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.3);position:relative;touch-action:none}
+.ocard svg.ws{display:block;width:100%;height:auto}
+.ocard .on{padding:5px 7px 7px;font-size:12px;font-weight:700;line-height:1.2}
+.chips{display:flex;gap:2px;margin-top:4px;width:100%}.chips i{flex:1;height:7px;border-radius:2px;display:block}
+.ocard.ok{box-shadow:0 0 0 3px var(--brass),0 4px 10px rgba(0,0,0,.3)}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tool{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:72px;border-radius:14px;border:2px dashed rgba(255,255,255,.28);background:rgba(255,255,255,.05);cursor:pointer;font-weight:700;padding:6px;text-align:center}
+.tool b{display:flex;align-items:center;gap:6px;font-size:16px}.tool b .ic{width:26px;height:26px}.tool small{font-weight:400;color:var(--mute);font-size:12px}
+.tool[disabled]{opacity:.35;cursor:default}
+.tool.ok{border-color:var(--brass);border-style:solid;background:rgba(214,166,64,.15)}.tool.hot{background:rgba(214,166,64,.4)}
+.walls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media(max-width:820px){.walls{grid-template-columns:minmax(0,1fr)}}
+.door{display:flex;flex-direction:column;gap:8px}
+.wall{position:relative;border-radius:16px;overflow:hidden;box-shadow:0 10px 22px rgba(0,0,0,.38);cursor:pointer}
+.wall svg.ws{display:block;width:100%;height:auto}
+.wall.ok{outline:4px solid var(--brass);outline-offset:-4px}
+.wall.hot{outline-width:7px}
+.wall.thump{animation:thump .55s}
+@keyframes thump{30%{transform:scale(1.03)}60%{transform:scale(.99)}}
+.badge{position:absolute;right:10px;top:10px;background:var(--brass);color:#2a241d;border-radius:999px;padding:4px 11px;font-weight:800;display:flex;align-items:center;gap:3px;font-size:16px}.badge .ic{width:16px;height:16px}
+.otitle{font:800 16px/1.15 Alegreya,serif;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.otitle small{font:600 12px "Golos Text";color:var(--mute);white-space:nowrap}
+.strip{background:rgba(255,255,255,.06);border-radius:12px;padding:4px}
+.lr{display:grid;grid-template-columns:26px minmax(0,1fr) auto 22px;gap:6px;align-items:center;padding:5px 6px;border-radius:8px;font-size:13.5px}
+.lr .ic{width:20px;height:20px}
+.lr .nm{font-weight:600}
+.lr .need{display:flex;align-items:center;gap:4px;border-radius:999px;padding:2px 8px 2px 3px;font-size:12px;font-weight:700;color:#fff;background:var(--c);white-space:nowrap}
+.lr .need .ic{width:14px;height:14px}
+.lr .st{font-weight:800;text-align:center}
+.lr.now{background:rgba(214,166,64,.22);box-shadow:inset 3px 0 0 var(--brass)}
+.lr.done .nm{opacity:.75}
+.lr.ok{outline:2px solid var(--brass)}.lr.hot{background:rgba(214,166,64,.45)}
+.st.y{color:var(--ok)}.st.n{color:#f0b35a}
+.emptyhint{padding:10px;font-size:14px;color:var(--mute);text-align:center}
+.lower{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;margin-top:14px;align-items:start}
+@media(max-width:820px){.lower{grid-template-columns:minmax(0,1fr)}}
+.tray{position:relative;background:linear-gradient(#e7dcc5,#d8c9ab);border-radius:16px;padding:10px;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;box-shadow:inset 0 3px 8px rgba(0,0,0,.25)}
+@media(max-width:700px){.tray{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.cell{aspect-ratio:3/4.3;border-radius:11px;border:2px dashed rgba(90,70,40,.3)}
+.dock{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);width:min(920px,94vw);display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:10px;z-index:45;animation:dockin .2s}
+@keyframes dockin{from{transform:translate(-50%,30px);opacity:0}}
+.dock .zone{min-height:118px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.zone{border-radius:14px;background:rgba(28,54,47,.9);border:3px dashed var(--brass);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--cream);text-align:center}
+.zone b{display:flex;align-items:center;gap:8px;font:800 26px Alegreya,serif}.zone b .ic{width:30px;height:30px}.zone small{font-size:13px}
+.zone.hot{background:rgba(214,166,64,.95);color:#2a241d;border-style:solid}
+.zone.full{background:rgba(120,30,25,.9);border-color:var(--bad)}
+.handw{display:flex;flex-direction:column;gap:6px}
+.handw .lbl{font-size:13px;color:var(--mute);font-weight:600}
+.hand{display:flex;gap:8px;min-height:60px;border-radius:12px;padding:4px}
+.hand.ok{outline:3px dashed var(--brass)}.hand.hot{background:rgba(214,166,64,.3)}
+.hand .ocard{width:118px}
+.turn{position:sticky;bottom:0;z-index:6;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:rgba(16,32,28,.96);border-top:2px solid var(--brass);margin:0 -14px;backdrop-filter:blur(6px)}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.07);font-weight:700;font-size:14px;opacity:.55}
+.step.on{opacity:1;background:rgba(214,166,64,.22);box-shadow:inset 0 0 0 2px var(--brass)}.step.done{opacity:.9}.step .ic{width:18px;height:18px}
+.hint{flex:1;font-size:14px;color:var(--mute);min-width:200px}
+.hint.warn{color:#ffd6a0;font-weight:600}
+.btn{min-height:46px;border-radius:12px;border:0;padding:10px 18px;font-weight:700;background:var(--brass);color:#2a241d;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn.alt{background:rgba(255,255,255,.1);color:var(--cream);border:1px solid rgba(255,255,255,.25)}
+.btn[disabled]{opacity:.35;cursor:default}
+#modal{position:fixed;inset:0;background:rgba(8,14,12,.62);display:flex;align-items:center;justify-content:center;z-index:40;padding:12px}
+.mbox{background:var(--paper);color:var(--ink);max-width:600px;width:100%;max-height:92vh;overflow:auto;border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:pop .3s}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+.mbox h2{font:800 26px/1.1 Alegreya,Georgia,serif;margin:0 0 10px}
+.mbox .btn.alt{color:var(--ink);background:#ece3cf;border-color:#d8cbb0}
+.mbox .strip{background:#efe6d2}.mbox .lr{color:var(--ink)}
+.hidden{display:none!important}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.choice{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px;border-radius:14px;background:#efe6d2;border:2px solid transparent;cursor:pointer;font-weight:800;font-size:20px;text-align:center}
+.choice:hover{border-color:var(--brass)}.choice .ic{width:34px;height:34px}.choice small{font:400 13px "Golos Text";color:#6b5f50}
+.choice.dis{opacity:.4;cursor:not-allowed}
+.choice svg.ws{width:120px;border-radius:10px}
+.pcin{animation:flip .8s cubic-bezier(.3,.7,.2,1)}@keyframes flip{from{transform:perspective(900px) rotateY(-100deg);opacity:.2}}
+.fact{background:#efe4cc;border-radius:12px;padding:10px 12px}
+.big svg.ws{width:240px;max-width:80%;display:block;margin:0 auto 10px;border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.sline{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.sline span{background:#efe4cc;border-radius:999px;padding:4px 10px;font-weight:700;display:flex;gap:4px;align-items:center}
+table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:7px 5px;border-bottom:1px solid #e0d4bc;text-align:left}td.n,th.n{text-align:right;white-space:nowrap}
+.scroll{overflow-x:auto}
+.float{position:fixed;z-index:60;pointer-events:none;font:800 26px Alegreya,serif;color:var(--brass);text-shadow:0 2px 6px rgba(0,0,0,.6);animation:up 1.2s forwards}
+@keyframes up{to{transform:translateY(-60px);opacity:0}}
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:#14241f;color:#fff;padding:11px 18px;border-radius:14px;z-index:70;font-weight:600;border:1px solid var(--brass);max-width:92vw;text-align:center}
+.toast.warn{border-color:var(--bad);background:#3a1714}
+.lobby{max-width:1100px;margin:0 auto;padding:16px}
+.hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:8px 0 18px}
+.hero .wall{cursor:default}
+.lgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
+@media(max-width:760px){.lgrid{grid-template-columns:minmax(0,1fr)}}
+.lrow{display:flex;gap:8px;align-items:center;margin:8px 0}
+.inp{flex:1;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:var(--cream);font:16px "Golos Text"}
+.kind{display:flex;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.25)}
+.kind button{width:46px;height:46px;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--mute)}.kind button.on{background:var(--brass);color:#2a241d}
+.code{font:800 34px/1 Alegreya,serif;letter-spacing:4px;color:var(--brass)}
+.waitb{font-size:13px;color:var(--mute)}
+.plq{display:inline-block;background:#24508f;color:#fff;font-size:11px;font-weight:700;border-radius:4px;padding:1px 6px;border:1px solid #fff;box-shadow:0 0 0 1px #24508f}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--mute);margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px}.legend i{width:16px;height:12px;border-radius:3px;display:inline-block}
+@media(max-width:600px){.logo{font-size:18px}.sn,.dd{display:none}.seat{padding-right:8px}.wrap{padding:8px 8px 0}.panel{padding:10px}.turn{margin:0 -8px}.hint{min-width:0;flex-basis:100%;order:3}}
+@media(min-width:900px) and (min-height:560px){
+ body.ingame{height:100vh;overflow:hidden}
+ .game{height:calc(100vh - 66px);display:grid;grid-template-columns:minmax(0,37fr) minmax(0,63fr);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px;max-width:none}
+ .game>.panel{margin:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:10px}
+ .game .ptitle{margin-bottom:8px;font-size:18px}
+ .game>.turn{grid-column:1/-1;position:static;margin:0;border-radius:14px;padding:8px 12px}
+ .game .shop{grid-template-columns:minmax(0,1fr);gap:10px;min-height:0;flex:1;align-content:start}
+ .game .shelf{padding:8px;gap:7px}
+ .game .card .top{height:18px;font-size:10.5px}.game .card svg.part{top:20px;height:calc(100% - 44px)}.game .card .lab{height:23px;font-size:11px}
+ .game .legend{margin-top:5px;font-size:11.5px}
+ .game .side{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:8px;align-items:start}
+ .game .side .ptitle{font-size:14px!important}.game .side .ptitle .meta{font-size:11px}
+ .game .omkt{gap:6px}.game .ocard .on{font-size:11px;padding:4px 5px 5px}
+ .game .tools{grid-template-columns:1fr;gap:6px;margin-top:22px}
+ .game .tool{min-height:0;padding:6px 4px}.game .tool small{font-size:10.5px}.game .tool b .ic{width:22px;height:22px}
+ .game .walls{flex:1;min-height:0;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .game .door{min-height:0;gap:5px}
+ .game .otitle{font-size:14px}
+ .game .wall{flex:1;min-height:0;display:flex;justify-content:center;align-items:flex-start;background:none;box-shadow:none;overflow:visible;border-radius:0}
+ .game .wall svg.ws{height:100%;width:auto;max-width:100%;border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,.38)}
+ .game .wall.ok{outline:none}.game .wall.ok svg.ws{outline:4px solid var(--brass);outline-offset:-4px}.game .wall.hot svg.ws{outline-width:7px}
+ .game .badge{right:auto;left:50%;transform:translateX(-50%);top:6px}
+ .game .strip{padding:2px}.game .lr{padding:2px 5px;font-size:12px;gap:5px;grid-template-columns:20px minmax(0,1fr) auto 16px}.game .lr .ic{width:16px;height:16px}.game .lr .need{font-size:11px;padding:1px 7px 1px 2px}.game .lr .need .ic{width:12px;height:12px}
+ .game .emptyhint{padding:6px;font-size:12.5px}
+ .game .lower{margin-top:8px;gap:10px}
+ .game .lower .ptitle{font-size:14px!important;margin-bottom:5px!important}
+ .game .tray{padding:6px;gap:6px}
+ .game .hand{min-height:0;padding:0;gap:6px}.game .hand .ocard{width:74px}.game .hand .ocard .on{font-size:9.5px;padding:3px 4px 4px}
+}
+@media(min-width:900px) and (max-height:760px) and (min-height:560px){
+ .game .legend{display:none}.game .otitle small{display:none}.game .ptitle .meta{font-size:11px}
+ .game .tray{grid-template-columns:repeat(8,minmax(0,62px))}.game .hand .ocard{width:62px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="gLight" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3d0" stop-opacity=".38"/><stop offset=".55" stop-color="#fff3d0" stop-opacity="0"/><stop offset="1" stop-color="#1b120a" stop-opacity=".28"/></linearGradient>
+<radialGradient id="gGlow"><stop offset="0" stop-color="#ffd27a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+<linearGradient id="gLog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a06b3c"/><stop offset=".6" stop-color="#7d5130"/><stop offset="1" stop-color="#5a3820"/></linearGradient>
+</defs></svg>
+<div id="app"></div>
+<div id="dock" class="dock hidden"></div>
+<div id="modal" class="hidden"></div>
+<script>
+/* ================= ДАНІ ================= */
+const STY={mod:{n:"Модерн",c:"#4f8a55"},cls:{n:"Класицизм",c:"#4f709a"},bar:{n:"Бароко",c:"#a5413b"},nar:{n:"Народне",c:"#c0832f"}};
+const SK=["mod","cls","bar","nar"],TYPES=["base","panel","glass","fit","dec"];
+const TN={base:"Основа",panel:"Філенки",glass:"Скло",fit:"Фурнітура",dec:"Оздоблення"};
+const LN=["Основа","Філенки","Фрамуга","Фурнітура","Оздоблення"];
+const LH=["полотно й рама","панелі на стулках","скло або дерев’яна вставка","ручки, калатала","декор над входом"];
+const ACC=[["base"],["panel"],["glass","panel"],["fit"],["dec"]];
+const CP={base:3,panel:5,glass:3,fit:4,dec:4};
+const PARTS=[];SK.forEach(s=>TYPES.forEach(t=>{for(let c=0;c<CP[t];c++)PARTS.push({id:PARTS.length,t,s});}));
+const MK=10,STMAX=8,OM=3,HMAX=3;
+const SEATC=["#d6a640","#5fb3d6","#e07a6a","#97c873"];
+const ORD=[
+{city:"Одеса",name:"Брама прибуткового будинку",shape:"arch",req:["cls","cls","cls","bar","cls"],desc:"Висока арка веде з вулиці в тінистий двір: важкі стулки, віялова фрамуга, левове калатало, а біля входу — чавунні колесовідбійники.",fact:"Значну частину старої Одеси збудовано з місцевого вапняку-черепашнику. Його видобували просто під містом — так з’явилися одеські катакомби."},
+{city:"Одеса",name:"Еклектичний під’їзд",shape:"seg",req:["bar","cls","mod","cls","mod"],desc:"Бароковий декор поруч із класичними філенками й модерновим вітражем — почерк одеського центру.",fact:"У другій половині ХІХ ст. одеські архітектори вільно поєднували елементи різних епох — еклектика стала обличчям історичного центру."},
+{city:"Одеса",name:"Двері Пасажу",shape:"arch",req:["bar","bar","mod","bar","bar"],desc:"Пишні двері торговельної галереї: скульптура, позолота і скло.",fact:"Одеський Пасаж на Дерибасівській відкрили на межі ХІХ і ХХ ст.; його фасади й галерею щедро прикрашено скульптурою."},
+{city:"Львів",name:"Сецесійний портал",shape:"arch",req:["mod","mod","mod","mod","mod"],desc:"Плавні лінії, рослинні мотиви, кольорове скло й кована «лоза» над входом.",fact:"Розквіт сецесії у Львові припав приблизно на 1900–1914 роки. Іван Левинський заснував фабрику будівельної кераміки, вироби якої прикрасили чимало фасадів міста."},
+{city:"Львів",name:"Двері кам’яниці",shape:"rect",req:["cls","cls","cls","cls","bar"],desc:"Строга симетрія, віялова фрамуга — а над входом маскарон, що пильнує вулицю.",fact:"Лев — символ Львова; кам’яні леви й левові маски трапляються на фасадах і біля входів по всьому старому місту."},
+{city:"Київ",name:"У дусі Городецького",shape:"seg",req:["mod","mod","mod","bar","mod"],desc:"Модерн із характером: вітраж, кована решітка і скульптурна деталь біля входу.",fact:"Будинок з химерами (1901–1903) Владислав Городецький звів для себе; фасади вкриті скульптурами звірів і мисливськими сюжетами."},
+{city:"Київ",name:"Класицизм Подолу",shape:"rect",req:["cls","cls","cls","cls","cls"],desc:"Бездоганно пропорційні двері купецького будинку з фронтоном і замковим каменем.",fact:"Після великої пожежі 1811 року Поділ відбудовували за новим регулярним планом, і багато споруд постали в стилі класицизму."},
+{city:"Чернігів",name:"Будинок з пропильною різьбою",shape:"rect",req:["nar","nar","nar","nar","nar"],desc:"Дерев’яні двері під ажурною лиштвою: ромби, розетки, зубчасті карнизи.",fact:"Для старого Чернігова характерні дерев’яні будинки кінця ХІХ — початку ХХ ст. з пропильним різьбленням на лиштвах і фронтонах."},
+{city:"Чернігів",name:"Бароковий вхід",shape:"arch",req:["bar","bar","bar","bar","bar"],desc:"Фігурні філенки, кольорове скло, калатало з левовою головою й маскарон.",fact:"Чернігів зберіг визначні пам’ятки козацького бароко, зокрема Катерининську церкву початку XVIII ст. з фігурними фронтонами."},
+{city:"Полтава",name:"Український модерн",shape:"trap",req:["nar","mod","mod","nar","nar"],desc:"Трапецієподібний отвір, народна різьба й стримані модернові лінії.",fact:"Будинок Полтавського губернського земства (1903–1908, арх. Василь Кричевський) — маніфест українського модерну: трапецієподібні вікна й двері, кераміка з народними орнаментами."},
+{city:"Чернівці",name:"Маленький Відень",shape:"arch",req:["cls","mod","mod","mod","mod"],desc:"Віденська елегантність: класична основа, модернові філенки й кована квітка.",fact:"На початку ХХ ст. Чернівці через тісні зв’язки з Віднем часто називали «маленьким Віднем»."},
+{city:"Гуцульщина",name:"Ворота гражди",shape:"rect",req:["nar","nar","nar","nar","nar"],desc:"Масивні дерев’яні ворота з ромбами, сонячними розетками й кованою клямкою.",fact:"Гражда — гуцульська садиба, де хата й господарські будівлі утворюють замкнений двір з одними воротами."},
+{city:"Харків",name:"Будинок Бекетова",shape:"seg",req:["cls","cls","cls","cls","bar"],desc:"Монументальний вхід із чіткою симетрією, віяловою фрамугою і маскароном.",fact:"Архітектор Олексій Бекетов спроєктував у Харкові десятки будівель; на його честь названо станцію метро «Архітектора Бекетова»."},
+{city:"Кам’янець",name:"Брама Старого міста",shape:"arch",req:["bar","nar","bar","bar","bar"],desc:"Кам’яна арка, важкі стулки й ковані цвяхи — двері міста-фортеці.",fact:"Старе місто Кам’янця-Подільського стоїть на скелястому «острові», який майже з усіх боків оточує каньйон річки Смотрич."},
+{city:"Луцьк",name:"Біля замку Любарта",shape:"arch",req:["bar","cls","bar","nar","bar"],desc:"Цегляна стіна, низька арка й ковані деталі старого міста.",fact:"Верхній замок у Луцьку відомий як замок Любарта — на честь литовсько-руського князя, за якого його почали мурувати з цегли."},
+{city:"Ужгород",name:"Двері Галагова",shape:"rect",req:["cls","mod","cls","mod","cls"],desc:"Лаконічні двері міжвоєнної забудови: чисті лінії, скло і метал. Навесні над ними цвіте сакура.",fact:"У міжвоєнні роки в Ужгороді постав цілий район функціоналістської забудови — Малий Галагов. Місто також славиться алеями сакур."}
+];
+const WALLS={"Одеса":{bg:"#e8d29d",k:"rust",l:"#c7a868"},"Львів":{bg:"#d8a05a",k:"plaster",l:"#b8843f",c2:"#efe1c1",c3:"#9c8f7c"},"Київ":{bg:"#efdfae",k:"pilaster",l:"#d1bd86"},"Чернігів":{bg:"#7096b8",k:"planks",l:"#557c9f"},"Гуцульщина":{bg:"#8a5a32",k:"logs",l:"#5a3820"},"Полтава":{bg:"#f4f0e5",k:"tiles",l:"#dad3c1"},"Чернівці":{bg:"#e9c2b6",k:"stucco",l:"#cfa395"},"Харків":{bg:"#cfcac0",k:"rust",l:"#a8a296"},"Кам’янець":{bg:"#d6c6a2",k:"stone",l:"#a8987a"},"Луцьк":{bg:"#b8613f",k:"brick",l:"#8e4529"},"Ужгород":{bg:"#efe9dc",k:"plaster",l:"#d3cab8",c2:"#ffffff",c3:"#b9b2a4"},_:{bg:"#d7cdbb",k:"shabby",l:"#b9ad97"}};
+
+/* ================= ІКОНКИ ================= */
+const IC={base:'<path d="M6 21V7a6 6 0 0 1 12 0v14M4 21h16"/>',panel:'<rect x="6" y="3" width="12" height="18" rx="1"/><rect x="8.5" y="6" width="7" height="5"/><rect x="8.5" y="13" width="7" height="5"/>',glass:'<path d="M3 17a9 9 0 0 1 18 0Z"/><path d="M12 17V8M12 17 6 11.5M12 17l6-5.5"/>',fit:'<circle cx="12" cy="7" r="3"/><circle cx="12" cy="15" r="4.5"/>',dec:'<circle cx="12" cy="12" r="4"/><path d="M4 9c1-4 4-6 8-6s7 2 8 6M8 19l4 2.5 4-2.5"/>',
+mod:'<path d="M6 20C6 10 10 5 19 4c-1 9-6 13-13 16Z"/><path d="M6 20l8-9"/>',cls:'<path d="M4 7h16M5 7l7-4 7 4M7 7v11M12 7v11M17 7v11M4 20h16"/>',bar:'<path d="M12 20c-5 0-8-3-8-7s3-7 7-7 6 2 6 5-2 4-4 4-3-1-3-3"/>',nar:'<path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/><circle cx="12" cy="12" r="3"/>',
+star:'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7Z" fill="currentColor"/>',hammer:'<path d="M13 4l7 7-2.5 2.5-7-7zM10.5 6.5 3 14l3.5 3.5L14 10"/>',bin:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',deck:'<rect x="5" y="3" width="12" height="16" rx="2"/><path d="M8 21h11V7"/>',recycle:'<path d="M7 19h10l-2-3M17 19l3-5M4 14l3-6 3 2M7 8l-2 4M14 5l3 5-3 1M17 10h-6"/>',end:'<path d="M5 12h13M13 6l6 6-6 6"/>',bot:'<rect x="5" y="8" width="14" height="11" rx="3"/><circle cx="9.5" cy="13.5" r="1.3" fill="currentColor"/><circle cx="14.5" cy="13.5" r="1.3" fill="currentColor"/><path d="M12 8V4M9 4h6"/>',net:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4.5-7 8-7s7 2 8 7"/>',book:'<path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1zM12 6v14"/>',menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',palette:'<path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4C21 6.5 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10" cy="7" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/>',scroll:'<path d="M7 4h11a2 2 0 0 1 2 2v1h-4M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7M7 4a2 2 0 0 1 2 2v12M11 9h4M11 13h4"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',tray:'<path d="M3 13h5l2 3h4l2-3h5M3 13l3-8h12l3 8v6H3z"/>'};
+const ic=(n,c)=>`<svg class="ic ${c||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
+
+/* ================= ДВЕРІ ================= */
+const SH={rect:"M10 150V10H90V150Z",arch:"M10 150V50A40 40 0 0 1 90 50V150Z",seg:"M10 150V28Q50 4 90 28V150Z",trap:"M10 150V32L28 10H72L90 32V150Z"};
+const WOOD={mod:"#4b6040",cls:"#87572d",bar:"#672b22",nar:"#a26e3c"},STONE={mod:"#d8ceb6",cls:"#e6dfcf",bar:"#d9c194",nar:"#7d5c3c"};
+const BR="#d6a640",BRD="#8a6a1f",IR="#1d1d1d",PS='fill="rgba(255,255,255,.15)" stroke="rgba(0,0,0,.42)" stroke-width="1.2"';
+let CN=0;const f1=v=>v.toFixed(1);
+function spokes(cx,cy,r,a0,a1,st,col){let o="";for(let a=a0;a<a1;a+=st){const q=a*Math.PI/180;o+=`<line x1="${f1(cx-r*Math.cos(q))}" y1="${f1(cy-r*Math.sin(q))}" x2="${f1(cx+r*Math.cos(q))}" y2="${f1(cy+r*Math.sin(q))}" stroke="${col}"/>`;}return o;}
+function glass(s){
+ if(s==="cls"){let o='<rect width="100" height="46" fill="#cfe2e6"/>';for(let a=0;a<=180;a+=22.5){const q=a*Math.PI/180;o+=`<line x1="50" y1="46" x2="${f1(50-60*Math.cos(q))}" y2="${f1(46-60*Math.sin(q))}" stroke="#f4f1e8" stroke-width="1.6"/>`;}return o+'<path d="M38 46A12 12 0 0 1 62 46Z" fill="#f4f1e8"/>';}
+ if(s==="mod")return '<rect width="100" height="46" fill="#ecdcaa"/><g stroke="#2b2b2b" stroke-width=".8"><ellipse cx="50" cy="30" rx="6" ry="15" fill="#6f9b58" transform="rotate(-45 50 46)"/><ellipse cx="50" cy="30" rx="6" ry="15" fill="#4f80a6"/><ellipse cx="50" cy="30" rx="6" ry="15" fill="#d9973b" transform="rotate(40 50 46)"/><circle cx="50" cy="18" r="5" fill="#c2463a"/><path d="M10 40C26 20 34 42 48 12M90 30C80 24 74 36 66 20" fill="none"/></g>';
+ if(s==="bar"){let o='<rect width="100" height="46" fill="#e2cc8e"/>',k=0;const C=["#b34a3a","#3f6f8f","#e0c060"];for(let y=14;y<=40;y+=12)for(let x=10;x<=90;x+=10)o+=`<path d="M${x} ${y-5}L${x+5} ${y}L${x} ${y+5}L${x-5} ${y}Z" fill="${C[k++%3]}" stroke="#5a3a1a" stroke-width=".6"/>`;return o;}
+ let o="";const C=["#c0392b","#e8b84a","#3f7d4a","#f3ecd8"];for(let j=0;j<4;j++)for(let i=0;i<7;i++)o+=`<rect x="${8+i*12}" y="${j*12}" width="12" height="12" fill="${C[(i+j)%4]}" stroke="#2b2b2b" stroke-width=".8"/>`;return o;}
+function woodT(s,ws){let o=`<rect width="100" height="46" fill="${WOOD[ws]}"/><rect width="100" height="46" fill="rgba(0,0,0,.14)"/>`;
+ if(s==="cls")o+=`<rect x="22" y="22" width="56" height="18" ${PS}/>`;else if(s==="mod")o+=`<path d="M18 42Q50 6 82 42Z" ${PS}/><circle cx="62" cy="32" r="3" ${PS}/>`;
+ else if(s==="bar")o+=`<path d="M28 44A22 22 0 0 1 72 44Z" ${PS}/>`+spokes(50,44,22,30,180,30,"rgba(0,0,0,.4)");
+ else for(const cx of [28,50,72])o+=`<circle cx="${cx}" cy="30" r="7" ${PS}/>`+spokes(cx,30,7,0,180,45,"rgba(0,0,0,.45)");return o;}
+function panels(s){let o="";for(const x of [14,53]){const w=33,cx=x+w/2;
+ if(s==="cls")o+=`<rect x="${x+3}" y="54" width="${w-6}" height="38" ${PS}/><rect x="${x+3}" y="98" width="${w-6}" height="44" ${PS}/>`;
+ else if(s==="mod"){o+=`<path d="M${x+4} 142V74Q${cx} 52 ${x+w-4} 74V142Z" ${PS}/>`;o+=x===14?`<circle cx="${cx}" cy="76" r="3.5" ${PS}/><path d="M${cx} 84V132" stroke="rgba(0,0,0,.35)"/>`:`<path d="M${x+8} 130Q${cx} 110 ${x+w-8} 126" fill="none" stroke="rgba(0,0,0,.35)"/>`;}
+ else if(s==="bar")o+=`<path d="M${x+3} 92V66Q${x+3} 54 ${cx} 54Q${x+w-3} 54 ${x+w-3} 66V92Z" ${PS}/><rect x="${x+3}" y="98" width="${w-6}" height="44" ${PS}/><path d="M${cx} 106L${cx+9} 120L${cx} 134L${cx-9} 120Z" ${PS}/>`;
+ else o+=`<rect x="${x+3}" y="54" width="${w-6}" height="88" ${PS}/><path d="M${cx} 60L${x+w-6} 98L${cx} 136L${x+6} 98Z" ${PS}/><circle cx="${cx}" cy="98" r="5" ${PS}/>`+spokes(cx,98,5,0,180,45,"rgba(0,0,0,.45)");}return o;}
+function fit(s){
+ if(s==="cls")return `<circle cx="44" cy="100" r="2.8" fill="${BR}" stroke="${BRD}"/><circle cx="56" cy="100" r="2.8" fill="${BR}" stroke="${BRD}"/><rect x="55" y="105" width="2.2" height="5" rx="1" fill="${BRD}"/>`;
+ if(s==="mod")return `<g fill="none" stroke="${BR}" stroke-width="2.6" stroke-linecap="round"><path d="M45 84C40 94 50 104 45 116"/><path d="M55 84C60 94 50 104 55 116"/></g>`;
+ if(s==="bar"){let o="";for(const cx of [31,69])o+=`<circle cx="${cx}" cy="82" r="5.5" fill="${BR}" stroke="${BRD}"/><circle cx="${cx-2}" cy="81" r=".9" fill="${BRD}"/><circle cx="${cx+2}" cy="81" r=".9" fill="${BRD}"/><circle cx="${cx}" cy="92" r="5" fill="none" stroke="${BR}" stroke-width="2"/>`;return o;}
+ return `<path d="M35 100H64q5 0 5 5" fill="none" stroke="${IR}" stroke-width="2.6" stroke-linecap="round"/><circle cx="35" cy="100" r="2.8" fill="${IR}"/>`+[[24,58],[76,58],[24,138],[76,138]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.4" fill="${IR}"/>`).join("");}
+function decIn(s){return s==="mod"?'<g fill="none" stroke="#1d1d1d" stroke-width="1.6"><path d="M8 44C24 18 36 42 50 12C64 42 76 18 92 44M50 12V44"/></g>':"";}
+function decOut(s){
+ if(s==="cls")return '<path d="M-6 3L50 -16L106 3Z" fill="#ebe4d3" stroke="#a69a80" stroke-width="1.2"/><path d="M45 3H55L53.5 15H46.5Z" fill="#f2ecdf" stroke="#a69a80"/>';
+ if(s==="mod")return '<path d="M50 4C40 -4 30 -3 20 6M50 4C60 -4 70 -3 80 6" fill="none" stroke="#3f5a35" stroke-width="1.8"/><ellipse cx="32" cy="-2" rx="5" ry="2.4" fill="#6f9b58" transform="rotate(-20 32 -2)"/><ellipse cx="68" cy="-2" rx="5" ry="2.4" fill="#6f9b58" transform="rotate(20 68 -2)"/><circle cx="50" cy="-4" r="6" fill="#d9973b" stroke="#7a4a1a"/><circle cx="50" cy="-4" r="2.5" fill="#c2463a"/>';
+ if(s==="bar")return '<g stroke="#8a6a3a" stroke-width="1"><circle cx="50" cy="-5" r="11" fill="#c9a96a"/><circle cx="50" cy="-5" r="7" fill="#e8d6a8"/><circle cx="47.5" cy="-7" r="1" fill="#5a3a1a"/><circle cx="52.5" cy="-7" r="1" fill="#5a3a1a"/><path d="M47 -2Q50 0 53 -2" fill="none"/><path d="M8 6c-10-6-4-16 4-12c4 2 2 7-2 6M92 6c10-6 4-16-4-12c-4 2-2 7 2 6" fill="none" stroke-width="2"/></g>';
+ let o='<g fill="#f1f3f5" stroke="#4f74a8" stroke-width="1"><rect x="-9" y="0" width="118" height="5"/>';for(let x=-9;x<109;x+=8)o+=`<path d="M${x} 0L${x+4} -8L${x+8} 0Z"/>`;
+ o+='<rect x="-10" y="5" width="6" height="146"/><rect x="104" y="5" width="6" height="146"/>';for(let y=14;y<150;y+=14)o+=`<circle cx="-7" cy="${y}" r="1.8"/><circle cx="107" cy="${y}" r="1.8"/>`;return o+'<circle cx="50" cy="-12" r="4"/></g>';}
+/* L — масив об'єктів {t,s} або null */
+function doorInner(shape,L,ghost){const id="c"+(CN++),d=SH[shape],b=L[0];
+ let o=`<defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs>`;
+ if(b)o+=`<path d="${d}" transform="translate(3 4)" fill="rgba(0,0,0,.3)"/><path d="${d}" fill="${WOOD[b.s]}" stroke="${STONE[b.s]}" stroke-width="9" stroke-linejoin="round"/>`;
+ else o+=`<path d="${d}" fill="${ghost?"rgba(60,40,20,.28)":"#ece3d1"}" stroke="${ghost?"rgba(255,255,255,.55)":"#b3a184"}" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+ o+=`<g clip-path="url(#${id})">`;
+ if(b&&b.s!=="mod")for(let x=18;x<90;x+=9)o+=`<path d="M${x} 48V148" stroke="rgba(255,255,255,.07)" stroke-width="1.4"/>`;
+ if(L[2])o+=L[2].t==="glass"?glass(L[2].s):woodT(L[2].s,b?b.s:"cls");
+ if(b)o+='<rect y="44" width="100" height="3.5" fill="rgba(0,0,0,.4)"/><rect x="49" y="47" width="2" height="103" fill="rgba(0,0,0,.35)"/><rect y="146" width="100" height="4" fill="rgba(0,0,0,.25)"/>';
+ if(L[1])o+=panels(L[1].s);if(L[3])o+=fit(L[3].s);if(L[4])o+=decIn(L[4].s);
+ o+="</g>";if(b)o+=`<path d="${d}" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="1"/>`;if(L[4])o+=decOut(L[4].s);return o;}
+const doorSVG=(shape,L,cls)=>`<svg viewBox="-12 -20 124 180" class="${cls||""}" aria-hidden="true">${doorInner(shape,L)}</svg>`;
+
+
+const PVB={base:"-14 -22 128 184",panel:"8 48 84 100",glass:"0 0 100 48",fit:"14 66 72 56",dec:"-14 -22 128 72"};
+function partSVG(p){const L=[null,null,null,null,null];L[TYPES.indexOf(p.t)]=p;let back="";
+ if(p.t==="panel"||p.t==="fit")back='<rect x="0" y="0" width="100" height="150" fill="#b08a5e"/>';if(p.t==="dec")back='<rect x="-14" y="-22" width="128" height="72" fill="#e6dbc4"/>';if(p.t==="glass")back='<rect width="100" height="48" fill="#b08a5e"/>';
+ let inner=doorInner("rect",L,false);if(p.t!=="base")inner=inner.replace(/<path d="M10 150V10H90V150Z" fill="#ece3d1"[^>]*\/>/,"");
+ return `<svg viewBox="${PVB[p.t]}" class="part" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${back}${inner}</svg>`;}
+const k3of=s=>s==="nar"?"panel":"glass";
+const ideal=o=>o.req.map((s,i)=>({t:i===2?k3of(s):TYPES[i],s}));
+
+/* ================= СТІНИ ================= */
+function wallPat(W){let o="";const L=W.l;
+ switch(W.k){
+ case "rust":for(let y=18,r=0;y<222;y+=18,r++){o+=`<line x1="0" y1="${y}" x2="200" y2="${y}" stroke="${L}" stroke-width="2.4"/>`;for(let x=r%2?20:0;x<200;x+=40)o+=`<line x1="${x}" y1="${y-18}" x2="${x}" y2="${y}" stroke="${L}" stroke-width="1.4"/>`;}break;
+ case "plaster":o+=`<rect width="200" height="16" fill="${W.c2}"/>`;for(let x=4;x<200;x+=10)o+=`<rect x="${x}" y="16" width="5" height="5" fill="${W.c2}"/>`;o+=`<rect y="196" width="200" height="26" fill="${W.c3}"/><path d="M0 196H200" stroke="rgba(0,0,0,.25)"/>`;break;
+ case "pilaster":for(const x of [4,174])o+=`<rect x="${x}" y="14" width="22" height="208" fill="#f6efd9"/><rect x="${x-3}" y="10" width="28" height="8" fill="#fffaf0"/><path d="M${x+5} 22V218M${x+11} 22V218M${x+17} 22V218" stroke="${L}"/>`;o+=`<rect width="200" height="10" fill="#fffaf0"/>`;break;
+ case "planks":for(let y=8;y<222;y+=9)o+=`<line x1="0" y1="${y}" x2="200" y2="${y}" stroke="${L}" stroke-width="1.6"/>`;o+=`<rect x="2" y="0" width="12" height="222" fill="#f2f4f6"/>`+[30,70,110,150,190].map(y=>`<circle cx="8" cy="${y}" r="3" fill="none" stroke="#4f74a8"/>`).join("");break;
+ case "logs":for(let y=0;y<222;y+=20)o+=`<rect y="${y}" width="200" height="20" fill="url(#gLog)"/><line x1="0" y1="${y+19.5}" x2="200" y2="${y+19.5}" stroke="#3d2614"/><circle cx="4" cy="${y+10}" r="9" fill="#c79a66" stroke="#5a3820"/><circle cx="4" cy="${y+10}" r="4" fill="none" stroke="#8a5f38"/><circle cx="196" cy="${y+10}" r="9" fill="#c79a66" stroke="#5a3820"/><circle cx="196" cy="${y+10}" r="4" fill="none" stroke="#8a5f38"/>`;break;
+ case "tiles":for(let x=0;x<200;x+=20)o+=`<rect x="${x}" y="12" width="20" height="20" fill="${x%40?"#2f6f86":"#e8f0e8"}" stroke="#fff"/><path d="M${x+10} 14L${x+18} 22L${x+10} 30L${x+2} 22Z" fill="${x%40?"#e8c04a":"#3f8a55"}"/>`;o+=`<rect y="200" width="200" height="22" fill="#cfc6b2"/>`;break;
+ case "stucco":for(let x=0;x<200;x+=40)o+=`<path d="M${x+4} 14Q${x+20} 34 ${x+36} 14" fill="none" stroke="#fff" stroke-width="3"/><circle cx="${x+4}" cy="14" r="3" fill="#fff"/>`;o+=`<rect width="200" height="10" fill="#fff6f2"/><rect y="198" width="200" height="24" fill="#d6aa9c"/>`;break;
+ case "brick":for(let y=0,r=0;y<222;y+=8,r++){o+=`<line x1="0" y1="${y}" x2="200" y2="${y}" stroke="${L}" stroke-width="1.2"/>`;for(let x=r%2?8:0;x<200;x+=16)o+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${y+8}" stroke="${L}"/>`;}break;
+ case "stone":[[0,0,38,30],[38,0,52,24],[90,0,40,34],[130,0,70,28],[0,30,30,40],[160,28,40,44],[0,70,26,50],[170,72,30,46],[0,120,32,44],[166,118,34,50],[0,164,40,58],[160,168,40,54]].forEach(r=>o+=`<rect x="${r[0]+1}" y="${r[1]+1}" width="${r[2]-2}" height="${r[3]-2}" rx="4" fill="rgba(255,255,255,.12)" stroke="${L}" stroke-width="1.6"/>`);break;
+ default:o+=`<path d="M150 150h34v10h-34zM156 160h34v10h-34zM150 170h30v10h-30z" fill="#b5694a" stroke="#8a4a32"/><path d="M146 144c10-6 40-4 48 4l-4 40c-12 6-36 4-46-2z" fill="none" stroke="${L}" stroke-width="2"/>`;}
+ return o;}
+const POT='<path d="M168 222h20l-3 -18h-14z" fill="#b5562f" stroke="#6e3218"/><g fill="#3f7d4a"><ellipse cx="172" cy="200" rx="6" ry="3" transform="rotate(-30 172 200)"/><ellipse cx="184" cy="199" rx="6" ry="3" transform="rotate(30 184 199)"/><ellipse cx="178" cy="194" rx="3" ry="6"/></g><g fill="#d9403a"><circle cx="172" cy="192" r="3.4"/><circle cx="182" cy="190" r="3.4"/><circle cx="177" cy="186" r="3"/></g>';
+function leaf5(cx,cy,r,col){let o="";for(const a of [-70,-35,0,35,70])o+=`<ellipse cx="${cx}" cy="${cy-r}" rx="${r*.3}" ry="${r}" fill="${col}" transform="rotate(${a} ${cx} ${cy})"/>`;return o;}
+function cityX(c){switch(c){
+ case "Одеса":return [28,172].map(x=>`<path d="M${x-8} 222Q${x-9} 200 ${x} 194Q${x+9} 200 ${x+8} 222Z" fill="#3b3d3f" stroke="#1f2022"/><ellipse cx="${x}" cy="195" rx="4.5" ry="2" fill="#6a6d70"/>`).join("")+leaf5(186,30,16,"#4f8a3c")+leaf5(170,10,12,"#5f9a48");
+ case "Львів":return `<circle cx="176" cy="48" r="15" fill="#e9dcc0" stroke="#9c8f7c" stroke-width="2"/><circle cx="176" cy="48" r="10" fill="#c9a96a"/><circle cx="176" cy="49" r="6" fill="#e8d6a8"/><circle cx="174" cy="47" r="1" fill="#5a3a1a"/><circle cx="178" cy="47" r="1" fill="#5a3a1a"/><path d="M174 52q2 1.5 4 0" stroke="#5a3a1a" fill="none"/>`+POT;
+ case "Київ":return leaf5(178,26,18,"#3e7a3e")+leaf5(196,48,13,"#4a8a46")+[[164,40],[190,62]].map(p=>`<path d="M${p[0]-4} ${p[1]}L${p[0]} ${p[1]-16}L${p[0]+4} ${p[1]}Z" fill="#fff" stroke="#e8c9c9"/><circle cx="${p[0]}" cy="${p[1]-6}" r="1.3" fill="#e67d8e"/>`).join("")+POT;
+ case "Чернігів":return `<rect x="172" y="64" width="24" height="74" fill="#f2f4f6" stroke="#4f74a8" stroke-width="1.5"/><path d="M172 64l24 37M196 64l-24 37M172 101l24 37M196 101l-24 37" stroke="#4f74a8"/><path d="M180 222V170" stroke="#3f7d4a" stroke-width="3"/><ellipse cx="176" cy="196" rx="7" ry="3" fill="#3f7d4a" transform="rotate(-30 176 196)"/>`+Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;return `<ellipse cx="${f1(180+11*Math.cos(a))}" cy="${f1(164+11*Math.sin(a))}" rx="5" ry="2.4" fill="#f2c230" transform="rotate(${i*30} ${f1(180+11*Math.cos(a))} ${f1(164+11*Math.sin(a))})"/>`;}).join("")+'<circle cx="180" cy="164" r="7" fill="#5a3a1a"/>';
+ case "Гуцульщина":{let o='<rect y="24" width="200" height="12" fill="#f3ead6"/>';for(let x=0;x<200;x+=12)o+=`<path d="M${x} 36L${x+6} 26L${x+12} 36Z" fill="${(x/12)%2?"#b3262a":"#1f1f1f"}"/>`;return o+`<circle cx="176" cy="66" r="12" fill="#c79a66" stroke="#5a3820" stroke-width="1.5"/>`+spokes(176,66,12,0,180,30,"#5a3820")+POT;}
+ case "Полтава":return `<path d="M182 222V120" stroke="#4f7d3f" stroke-width="3"/>`+[130,146,162,178,194].map((y,i)=>`<circle cx="${i%2?188:176}" cy="${y}" r="7" fill="${["#e46aa0","#f08bb8","#d94f8a","#f3a2c6","#e46aa0"][i]}"/><circle cx="${i%2?188:176}" cy="${y}" r="2" fill="#f7e27a"/>`).join("")+[150,186].map(y=>`<ellipse cx="190" cy="${y}" rx="8" ry="4" fill="#4f7d3f"/>`).join("");
+ case "Чернівці":return `<circle cx="176" cy="56" r="13" fill="#fff6f2" stroke="#cfa395" stroke-width="2"/><path d="M164 56q12 14 24 0" fill="none" stroke="#7fae6c" stroke-width="3"/><circle cx="176" cy="54" r="4" fill="#e8b0a0"/>`+POT;
+ case "Харків":return `<rect x="170" y="20" width="22" height="196" fill="#ecebe6"/><path d="M175 26V212M181 26V212M187 26V212" stroke="#c9c6bd"/><rect x="166" y="14" width="30" height="10" fill="#f7f6f2" stroke="#b9b4aa"/><path d="M168 24q4 6 8 0M184 24q4 6 8 0" stroke="#b9b4aa" fill="none"/>`;
+ case "Кам’янець":return `<rect x="172" y="56" width="16" height="44" rx="2" fill="#c8b48c" stroke="#8a7a5a"/><rect x="178" y="62" width="4" height="32" fill="#2a2420"/>`+Array.from({length:14},(_,i)=>`<ellipse cx="${6+i*6}" cy="${4+(i%3)*4}" rx="4" ry="2.6" fill="${i%2?"#5f8f45":"#4a7a38"}" transform="rotate(${i*25} ${6+i*6} ${4+(i%3)*4})"/>`).join("")+POT;
+ case "Луцьк":{let o="";for(let x=0;x<200;x+=20)o+=`<rect x="${x+10}" y="0" width="10" height="10" fill="#1c362f" opacity=".85"/>`;return o+`<path d="M170 110V74Q180 56 190 74V110Z" fill="#5a2a18" stroke="#3d1a0e"/>`+POT;}
+ case "Ужгород":return `<path d="M200 6C180 14 168 10 150 26M178 12C176 24 184 32 180 44" stroke="#5a3a2a" stroke-width="3" fill="none"/>`+[[156,22],[164,16],[172,24],[184,10],[190,20],[178,36],[182,46],[196,30],[166,30]].map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${4+i%2}" fill="${i%3?"#f6b8c8":"#f9d3de"}"/>`).join("")+[[150,70],[166,110],[60,40],[140,150]].map(p=>`<ellipse cx="${p[0]}" cy="${p[1]}" rx="2.4" ry="1.4" fill="#f6b8c8" transform="rotate(30 ${p[0]} ${p[1]})"/>`).join("")+POT;
+ default:return c?POT:"";}}
+function wallSVG(city,shape,L,ghost){const W=WALLS[city]||WALLS._;
+ let o=`<svg viewBox="0 0 200 250" class="ws" aria-hidden="true"><rect width="200" height="250" fill="${W.bg}"/>${wallPat(W)}`;
+ o+=`<path d="M22 58h10" stroke="#2a2a2a" stroke-width="2"/><path d="M30 52v12" stroke="#2a2a2a" stroke-width="2"/><circle cx="26" cy="76" r="18" fill="url(#gGlow)"/><path d="M20 66h12l-2 18h-8z" fill="#ffd98a" stroke="#2a2a2a" stroke-width="1.6"/><path d="M19 66l7-5 7 5" fill="#2a2a2a"/>`;
+ o+=`<rect y="222" width="200" height="28" fill="#7d766b"/>`;for(let r=0;r<2;r++)for(let x=(r?6:0);x<200;x+=13)o+=`<ellipse cx="${x}" cy="${229+r*12}" rx="6" ry="4.5" fill="#968e81" stroke="#5f594f"/>`;
+ o+=`<rect x="40" y="216" width="120" height="8" rx="1" fill="#bdb3a1" stroke="#857b6b"/>`+cityX(city);
+ o+=`<svg x="36" y="32" width="128" height="186" viewBox="-12 -20 124 180">${doorInner(shape,L,ghost)}</svg>`;
+ o+=`<rect width="200" height="250" fill="url(#gLight)" pointer-events="none"/>`;
+ if(city)o+=`<g><rect x="8" y="${city==="Гуцульщина"?40:8}" width="${city.length*6.2+12}" height="15" rx="2.5" fill="#24508f" stroke="#fff" stroke-width="1.3"/><text x="14" y="${city==="Гуцульщина"?51:19}" font-size="9.5" font-weight="700" fill="#fff" font-family="Golos Text,sans-serif">${city}</text></g>`;
+ return o+"</svg>";}
+
+/* ================= РУШІЙ ================= */
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const PT=id=>PARTS[id];
+const isDone=d=>!!d&&d.L.every(x=>x!=null);
+const nextIdx=d=>d.L.findIndex(x=>x==null);
+const cnt=v=>typeof v==="number"?v:v.length;
+const reqOf=(d,k)=>d&&d.o>=0?ORD[d.o].req[k]:null;
+function mkGame(seats){const g={seats,cur:0,phase:"take",placed:0,mdisc:false,otook:false,market:[],deck:shuffle(PARTS.map(p=>p.id)),disc:[],od:shuffle(ORD.map((_,i)=>i)),om:[],
+ pl:seats.map(()=>({doors:[null,null,null],st:[],hand:[],work:0,brak:0})),endBy:-1,left:-1,trig:false,over:false,seq:0,fx:null,round:1,rs:0};
+ g.pl.forEach(p=>{if(g.od.length)p.hand.push(g.od.pop());});refillO(g);refillM(g);return g;}
+function drawP(g){if(!g.deck.length){if(!g.disc.length)return null;g.deck=shuffle(g.disc);g.disc=[];g.rs++;}return g.deck.pop();}
+function refillM(g){while(g.market.length<MK){const c=drawP(g);if(c==null)break;g.market.push(c);}}
+function refillO(g){while(g.om.length<OM&&Array.isArray(g.od)&&g.od.length)g.om.push(g.od.pop());}
+function takeSet(g,pid,mode){const p=PT(pid);return g.market.filter(id=>mode==="s"?PT(id).s===p.s:PT(id).t===p.t);}
+const free=(g,seat)=>STMAX-g.pl[seat].st.length;
+function targets(g,seat,pid){const P=g.pl[seat],p=PT(pid),res=[];
+ P.doors.forEach((d,i)=>{if(!d){if(p.t==="base")res.push({slot:i,layer:0});return;}if(isDone(d))return;const n=nextIdx(d);
+  if(ACC[n].includes(p.t))res.push({slot:i,layer:n});for(let k=0;k<n;k++)if(ACC[k].includes(p.t))res.push({slot:i,layer:k,rep:true});});return res;}
+function doorScore(d){if(!isDone(d))return 0;let s=0,m=0;d.L.forEach((id,i)=>{s++;if(d.o>=0&&PT(id).s===ORD[d.o].req[i]){s++;m++;}});return s+(m===5?3:0);}
+function matches(d){return d.o<0?0:d.L.filter((id,i)=>id!=null&&PT(id).s===ORD[d.o].req[i]).length;}
+function score(g,i){const P=g.pl[i];return P.doors.reduce((a,d)=>a+doorScore(d),0)+P.work-P.brak-(g.over?P.st.length:0);}
+function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.pl[seat];
+ switch(m.a){
+ case "order":{if(g.otook||P.hand.length>=HMAX||!g.om.includes(m.o))return false;g.om.splice(g.om.indexOf(m.o),1);P.hand.push(m.o);refillO(g);g.otook=true;g.fx={k:"order",o:m.o,seat};return true;}
+ case "mdisc":{if(g.phase!=="take"||g.mdisc)return false;const i=g.market.indexOf(m.pid);if(i<0)return false;g.market.splice(i,1);g.disc.push(m.pid);const r0=g.rs;refillM(g);g.mdisc=true;g.fx={k:"mdisc",pid:m.pid,rs:g.rs>r0};return true;}
+ case "take":{if(g.phase!=="take"||!g.market.includes(m.pid)||(m.mode!=="s"&&m.mode!=="t"))return false;const ids=takeSet(g,m.pid,m.mode);if(ids.length>free(g,seat))return false;
+  g.market=g.market.filter(id=>!ids.includes(id));P.st.push(...ids);const r0=g.rs;refillM(g);g.phase="place";g.fx={k:"take",ids,seat,rs:g.rs>r0};return true;}
+ case "work":{if(g.phase!=="take")return false;P.work++;g.phase="place";g.fx={k:"work",seat};return true;}
+ case "sdisc":{const i=P.st.indexOf(m.pid);if(i<0)return false;P.st.splice(i,1);g.disc.push(m.pid);P.brak++;g.fx={k:"sdisc",pid:m.pid,seat};return true;}
+ case "place":{if(g.phase!=="place"||g.placed>=2||!P.st.includes(m.pid))return false;
+  const t=targets(g,seat,m.pid).find(x=>x.slot===m.slot&&(m.layer==null?!x.rep:x.layer===m.layer));if(!t)return false;
+  let d=P.doors[m.slot];if(!d){let o=-1;if(P.hand.length){o=P.hand.includes(m.o)?m.o:P.hand[0];P.hand.splice(P.hand.indexOf(o),1);}d=P.doors[m.slot]={o,L:[null,null,null,null,null]};}
+  const old=d.L[t.layer];if(old!=null)g.disc.push(old);d.L[t.layer]=m.pid;P.st.splice(P.st.indexOf(m.pid),1);g.placed++;
+  g.fx={k:"place",pid:m.pid,seat,slot:m.slot,layer:t.layer,rep:old!=null};
+  if(isDone(d)){g.fx.done=true;g.fx.pts=doorScore(d);if(g.endBy<0&&P.doors.every(isDone)){g.endBy=seat;g.left=g.seats.length-1;}}return true;}
+ case "end":{if(g.phase!=="place")return false;const n=g.seats.length;
+  if(!g.market.length&&!cnt(g.deck)&&!cnt(g.disc)){g.over=true;g.fx={k:"over"};return true;}
+  if(g.endBy>=0){if(!g.trig&&g.cur===g.endBy){g.trig=true;if(g.left<=0){g.over=true;g.fx={k:"over"};return true;}}else{g.left--;if(g.left<=0){g.over=true;g.fx={k:"over"};return true;}}}
+  g.cur=(g.cur+1)%n;if(g.cur===0)g.round++;g.phase="take";g.placed=0;g.mdisc=false;g.otook=false;g.fx={k:"turn"};return true;}}
+ return false;}
+/* підказки для підсвітки: "perfect" — тип і колір, "fit" — лише тип */
+function hintMarket(g,seat,pid){const P=g.pl[seat],p=PT(pid);let r="";
+ for(const d of P.doors){if(!d){if(p.t==="base"){r=r||"fit";if(P.hand.some(o=>ORD[o].req[0]===p.s))return "perfect";}continue;}if(isDone(d))continue;const n=nextIdx(d);
+  for(let k=n;k<5;k++)if(ACC[k].includes(p.t)){r=r||"fit";if(reqOf(d,k)===p.s)return "perfect";}}return r;}
+function hintStore(g,seat,pid){const T=targets(g,seat,pid).filter(t=>!t.rep);if(!T.length)return "";const P=g.pl[seat],p=PT(pid);
+ for(const t of T){const d=P.doors[t.slot];if(!d){if(P.hand.some(o=>ORD[o].req[0]===p.s))return "perfect";}else if(reqOf(d,t.layer)===p.s)return "perfect";}return "fit";}
+
+/* ================= БОТ ================= */
+function useVal(g,P,id,have){const p=PT(id);let best=-0.7;
+ P.doors.forEach(d=>{if(!d){if(p.t==="base"){const ok=P.hand.some(o=>ORD[o].req[0]===p.s),al=have.some(h=>PT(h).t==="base");best=Math.max(best,al?0.1:(ok?3:1.6));}return;}if(isDone(d))return;const n=nextIdx(d);
+  for(let k=n;k<5;k++){if(!ACC[k].includes(p.t))continue;const req=reqOf(d,k);const al=have.some(h=>{const q=PT(h);return ACC[k].includes(q.t)&&(!req||q.s===req);});let v=req===p.s?3:1;if(k>n)v*=.8;if(al)v*=.3;best=Math.max(best,v);}
+  for(let k=0;k<n;k++)if(ACC[k].includes(p.t)&&d.o>=0&&PT(d.L[k]).s!==ORD[d.o].req[k]&&p.s===ORD[d.o].req[k])best=Math.max(best,1.5);});return best;}
+function botOrder(g,seat){const P=g.pl[seat];if(g.otook||P.hand.length>=2||!g.om.length)return null;const empty=P.doors.some(d=>!d);if(!empty)return null;
+ let best=g.om[0],bv=-1;for(const o of g.om){let v=0;ORD[o].req.forEach((s,k)=>{if(P.st.some(id=>PT(id).s===s&&ACC[k].includes(PT(id).t)))v++;});if(v>bv){bv=v;best=o;}}return {a:"order",o:best};}
+function botTake(g,seat){const P=g.pl[seat];let best={a:"work"},bv=0.9;const seen=new Set(),fr=free(g,seat);
+ for(const pid of g.market)for(const mode of ["s","t"]){const p=PT(pid),key=mode+(mode==="s"?p.s:p.t);if(seen.has(key))continue;seen.add(key);
+  const ids=takeSet(g,pid,mode);if(ids.length>fr)continue;let v=0;const tmp=P.st.slice();ids.forEach(id=>{v+=useVal(g,P,id,tmp);tmp.push(id);});if(v>bv){bv=v;best={a:"take",pid,mode};}}
+ return best;}
+function botPlace(g,seat){const P=g.pl[seat];let best=null,bv=0;
+ for(const pid of P.st)for(const t of targets(g,seat,pid)){const d=P.doors[t.slot],p=PT(pid);let v,mv;
+  if(!d){const o=P.hand.find(o=>ORD[o].req[0]===p.s);v=o!=null?3:1.2;mv={a:"place",pid,slot:t.slot,o:o!=null?o:P.hand[0]};}
+  else{const req=reqOf(d,t.layer);v=t.rep?((req&&PT(d.L[t.layer]).s!==req&&p.s===req)?2.5:-1):(req===p.s?3:1);mv={a:"place",pid,slot:t.slot,layer:t.layer};}
+  if(v>bv){bv=v;best=mv;}}return best;}
+function botStep(g,seat){
+ if(g.phase==="take"){const o=botOrder(g,seat);if(o)return o;let m=botTake(g,seat);
+  if(m.a==="work"&&!g.mdisc&&g.market.length){const P=g.pl[seat];let w=g.market[0],wv=99;for(const id of g.market){const v=useVal(g,P,id,P.st);if(v<wv){wv=v;w=id;}}return {a:"mdisc",pid:w};}
+  if(m.a==="work"&&free(g,seat)<2){const P=g.pl[seat];const junk=P.st.find(id=>useVal(g,P,id,[])<0);if(junk!=null)return {a:"sdisc",pid:junk};}return m;}
+ const m=g.placed<2?botPlace(g,seat):null;if(m)return m;const P=g.pl[seat];
+ if(P.st.length>=STMAX){const c={};P.st.forEach(id=>c[PT(id).t]=(c[PT(id).t]||0)+1);const top=Object.keys(c).sort((x,y)=>c[y]-c[x])[0];let junk=P.st.find(id=>useVal(g,P,id,[])<0);if(junk==null&&c[top]>=2)junk=P.st.filter(id=>PT(id).t===top).pop();if(junk!=null)return {a:"sdisc",pid:junk};}
+ return {a:"end"};}
+
+/* ================= СТАН / МЕРЕЖА ================= */
+let G=null,VIEW=0,SELP=null,BOTT=null,MB=[],PICK=null;
+let NET={role:null,r:null,code:"",myPeer:null,peers:[],lobby:null,hostPeer:null,timer:null};
+let SETUP={seats:[{n:"Оксана",k:"local"},{n:"Бот Тарас",k:"bot"}]};
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clean=s=>String(s||"").replace(/[\x00-\x1f\x7f]/g,"").trim().slice(0,16);
+function save(){if(NET.role==="guest")return;try{localStorage.setItem("brami3",JSON.stringify(G));}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem("brami3"));}catch(e){return null;}}
+function toast(t,warn){const el=document.createElement("div");el.className="toast"+(warn?" warn":"");el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),warn?3600:2200);}
+function floatAt(el,txt){if(!el)return;const r=el.getBoundingClientRect(),f=document.createElement("div");f.className="float";f.textContent=txt;f.style.left=(r.left+r.width/2-20)+"px";f.style.top=(r.top+r.height/3)+"px";document.body.appendChild(f);setTimeout(()=>f.remove(),1300);}
+const mySeat=()=>G?G.seats.findIndex(s=>s.k==="net"&&s.peer&&s.peer===NET.myPeer):-1;
+const mine=()=>NET.role==="guest"?G&&G.cur===mySeat():G&&G.seats[G.cur].k==="local";
+const canAct=()=>G&&!G.over&&mine();
+function pack(g){return Object.assign({},g,{deck:cnt(g.deck),disc:cnt(g.disc),od:cnt(g.od)});}
+function act(m){if(!canAct())return;if(m.a==="take"&&takeSet(G,m.pid,m.mode).length>free(G,G.cur)){warnFull(takeSet(G,m.pid,m.mode).length);return;}
+ if(NET.role==="guest"){if(!netSend(m))toast("Немає зв’язку з господарем",1);return;}doMove(G.cur,m);}
+function warnFull(n){toast(`Не влізе: береш ${n}, а в лотку вільно ${free(G,G.cur)}. Скиньте зайве з лотка (−1★ за кожну) або оберіть інший набір чи підробіток.`,1);}
+function doMove(seat,m){if(!apply(G,seat,m))return false;G.seq++;SELP=null;save();const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();afterFx(fx);bcast();schedule();return true;}
+function afterFx(fx){if(!fx)return;
+ if(fx.rs)toast("Колода скінчилась — скинуті деталі перемішано назад");
+ if(fx.k==="work")floatAt(document.getElementById("work"),"+1★");
+ if(fx.k==="sdisc")floatAt(document.getElementById("bin"),"−1★");
+ if(fx.k==="place"){const w=document.querySelector(`.wall[data-slot="${fx.slot}"]`);if(w){w.classList.remove("thump");void w.offsetWidth;w.classList.add("thump");}
+  if(fx.done){floatAt(w,"+"+fx.pts+"★");const ctrl=G.seats[fx.seat].k==="local"||(NET.role==="guest"&&fx.seat===mySeat());if(ctrl)setTimeout(()=>postcard(fx.seat,fx.slot),550);else toast(G.seats[fx.seat].n+" завершує двері: +"+fx.pts+"★");}}
+ if(fx.k==="turn"){const s=G.seats[G.cur];if(s.k==="local"&&G.seats.filter(x=>x.k==="local").length>1)passScreen();}
+ if(fx.k==="over")setTimeout(finalScreen,600);}
+function schedule(){clearTimeout(BOTT);if(!G||G.over||NET.role==="guest")return;if(G.seats[G.cur].k!=="bot")return;
+ BOTT=setTimeout(()=>{if(!G||G.over||G.seats[G.cur].k!=="bot")return;const seat=G.cur;const m=botStep(G,seat);if(!doMove(seat,m))doMove(seat,{a:"end"});},G.phase==="take"?950:800);}
+
+/* ---- мережа: WebSocket-сервер кімнат ---- */
+const PID=null;
+function wsURL(){return (location.protocol==="https:"?"wss://":"ws://")+location.host+"/ws";}
+function openWS(onmsg){return new Promise((res,rej)=>{let ws;try{ws=new WebSocket(wsURL());}catch(e){return rej(e);}
+ const t=setTimeout(()=>{try{ws.close();}catch(_){}rej(new Error("timeout"));},15000);
+ ws.onopen=()=>{clearTimeout(t);res(ws);};ws.onerror=()=>{clearTimeout(t);rej(new Error("ws"));};
+ ws.onmessage=e=>{let d;try{d=JSON.parse(e.data);}catch(_){return;}onmsg(d);};});}
+function wsSend(m){try{if(NET.ws&&NET.ws.readyState===1)NET.ws.send(JSON.stringify(m));return NET.ws&&NET.ws.readyState===1;}catch(e){return false;}}
+function bcast(){if(NET.role!=="host")return;wsSend({t:"state",data:G?{g:pack(G)}:{lobby:NET.lobby}});}
+function netSend(m){return wsSend({t:"move",m});}
+async function hostRoom(){let codeP;const got=new Promise(r=>codeP=r);
+ try{NET.ws=await openWS(d=>{
+  if(d.t==="hosted"){codeP(d.code);return;}
+  if(d.t==="hello"){const name=clean(d.name)||"Гість";const seats=G?G.seats:NET.lobby;if(!seats)return;if(!seats.some(s=>s.peer===d.from)){const live=new Set(NET.live||[]);
+    let i=seats.findIndex(s=>s.k==="net"&&!s.peer);if(i<0)i=seats.findIndex(s=>s.k==="net"&&s.n===name&&!live.has(s.peer));if(i<0)i=seats.findIndex(s=>s.k==="net"&&!live.has(s.peer));
+    if(i>=0){seats[i].peer=d.from;seats[i].n=name;save();}else wsSend({t:"to",to:d.from,data:{t:"full"}});}
+   NET.live=(NET.live||[]).concat(d.from);if(G)render();else lobbyRender();bcast();return;}
+  if(d.t==="left"){NET.live=(NET.live||[]).filter(x=>x!==d.from);if(!G)lobbyRender();return;}
+  if(d.t==="move"&&G){const seat=G.seats.findIndex(s=>s.k==="net"&&s.peer===d.from);const m=d.m;if(seat<0||seat!==G.cur||!m||typeof m!=="object")return;
+   doMove(seat,{a:String(m.a),pid:+m.pid,mode:m.mode,slot:+m.slot,layer:m.layer==null?null:+m.layer,o:m.o==null?null:+m.o});}});}
+ catch(e){toast("Не вдалося з’єднатися із сервером гри. Якщо сервер щойно прокинувся — спробуйте ще раз за хвилину.",1);return false;}
+ NET.ws.onclose=()=>{if(NET.role==="host")toast("З’єднання із сервером втрачено",1);};
+ wsSend({t:"host"});NET.code=await Promise.race([got,new Promise(r=>setTimeout(()=>r(null),10000))]);if(!NET.code){toast("Сервер не відповів",1);return false;}
+ NET.role="host";try{location.hash="g-"+NET.code;}catch(e){}NET.timer=setInterval(bcast,5000);return true;}
+async function joinRoom(code,name){code=String(code).toLowerCase().replace(/[^a-z0-9]/g,"");if(code.length<4)return toast("Введіть код кімнати",1);
+ NET.role="guest";NET.code=code;G=null;guestWait();
+ try{NET.ws=await openWS(d=>{
+  if(d.t==="joined"){NET.myPeer=d.id;return;}
+  if(d.t==="nf"){toast("Кімнату "+code.toUpperCase()+" не знайдено. Перевірте код і чи відкрита гра в господаря.",1);leave();return;}
+  if(d.t==="hostgone"){toast("Господар вийшов із гри",1);return;}
+  if(d.t==="full"){toast("У кімнаті немає вільних онлайн-місць",1);return;}
+  if(d.t==="state"&&d.data){if(d.data.g){const prev=G?G.seq:-1;G=d.data.g;if(G.seq!==prev){const fx=G.fx;if(fx&&fx.k==="turn")VIEW=G.cur;render();if(prev>=0)afterFx(fx);}}else if(d.data.lobby){NET.lobby=d.data.lobby;guestWait();}}});}
+ catch(e){toast("Не вдалося з’єднатися із сервером гри",1);NET.role=null;lobbyRender();return;}
+ NET.ws.onclose=()=>{if(NET.role==="guest")toast("З’єднання розірвано",1);};
+ wsSend({t:"join",code,name:clean(name)||"Гість"});}
+/* ================= ВІДОБРАЖЕННЯ ================= */
+function cardHTML(pid,src,extra){const p=PT(pid);return `<div class="card ${extra||""}" style="--c:${STY[p.s].c}" data-pid="${pid}" data-drag="${src}:${pid}" tabindex="0" title="${TN[p.t]} · ${STY[p.s].n}"><div class="top">${ic(p.s)}${STY[p.s].n}</div>${partSVG(p)}<div class="lab">${ic(p.t)}${TN[p.t]}</div></div>`;}
+function seatAva(s,i){return `<span class="ava" style="background:${SEATC[i]}">${s.k==="bot"?ic("bot"):s.k==="net"?ic("net"):ic("user")}</span>`;}
+function chipsOf(o){return `<div class="chips">${o.req.map(s=>`<i style="background:${STY[s].c}"></i>`).join("")}</div>`;}
+function ocardHTML(oid,src){const o=ORD[oid];return `<div class="ocard" ${src?`data-drag="${src}:${oid}" data-oid="${oid}"`:""} onclick="${src?"":`showOrder(${oid})`}" tabindex="0" title="${esc(o.city+" · "+o.name)}">${wallSVG(o.city,o.shape,ideal(o))}<div class="on">${esc(o.name)}${chipsOf(o)}</div></div>`;}
+function stripHTML(d,slot,inModal){const nx=d?nextIdx(d):0;return `<div class="strip">`+[0,1,2,3,4].map(k=>{const id=d?d.L[k]:null,p=id!=null?PT(id):null,req=reqOf(d,k);
+ const tIc=p?p.t:(k===2?(req?k3of(req):"glass"):TYPES[k]);const now=d&&!isDone(d)&&k===nx;const m=p&&req&&p.s===req;
+ const st=p?(req?(m?'<span class="st y">✓</span>':`<span class="st n" title="Інший стиль: ${STY[p.s].n}">≈</span>`):'<span class="st y">✓</span>'):(now?'<span class="st" style="color:var(--brass)">◀</span>':'<span class="st" style="opacity:.4">·</span>');
+ const need=req?`<span class="need" style="--c:${STY[req].c}">${ic(req)}${STY[req].n}</span>`:`<span class="need" style="--c:#7a7064">будь-який</span>`;
+ return `<div class="lr ${now?"now":""} ${p?"done":""}" ${inModal?"":`data-drop="pip:${slot}:${k}"`} title="${LN[k]}: ${LH[k]}${now?" — зараз потрібно це":""}">${ic(tIc)}<span class="nm">${LN[k]}${k===2&&req?` · ${req==="nar"?"дерево":"скло"}`:""}</span>${need}${st}</div>`;}).join("")+`</div>`;}
+function doorHTML(P,i){const d=P.doors[i];
+ if(!d)return `<div class="door"><div class="otitle">Вільне місце <small>Місце ${i+1}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG("","rect",[null,null,null,null,null],true)}</div><div class="strip"><div class="emptyhint">${ic("base")} Покладіть сюди <b>Основу</b> — і оберіть замовлення з руки</div></div></div>`;
+ const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>id!=null?PT(id):null);
+ return `<div class="door"><div class="otitle">${o?esc(o.name):"Вільна реставрація"}<small>${isDone(d)?"готово":matches(d)+"/5 у стилі"}</small></div><div class="wall" data-drop="door:${i}" data-slot="${i}" onclick="clickDoor(${i})">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}${isDone(d)?`<div class="badge">${ic("star")}${doorScore(d)}</div>`:""}</div>${isDone(d)?"":stripHTML(d,i)}</div>`;}
+function warnText(){if(!canAct()||VIEW!==G.cur)return "";const P=G.pl[G.cur],fr=free(G,G.cur);
+ if(G.phase==="take"){const min=Math.min(...G.market.flatMap(id=>[takeSet(G,id,"s").length,takeSet(G,id,"t").length]));if(G.market.length&&min>fr)return `Лоток майже повний (вільно ${fr}) — жоден набір не влізе. Скиньте зайве в кошик (−1★) або візьміть підробіток.`;if(!G.market.length)return "Крамниця порожня — візьміть підробіток.";}
+ if(G.phase==="place"&&G.placed<2&&!P.st.some(id=>targets(G,G.cur,id).length))return P.doors.some(d=>!d)&&!P.st.some(id=>PT(id).t==="base")?"Немає що ставити: для нових дверей потрібна Основа. Завершуйте хід.":"Немає що ставити — завершуйте хід.";
+ if(!P.hand.length&&P.doors.some(d=>!d)&&!G.otook)return "Візьміть замовлення з трьох відкритих — без нього двері будуть «вільною реставрацією».";return "";}
+function hint(){const s=G.seats[G.cur];if(!canAct())return s.k==="bot"?esc(s.n)+" думає…":"Хід: "+esc(s.n);
+ if(VIEW!==G.cur)return "Ви дивитеся чужий альбом";
+ if(G.phase==="take")return "Перетягніть деталь з крамниці в лоток: ліва половина — увесь колір, права — весь тип. Або підробіток.";
+ return G.placed<2?"Перетягніть деталь з лотка на двері або на рядок шару, щоб замінити":"Можна завершувати хід";}
+function render(){if(!G)return NET.role==="guest"?guestWait():lobbyRender();
+ const before=snap();const n=G.seats.length;if(VIEW>=n)VIEW=G.cur;const P=G.pl[VIEW],my=canAct(),isCur=VIEW===G.cur;
+ let h=`<div class="bar"><div class="logo">Брами та дворики</div><div class="seats">`+G.seats.map((s,i)=>`<div class="seat ${i===G.cur?"cur":""} ${i===VIEW?"view":""}" onclick="VIEW=${i};render()" title="${esc(s.n)}">${seatAva(s,i)}<span class="sn">${esc(s.n)}</span><span class="sc">${ic("star")}${score(G,i)}</span><span class="dd">${G.pl[i].doors.map(d=>`<i class="${isDone(d)?"on":""}"></i>`).join("")}</span></div>`).join("")+`</div>
+ ${NET.role?`<span class="plq" title="Код кімнати">${esc(NET.code.toUpperCase())}</span>`:""}<button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button><button class="ibtn" onclick="menu()" title="Меню">${ic("menu")}</button></div><div class="wrap game">`;
+ const hm=id=>my&&G.phase==="take"?hintMarket(G,G.cur,id):"";
+ h+=`<section class="panel"><div class="ptitle">Крамниця<span class="meta"><span title="Деталей у колоді">${ic("deck")}колода ${cnt(G.deck)}</span><span title="Скинуті деталі повернуться в колоду, коли вона скінчиться">${ic("recycle")}скинуто ${cnt(G.disc)}</span></span></div>
+ <div class="shop"><div><div class="shelf">${G.market.map(id=>cardHTML(id,"m",(my&&G.phase==="take"?"":"off ")+hm(id)+(SELP===id?" sel":""))).join("")}</div>
+ <div class="legend"><span><i style="box-shadow:0 0 0 3px var(--ok)"></i>підходить за типом</span><span><i style="background:var(--brass)"></i>★ тип і колір як у замовленні</span></div></div>
+ <div class="side"><div><div class="ptitle" style="font-size:16px;margin-bottom:8px">${ic("scroll")} Замовлення<span class="meta">${G.otook?"вже взято цього ходу":"1 за хід, у руці до "+HMAX}</span></div><div class="omkt">${G.om.map(o=>ocardHTML(o,"o")).join("")||'<span class="waitb">Замовлення скінчились</span>'}</div></div>
+ <div class="tools"><button class="tool" id="work" onclick="act({a:'work'})" ${my&&G.phase==="take"?"":"disabled"}><b>${ic("hammer")}+1${ic("star")}</b>Підробіток<small>допомогти в іншій реставрації замість деталей</small></button>
+ <div class="tool" id="bin" data-drop="bin" onclick="binClick()"><b>${ic("bin")}</b>Кошик<small>${G.mdisc?"з крамниці вже скидали":"з крамниці — 1 раз безкоштовно"} · з лотка −1★</small></div></div></div></div></section>`;
+ const hs=id=>my&&isCur&&G.phase==="place"&&G.placed<2?hintStore(G,G.cur,id):"";
+ h+=`<section class="panel"><div class="ptitle">${seatAva(G.seats[VIEW],VIEW)} Альбом: ${esc(G.seats[VIEW].n)}<span class="meta"><span>коло ${G.round}${G.endBy>=0?" · фінальне":""}</span><span title="Підробіток">${ic("hammer")}+${P.work}</span><span title="Брак">${ic("bin")}−${P.brak}</span></span></div>
+ <div class="walls">${[0,1,2].map(i=>doorHTML(P,i)).join("")}</div>
+ <div class="lower"><div><div class="ptitle" style="font-size:16px;margin-bottom:8px">${ic("tray")} Лоток<span class="meta">${P.st.length}/${STMAX} · залишок у кінці гри −1★ за кожну</span></div><div class="tray" id="tray">${P.st.map(id=>cardHTML(id,"s",(my&&isCur?"":"off ")+hs(id)+(SELP===id?" sel":""))).join("")}${Array.from({length:Math.max(0,STMAX-P.st.length)},()=>'<div class="cell"></div>').join("")}</div></div>
+ <div class="handw"><div class="ptitle" style="font-size:16px;margin-bottom:0">${ic("scroll")} Рука ${P.hand.length}/${HMAX}</div><div class="hand" data-drop="hand">${P.hand.map(o=>ocardHTML(o)).join("")||'<span class="waitb" style="padding:8px">порожньо</span>'}</div></div></div></section>`;
+ const ph=G.phase,w=warnText();
+ h+=`<div class="turn"><div class="steps"><span class="step ${ph==="take"?"on":"done"}">${ic("palette")}1 · Взяти</span><span class="step ${ph==="place"?"on":""}">${ic("base")}2 · Поставити ${G.placed}/2</span><span class="step ${G.otook?"done":"on"}" style="${G.otook?"":"opacity:.85"}">${ic("scroll")}Замовлення ${G.otook?"✓":"0/1"}</span></div>
+ <div class="hint ${w?"warn":""}">${w||hint()}</div>${my?`<button class="btn" onclick="act({a:'end'})" ${ph==="place"?"":"disabled"}>${ic("end")}Завершити хід</button>`:""}</div></div>`;
+ app.innerHTML=h;document.body.classList.add('ingame');animate(before);}
+/* ---- FLIP ---- */
+function snap(){const m={};document.querySelectorAll("[data-pid]").forEach(e=>{m[e.dataset.pid]={r:e.getBoundingClientRect(),h:e.outerHTML};});return m;}
+function animate(before){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const now={},had=Object.keys(before).length>0;
+ document.querySelectorAll("[data-pid]").forEach(e=>{const id=e.dataset.pid;now[id]=1;const b=before[id];if(b){const a=e.getBoundingClientRect(),dx=b.r.left-a.left,dy=b.r.top-a.top;if(Math.abs(dx)+Math.abs(dy)>2&&e.animate)e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:560,easing:"cubic-bezier(.2,.8,.2,1)"});}
+  else if(had&&e.animate)e.animate([{opacity:0,transform:"translateY(-20px) scale(.85)"},{opacity:1,transform:"none"}],{duration:420,delay:280,fill:"backwards",easing:"ease-out"});});
+ const fx=G&&G.fx;for(const id in before){if(now[id])continue;const b=before[id];let tgt=null;
+  if(fx&&fx.k==="place"&&String(fx.pid)===id)tgt=document.querySelector(`.wall[data-slot="${fx.slot}"]`);else tgt=document.getElementById("bin");
+  const g=document.createElement("div");g.innerHTML=b.h;const el=g.firstElementChild;el.classList.remove("sel","off","fit","perfect");Object.assign(el.style,{position:"fixed",left:b.r.left+"px",top:b.r.top+"px",width:b.r.width+"px",height:b.r.height+"px",zIndex:55,margin:0,pointerEvents:"none"});document.body.appendChild(el);
+  if(tgt&&el.animate){const t=tgt.getBoundingClientRect(),dx=t.left+t.width/2-(b.r.left+b.r.width/2),dy=t.top+t.height/2-(b.r.top+b.r.height/2);
+   el.animate([{transform:"none",opacity:1},{transform:`translate(${dx*.6}px,${dy*.6-40}px) scale(.85) rotate(-6deg)`,opacity:1,offset:.6},{transform:`translate(${dx}px,${dy}px) scale(.4)`,opacity:0}],{duration:600,easing:"ease-in-out"}).onfinish=()=>el.remove();}else el.remove();}}
+
+/* ---- перетягування ---- */
+let DR=null;
+document.addEventListener("pointerdown",e=>{const el=e.target.closest("[data-drag]");if(!el||!canAct()||el.classList.contains("off"))return;if(VIEW!==G.cur){VIEW=G.cur;render();return;}e.preventDefault();DR={el,src:el.dataset.drag,x:e.clientX,y:e.clientY,on:false,hot:null};});
+document.addEventListener("pointermove",e=>{if(!DR)return;if(!DR.on){if(Math.hypot(e.clientX-DR.x,e.clientY-DR.y)<7)return;startDrag();}
+ if(e.clientY<70)window.scrollBy(0,-16);else if(e.clientY>innerHeight-30)window.scrollBy(0,16);DR.g.style.left=(e.clientX-DR.ox)+"px";DR.g.style.top=(e.clientY-DR.oy)+"px";const t=dropAt(e.clientX,e.clientY);if(t!==DR.hot){if(DR.hot)DR.hot.classList.remove("hot");DR.hot=t;if(t)t.classList.add("hot");markWill(t);}});
+document.addEventListener("pointerup",e=>{if(!DR)return;const d=DR;if(!d.on){DR=null;clickSrc(d.src);return;}let t=dropAt(e.clientX,e.clientY)||d.hot;const raw=document.elementFromPoint(e.clientX,e.clientY);const z=raw&&raw.closest(".zone.full");DR=null;endDrag(d);if(z&&!t){const[,pid]=d.src.split(":");warnFull(takeSet(G,+pid,z.dataset.drop.slice(5)).length);return;}if(t)drop(d.src,t.dataset.drop);});
+document.addEventListener("pointercancel",()=>{if(DR&&DR.on)endDrag(DR);DR=null;});
+function startDrag(){DR.on=true;const r=DR.el.getBoundingClientRect();DR.ox=DR.x-r.left;DR.oy=DR.y-r.top;const g=DR.el.cloneNode(true);g.classList.add("ghost");g.style.width=r.width+"px";g.style.height=r.height+"px";document.body.appendChild(g);DR.g=g;DR.el.classList.add("lift");
+ const [k,v]=DR.src.split(":");DR.valid=validDrops(k,+v);document.querySelectorAll("[data-drop]").forEach(z=>{if(DR.valid.has(z.dataset.drop))z.classList.add("ok");});
+ if(k==="m"){document.body.classList.add("dm");const p=PT(+v),fr=free(G,G.cur),ns=takeSet(G,+v,"s").length,nt=takeSet(G,+v,"t").length;
+  dock(`<div class="zone ${ns>fr?"full":""}" data-drop="take:s"><b><span style="background:${STY[p.s].c};width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff">${ic(p.s)}</span>×${ns}</b><small>${ns>fr?"не влізе — у лотку вільно "+fr:"взяти увесь колір «"+STY[p.s].n+"»"}</small></div><div class="zone ${nt>fr?"full":""}" data-drop="take:t"><b>${ic(p.t)}×${nt}</b><small>${nt>fr?"не влізе — у лотку вільно "+fr:"взяти всі «"+TN[p.t]+"»"}</small></div>${G.mdisc?"":`<div class="zone" data-drop="bin"><b>${ic("bin")}</b><small>скинути цю одну (безкоштовно)</small></div>`}`);}
+ else if(k==="o")dock(`<div class="zone" data-drop="hand"><b>${ic("scroll")}</b><small>${DR.valid.has("hand")?"взяти замовлення в руку":(G.otook?"замовлення вже взято цього ходу":"у руці вже "+HMAX)}</small></div>`);
+ else dock(`<div class="zone" data-drop="bin" style="max-width:260px;justify-self:center"><b>${ic("bin")}</b><small>у кошик: −1★</small></div>`);
+ document.querySelectorAll("#dock [data-drop]").forEach(z=>{if(!DR.valid.has(z.dataset.drop)&&!z.classList.contains("full"))z.style.opacity=".45";});}
+function dock(html){const d=document.getElementById("dock");d.innerHTML=html;d.classList.remove("hidden");}
+function endDrag(d){const k=document.getElementById("dock");k.classList.add("hidden");k.innerHTML="";if(d.g)d.g.remove();d.el.classList.remove("lift");if(d.hot)d.hot.classList.remove("hot");document.body.classList.remove("dm");document.querySelectorAll(".ok").forEach(z=>z.classList.remove("ok"));document.querySelectorAll(".will").forEach(z=>z.classList.remove("will"));}
+function dropAt(x,y){const el=document.elementFromPoint(x,y);const z=el&&el.closest("[data-drop]");return z&&DR&&DR.valid&&DR.valid.has(z.dataset.drop)?z:null;}
+function markWill(t){document.querySelectorAll(".will").forEach(z=>z.classList.remove("will"));if(!t||!DR)return;const [k,pid]=DR.src.split(":");if(k!=="m")return;const dk=t.dataset.drop;if(dk.startsWith("take:"))takeSet(G,+pid,dk.slice(5)).forEach(id=>{const c=document.querySelector(`.shelf [data-pid="${id}"]`);if(c)c.classList.add("will");});}
+function validDrops(k,v){const s=new Set();if(!canAct())return s;
+ if(k==="o"){if(!G.otook&&G.pl[G.cur].hand.length<HMAX)s.add("hand");return s;}
+ if(k==="m"){if(G.phase==="take"){const fr=free(G,G.cur);if(takeSet(G,v,"s").length<=fr)s.add("take:s");if(takeSet(G,v,"t").length<=fr)s.add("take:t");if(!G.mdisc)s.add("bin");}return s;}
+ s.add("bin");if(G.phase==="place"&&G.placed<2&&VIEW===G.cur)targets(G,G.cur,v).forEach(t=>{if(!t.rep)s.add("door:"+t.slot);s.add("pip:"+t.slot+":"+t.layer);});return s;}
+function drop(src,key){const [k,ps]=src.split(":"),v=+ps;
+ if(k==="o")return act({a:"order",o:v});
+ if(key==="bin")return act(k==="m"?{a:"mdisc",pid:v}:{a:"sdisc",pid:v});
+ if(key.startsWith("take:"))return act({a:"take",pid:v,mode:key.slice(5)});
+ const parts=key.split(":"),slot=+parts[1],layer=parts[0]==="pip"?+parts[2]:null;placeTo(v,slot,layer);}
+function placeTo(pid,slot,layer){const P=G.pl[G.cur];if(!P.doors[slot]){if(P.hand.length>1)return chooseOrder(P,o=>act({a:"place",pid,slot,o}));return act({a:"place",pid,slot,o:P.hand[0]});}
+ const t=targets(G,G.cur,pid).find(x=>x.slot===slot&&x.layer===layer);act({a:"place",pid,slot,layer:t&&!t.rep?null:layer});}
+/* ---- клік-альтернатива ---- */
+function clickSrc(src){const [k,ps]=src.split(":"),v=+ps;
+ if(k==="o")return showOrder(v,true);
+ if(k==="m"){if(G.phase!=="take")return;const p=PT(v),ns=takeSet(G,v,"s").length,nt=takeSet(G,v,"t").length,fr=free(G,G.cur);
+  const ch=(mode,n,inner,label)=>`<div class="choice ${n>fr?"dis":""}" onclick="${n>fr?`warnFull(${n})`:`mclose(-1);act({a:'take',pid:${v},mode:'${mode}'})`}">${inner}×${n}<small>${n>fr?"не влізе (вільно "+fr+")":label}</small></div>`;
+  modal(`<h2>Що берете?</h2><div class="choices">${ch("s",ns,`<span style="color:${STY[p.s].c}">${ic(p.s)}</span>`,"увесь колір: "+STY[p.s].n)}${ch("t",nt,ic(p.t),"усі: "+TN[p.t])}${G.mdisc?"":`<div class="choice" onclick="mclose(-1);act({a:'mdisc',pid:${v}})">${ic("bin")}<small>скинути цю одну (безкоштовно)</small></div>`}</div>`,[["Скасувати",null]]);return;}
+ SELP=SELP===v?null:v;render();if(SELP!=null){const s=validDrops("s",v);document.querySelectorAll("[data-drop]").forEach(z=>{if(s.has(z.dataset.drop))z.classList.add("ok");});}}
+function clickDoor(i){if(SELP==null)return;const t=targets(G,G.cur,SELP).filter(x=>x.slot===i);if(!t.length||G.phase!=="place"||G.placed>=2)return toast("Сюди ця деталь зараз не підходить",1);const nr=t.find(x=>!x.rep);const pid=SELP;SELP=null;placeTo(pid,i,nr?nr.layer:t[0].layer);}
+document.addEventListener("click",e=>{if(SELP==null)return;const r=e.target.closest("[data-drop^='pip:']");if(r){e.stopPropagation();const [,s,l]=r.dataset.drop.split(":");const pid=SELP;if(targets(G,G.cur,pid).some(t=>t.slot===+s&&t.layer===+l)){SELP=null;placeTo(pid,+s,+l);}else toast("Сюди ця деталь не підходить",1);}},true);
+function binClick(){if(SELP!=null){const pid=SELP;SELP=null;act({a:"sdisc",pid});}}
+
+/* ---- модальні ---- */
+function modal(html,btns){MB=(btns||[]).map(b=>b[1]);const m=document.getElementById("modal");m.innerHTML=`<div class="mbox" role="dialog">${html}${btns&&btns.length?`<div class="sline" style="margin-top:16px">${btns.map((b,i)=>`<button class="btn ${i?"alt":""}" onclick="mclose(${i})">${b[0]}</button>`).join("")}</div>`:""}</div>`;m.classList.remove("hidden");}
+function mclose(i){const m=document.getElementById("modal");m.classList.add("hidden");m.innerHTML="";const f=i>=0?MB[i]:null;MB=[];if(f)f();}
+function passScreen(){const s=G.seats[G.cur];modal(`<div style="text-align:center"><div style="display:flex;justify-content:center">${seatAva(s,G.cur)}</div><h2 style="margin-top:8px">Хід: ${esc(s.n)}</h2></div>`,[["Почати",null]]);}
+function chooseOrder(P,cb){PICK=cb;modal(`<h2>Яке замовлення починаєте?</h2><div class="choices">`+P.hand.map(o=>`<div class="choice" onclick="pickOrder(${o})">${wallSVG(ORD[o].city,ORD[o].shape,ideal(ORD[o]))}<small><b>${esc(ORD[o].name)}</b></small>${chipsOf(ORD[o])}</div>`).join("")+`</div>`,[["Скасувати",null]]);}
+function pickOrder(o){const f=PICK;PICK=null;mclose(-1);if(f)f(o);}
+function showOrder(oid,fromMkt){const o=ORD[oid];const can=fromMkt&&canAct()&&!G.otook&&G.pl[G.cur].hand.length<HMAX&&G.om.includes(oid);
+ modal(`<h2>${esc(o.name)}</h2><div class="big">${wallSVG(o.city,o.shape,ideal(o))}</div>${stripHTML({o:oid,L:[null,null,null,null,null]},0,true)}<p>${esc(o.desc)}</p><p class="waitb" style="color:#6b5f50">За готові двері: 1★ за кожну деталь, +1★ за деталь у потрібному стилі, +3★ якщо всі п’ять — максимум 13★.</p>`,
+ can?[["Взяти замовлення",()=>act({a:"order",o:oid})],["Закрити",null]]:[["Закрити",null]]);
+ if(fromMkt&&!can&&canAct())toast(G.otook?"Замовлення вже взято цього ходу":G.pl[G.cur].hand.length>=HMAX?"У руці вже "+HMAX+" замовлення":"",1);}
+function postcard(seat,slot){const d=G.pl[seat].doors[slot];if(!d)return;const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>PT(id)),m=matches(d),pts=doorScore(d);
+ modal(`<div class="pcin"><h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2><div class="big">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}</div>
+ <div class="sline"><span>${ic("base")}деталі 5 × 1★</span><span style="color:#2f7d4f">${ic("palette")}у стилі ${m} × 1★</span>${m===5?`<span style="color:#a87b22">${ic("star")}автентично +3★</span>`:""}<span>= ${pts}★</span></div>
+ ${o?`<p class="fact">${esc(o.fact)}</p>`:""}</div>`,[["До колекції",null]]);}
+function finalScreen(){const rows=G.seats.map((s,i)=>{const P=G.pl[i];return {i,s,doors:P.doors.reduce((a,d)=>a+doorScore(d),0),work:P.work,brak:P.brak,left:P.st.length,tot:score(G,i)};}).sort((a,b)=>b.tot-a.tot);
+ modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Підробіток</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
+ ${rows.map(r=>`<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${r.work}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`).join("")}</table></div>`,[["Нова гра",()=>{leave();}],["Подивитися альбоми",null]]);}
+function rules(){modal(`<h2>Як грати</h2>
+<p>${ic("scroll")} <b>Замовлення.</b> На старті у вас одне. Відкриті три — беріть одне за хід у будь-який момент (у руці до ${HMAX}).</p>
+<p>${ic("palette")} <b>1 · Взяти.</b> Перетягніть картку з крамниці в лоток: ліва половина — <b>усі деталі цього кольору</b>, права — <b>усі деталі цього типу</b>. Якщо не влізе в лоток — гра попередить. Або ${ic("hammer")} <b>підробіток</b>: +1★.</p>
+<p>${ic("base")} <b>2 · Поставити до 2 деталей</b> з лотка на двері. Шари по черзі: Основа → Філенки → Фрамуга → Фурнітура → Оздоблення. Рядок, що підсвічений ◀, — те, що потрібно зараз. Перетягніть деталь на вже заповнений рядок, щоб <b>замінити</b> її (стара йде у скид).</p>
+<p><b>Підсвітка:</b> зелена рамка — деталь підходить за типом; золота з ★ — і за типом, і за кольором замовлення.</p>
+<p>${ic("bin")} <b>Кошик.</b> З крамниці раз за хід можна безкоштовно скинути одну картку. Скинуте з лотка — −1★. Коли колода скінчиться, скинуте перемішується назад.</p>
+<p>${ic("star")} <b>Очки за готові двері:</b> 1★ за кожну деталь, +1★ за деталь потрібного кольору на своєму місці, +3★ якщо всі п’ять правильні.</p>
+<p><b>Кінець:</b> коли хтось завершує треті двері, інші ходять ще по разу. Кожна деталь у лотку — −1★.</p>`,[["Зрозуміло",null]]);}
+function menu(){modal(`<h2>Меню</h2>${NET.role==="host"?`<p>Код кімнати: <b class="code" style="color:#a87b22">${esc(NET.code.toUpperCase())}</b></p>`:""}`,[["Продовжити",null],["Вийти в лобі",leave]]);}
+function leave(){clearTimeout(BOTT);clearInterval(NET.timer);const w=NET.ws;NET.role=null;try{if(w)w.close();}catch(e){}NET={role:null,r:null,code:"",myPeer:null,peers:[],lobby:null,hostPeer:null,timer:null};G=null;try{localStorage.removeItem("brami3");history.replaceState(null,"",location.pathname);}catch(e){}lobbyRender();}
+
+/* ================= ЛОБІ ================= */
+function heroHTML(){return `<div class="hero">${[3,9,15].map(i=>`<div class="wall">${wallSVG(ORD[i].city,ORD[i].shape,ideal(ORD[i]))}</div>`).join("")}</div>`;}
+function lobbyRender(){document.body.classList.remove('ingame');if(NET.role==="guest")return guestWait();const sv=load(),hosting=NET.role==="host",seats=hosting?NET.lobby:SETUP.seats;const hash=(location.hash||"").match(/^#g-([a-z0-9]{4,6})$/);
+ let h=`<div class="bar"><div class="logo">Брами та дворики</div><div class="seats"></div><button class="ibtn" onclick="rules()" title="Правила">${ic("book")}</button></div><div class="lobby">${heroHTML()}<div class="lgrid">`;
+ h+=`<section class="panel"><div class="ptitle">${hosting?"Кімната відкрита":"Нова гра"}</div>`;
+ if(hosting)h+=`<div class="lrow"><span class="code">${esc(NET.code.toUpperCase())}</span><button class="ibtn" onclick="copyCode()" title="Скопіювати код">${ic("copy")}</button></div><p class="waitb">Надішліть код друзям: вони відкривають цю ж сторінку гри й вводять його в «Приєднатися». Не закривайте цю вкладку до кінця гри.</p>`;
+ seats.forEach((s,i)=>{h+=`<div class="lrow">${seatAva(s,i)}`+(hosting?`<span class="sn" style="flex:1">${esc(s.n)}${s.k==="net"?(s.peer?" ✓":" · чекаємо…"):""}</span>`:`<input class="inp" id="nm${i}" maxlength="16" value="${esc(s.n)}" oninput="SETUP.seats[${i}].n=this.value"><div class="kind">${["local","bot","net"].map(k=>`<button class="${s.k===k?"on":""}" onclick="SETUP.seats[${i}].k='${k}';lobbyRender()" title="${{local:"Гравець за цим екраном",bot:"Бот",net:"Онлайн-гравець"}[k]}">${ic({local:"user",bot:"bot",net:"net"}[k])}</button>`).join("")}</div>`)+`</div>`;});
+ if(!hosting)h+=`<div class="lrow"><button class="ibtn" onclick="if(SETUP.seats.length<4){SETUP.seats.push({n:'Бот '+(SETUP.seats.length+1),k:'bot'});lobbyRender()}" title="Додати гравця">${ic("plus")}</button><button class="ibtn" onclick="if(SETUP.seats.length>1){SETUP.seats.pop();lobbyRender()}" title="Прибрати гравця">${ic("minus")}</button><span class="waitb">${ic("user")} за цим екраном · ${ic("bot")} бот · ${ic("net")} онлайн</span></div>`;
+ h+=`<div class="sline"><button class="btn" onclick="startGame()">${ic("end")}${hosting?"Почати гру":"Почати"}</button>${sv&&!sv.over&&!hosting?`<button class="btn alt" onclick="resume()">Продовжити збережену</button>`:""}</div>`;
+ 
+ h+=`</section><section class="panel"><div class="ptitle">${ic("net")} Приєднатися</div><div class="lrow"><input class="inp" id="jc" placeholder="Код" maxlength="6" value="${hash?esc(hash[1].toUpperCase()):""}" style="text-transform:uppercase;letter-spacing:3px"></div><div class="lrow"><input class="inp" id="jn" placeholder="Ваше ім’я" maxlength="16"></div><button class="btn" onclick="joinRoom(document.getElementById('jc').value,document.getElementById('jn').value)">Увійти</button><p class="waitb">Попросіть господаря створити кімнату й надіслати вам код. Господар має тримати гру відкритою до кінця партії.</p></section></div></div>`;
+ app.innerHTML=h;}
+function copyCode(){try{navigator.clipboard.writeText(NET.code.toUpperCase()).then(()=>toast("Код скопійовано"),()=>toast(NET.code.toUpperCase()));}catch(e){toast(NET.code.toUpperCase());}}
+async function startGame(){if(NET.role==="host"){beginGame(NET.lobby.map(s=>s.k==="net"&&!s.peer?{n:"Бот "+s.n,k:"bot"}:s));return;}
+ const seats=SETUP.seats.map((s,i)=>({n:clean(s.n)||"Гравець "+(i+1),k:s.k}));
+ if(seats.some(s=>s.k==="net")){if(await hostRoom()){NET.lobby=seats.map(s=>({...s,peer:null}));lobbyRender();bcast();return;}seats.forEach(s=>{if(s.k==="net")s.k="bot";});}
+ beginGame(seats);}
+function beginGame(seats){G=mkGame(seats.map(s=>({n:s.n,k:s.k,peer:s.peer||null})));VIEW=0;save();render();bcast();if(G.seats[0].k==="local"&&G.seats.filter(s=>s.k==="local").length>1)passScreen();schedule();}
+function resume(){G=load();if(!G)return;G.seats.forEach(s=>{if(s.k==="net")s.k="bot";});VIEW=G.cur;render();schedule();}
+function guestWait(){if(G)return render();document.body.classList.remove('ingame');const ls=NET.lobby||[];app.innerHTML=`<div class="bar"><div class="logo">Брами та дворики</div></div><div class="lobby">${heroHTML()}<section class="panel"><div class="ptitle">${ic("net")} Кімната ${esc(NET.code.toUpperCase())}</div>${ls.length?ls.map((s,i)=>`<div class="lrow">${seatAva(s,i)}<span class="sn">${esc(s.n)}${s.peer&&s.peer===NET.myPeer?" — ви":""}</span></div>`).join(""):`<p class="waitb">Під’єднуємося до господаря кімнати…</p>`}<p class="waitb">Гра почнеться, коли господар натисне «Почати гру».</p><button class="btn alt" onclick="leave()">Вийти</button></section></div>`;}
+
+lobbyRender();
+</script>
+</body>
+</html>
