@@ -155,8 +155,8 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:7px 5px;b
 @media(max-width:600px){.logo{font-size:18px}.sn,.dd{display:none}.seat{padding-right:8px}.wrap{padding:8px 8px 0}.panel{padding:10px}.turn{margin:0 -8px}.hint{min-width:0;flex-basis:100%;order:3}}
 @media(min-width:900px) and (min-height:560px){
  body.ingame{height:100vh;overflow:hidden}
- body.ingame #app{height:100vh;display:flex;flex-direction:column}body.ingame .bar{flex:none}body.ingame .seats{flex-wrap:nowrap;overflow:hidden}
- .game{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:minmax(0,37fr) minmax(0,63fr);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px;max-width:none}
+ body.ingame #app{height:calc(100vh / var(--appz,1));zoom:var(--appz,1);display:flex;flex-direction:column}body.ingame .bar{flex:none}body.ingame .seats{flex-wrap:nowrap;overflow:hidden}
+ .game{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:min(37%,560px) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:10px;padding:10px;max-width:none}
  .game>.panel{margin:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:10px}
  .game .ptitle{margin-bottom:8px;font-size:18px}
  .game>.turn{grid-column:1/-1;position:static;margin:0;border-radius:14px;padding:8px 12px}
@@ -916,6 +916,9 @@ addEventListener("resize",()=>{if(document.querySelector(".coach"))coach();});
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FX={c:document.getElementById("fxc"),p:[],amb:[],run:false};
 FX.x=FX.c.getContext("2d");
+/* малі екрани ноутбуків: гра зменшується цілком, щоб усе (разом з цілями) влазило без прокрутки */
+function fitZoom(){const w=innerWidth,hh=innerHeight;let z=1;if(w>=900&&hh>=480)z=Math.max(.6,Math.min(1,hh/900,w/1400));document.documentElement.style.setProperty("--appz",z.toFixed(3));}
+addEventListener("resize",fitZoom);fitZoom();
 function fxSize(){const d=devicePixelRatio||1;FX.c.width=innerWidth*d;FX.c.height=innerHeight*d;FX.x.setTransform(d,0,0,d,0,0);}
 addEventListener("resize",fxSize);fxSize();
 const GOLD=["#ffd27a","#d6a640","#fff3c4","#f2b84b"],CONF=["#4f8a55","#4f709a","#a5413b","#c0832f","#d6a640","#fff3c4"];
