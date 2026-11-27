@@ -361,8 +361,8 @@ const TN={base:"Полотно",glass:"Фрамуга",portal:"Портал",pan
 const LN=TYPES.map(t=>TN[t]);
 const LH=["стулки дверей","засклене вікно над дверима","рама й арка навколо","панелі на стулках","ручки, калатала","декор над входом"];
 const ACC=TYPES.map(t=>[t]);
-/* колода: 6 стилів × 6 типів; копій — за кількістю гравців (2 гравці: 2, інакше 3) */
-const COPIES=3,copiesFor=n=>n<=2?2:3;
+/* колода: 6 стилів × 6 типів; копій кожної деталі — стільки, скільки гравців (мінімум 2): 2→72, 3→108, 4→144 карти */
+const COPIES=4,copiesFor=n=>Math.max(2,Math.min(4,n));
 const PARTS=[];SK.forEach(s=>TYPES.forEach(t=>{for(let c=0;c<COPIES;c++)PARTS.push({id:PARTS.length,t,s,c});}));
 const MK=10,STMAX=8,OM=3,HMAX=3;
 const SEATC=["#d6a640","#5fb3d6","#e07a6a","#97c873"];
