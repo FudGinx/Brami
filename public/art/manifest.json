@@ -32,5 +32,12 @@
   "card_03",
   "card_04"
  ],
- "ui": []
+ "ui": [
+  "table",
+  "cover",
+  "shelf",
+  "tray",
+  "ava",
+  "bot"
+ ]
 }
