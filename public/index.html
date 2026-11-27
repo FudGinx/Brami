@@ -275,6 +275,9 @@ body.art-ui .tray .cell{border:none}
 .galdoor{border:0;padding:0;background:none;cursor:pointer;width:120px;text-align:center;border-radius:12px;transition:transform .15s}
 .galdoor:hover{transform:translateY(-4px)}.galdoor .ws{border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.25)}
 .galst{display:block;color:#d6a640;font-size:14px;letter-spacing:1px;margin-top:3px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 10px}
+.pair figure{margin:0;text-align:center}.pair .ws{border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.pair figcaption{font-size:13px;font-weight:700;color:#6b5f50;margin-top:6px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -437,7 +440,9 @@ function wallSVG(city,shape,L,ghost){const key=city?CITYKEY[city]:"empty",box=AR
  const R=((box.rise!=null?box.rise:box.w*.4/box.h)*100).toFixed(1),C=((box.cut||0)*100).toFixed(1);
  const rad=!all?"":box.shape==="trap"?`clip-path:polygon(${C}% 0,${100-C}% 0,100% ${R}%,100% 100%,0 100%,0 ${R}%);`:(box.shape==="arch"||(box.shape==null&&box.arch))?`border-radius:50% 50% 0 0 / ${R}% ${R}% 0 0;overflow:hidden;`:"";
  return `<div class="ws wa"><img class="wbg" src="/art/walls/${key}.webp" alt="" draggable="false">${city?`<span class="plq wplq">${city}</span>`:""}<div class="dw" style="${pos};${rad}">${door}</div>${over?`<div class="dw" style="${pos}">${over}</div>`:""}</div>`;}
-function orderPic(oid){const k="card_"+String(oid).padStart(2,"0");if(ARTM.cs.has(k))return `<img class="ws" src="/art/cards/${k}.webp" alt="" draggable="false">`;const o=ORD[oid];return wallSVG(o.city,o.shape,ideal(o));}
+function orderPic(oid){const o=ORD[oid];return wallSVG(o.city,o.shape,ideal(o));}
+function protoPic(oid){const k="card_"+String(oid).padStart(2,"0");return ARTM.cs.has(k)?`<img class="ws" src="/art/cards/${k}.webp" alt="Листівка-прототип" draggable="false">`:"";}
+function pairHTML(left,lcap,right,rcap){return right?`<div class="pair"><figure>${left}<figcaption>${lcap}</figcaption></figure><figure>${right}<figcaption>${rcap}</figcaption></figure></div>`:`<div class="big">${left}</div>`;}
 /* ================= РУШІЙ ================= */
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 const PT=id=>PARTS[id];
@@ -688,14 +693,14 @@ function passScreen(){const s=G.seats[G.cur];modal(`<div style="text-align:cente
 function chooseOrder(P,cb){PICK=cb;modal(`<h2>Яке замовлення починаєте?</h2><div class="choices">`+P.hand.map(o=>`<div class="choice" onclick="pickOrder(${o})">${orderPic(o)}<small><b>${esc(ORD[o].name)}</b></small>${chipsOf(ORD[o])}</div>`).join("")+`</div>`,[["Скасувати",null]]);}
 function pickOrder(o){const f=PICK;PICK=null;mclose(-1);if(f)f(o);}
 function showOrder(oid,fromMkt){const o=ORD[oid];const can=fromMkt&&canAct()&&!G.otook&&G.pl[G.cur].hand.length<HMAX&&G.om.includes(oid);
- modal(`<h2>${esc(o.name)}</h2><div class="big">${orderPic(oid)}</div>${stripHTML({o:oid,L:[null,null,null,null,null]},0,true)}<p>${esc(o.desc)}</p><p class="waitb" style="color:#6b5f50">За готові двері: 1★ за кожну деталь, +1★ за деталь у потрібному стилі, +3★ якщо всі п’ять — максимум 13★.</p>`,
+ modal(`<h2>${esc(o.name)}</h2>${pairHTML(orderPic(oid),"Що треба зібрати",protoPic(oid),"Листівка-прототип")}${stripHTML({o:oid,L:[null,null,null,null,null]},0,true)}<p>${esc(o.desc)}</p><p class="waitb" style="color:#6b5f50">За готові двері: 1★ за кожну деталь, +1★ за деталь у потрібному стилі, +3★ якщо всі п’ять — максимум 13★.</p>`,
  can?[["Взяти замовлення",()=>act({a:"order",o:oid})],["Закрити",null]]:[["Закрити",null]]);
  if(fromMkt&&!can&&canAct())toast(G.otook?"Замовлення вже взято цього ходу":G.pl[G.cur].hand.length>=HMAX?"У руці вже "+HMAX+" замовлення":"",1);}
 const VERD=[["Еклектика — теж стиль!","Від прототипу лишилася хіба адреса, але двері стоять і радують двір."],["Еклектика — теж стиль!","Сміливо й по-своєму: архітектори ХІХ століття оцінили б."],["Сміливе поєднання","Двоє деталей впізнають оригінал, решта — ваша фантазія."],["Добра робота","Більшість рис прототипу збережено."],["Майже влучили!","Лише одна деталь не з того стилю — ще трохи, і було б ідеально."],["Ідеально!","Автентична реставрація: усі п’ять шарів як у прототипі."]];
 function verdictHTML(d){if(d.o<0)return `<div class="verd"><b>Вільна фантазія</b><small>Без замовлення — двері зібрано на власний смак.</small></div>`;const m=matches(d),v=VERD[m];
  return `<div class="verd v${m}"><div class="vst">${[0,1,2,3,4].map(i=>`<span class="${i<m?"on":""}" style="animation-delay:${.35+i*.12}s">${ic("star")}</span>`).join("")}</div><b>${v[0]}</b><small>${v[1]}</small></div>`;}
 function postcard(seat,slot,browse){const d=G.pl[seat].doors[slot];if(!d)return;const o=d.o>=0?ORD[d.o]:null,L=d.L.map(id=>PT(id)),m=matches(d),pts=doorScore(d);
- modal(`<div class="pcin">${verdictHTML(d)}<h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2><div class="big">${wallSVG(o?o.city:"",o?o.shape:"rect",L)}</div>
+ modal(`<div class="pcin">${verdictHTML(d)}<h2>${o?esc(o.city+" · "+o.name):"Вільна реставрація"}</h2>${pairHTML(wallSVG(o?o.city:"",o?o.shape:"rect",L),"Ваша реставрація",o?protoPic(d.o):"","Листівка-прототип")}
  <div class="sline"><span>${ic("base")}деталі 5 × 1★</span><span style="color:#2f7d4f">${ic("palette")}у стилі ${m} × 1★</span>${m===5?`<span style="color:#a87b22">${ic("star")}автентично +3★</span>`:""}<span>= ${pts}★</span></div>
  ${o?`<p class="fact">${esc(o.fact)}</p>`:""}</div>`,browse==="gal"?[["До альбому",gallery],["Закрити",null]]:[[browse?"Закрити":"До колекції",null]]);}
 function gallery(){let any=false;const rows=G.seats.map((s,i)=>{const ds=G.pl[i].doors.map((d,k)=>[d,k]).filter(([d])=>isDone(d));if(ds.length)any=true;
