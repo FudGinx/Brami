@@ -4,6 +4,7 @@
   "base_mod",
   "dec_cls",
   "dec_mod",
+  "dec_nar",
   "fit_cls",
   "fit_mod",
   "glass_cls",
@@ -12,25 +13,144 @@
   "panel_mod"
  ],
  "walls": {
-  "odesa": {
-   "x": 0.2021,
-   "y": 0.143,
-   "w": 0.583,
-   "h": 0.7344,
+  "uzhhorod": {
+   "x": 0.2139,
+   "y": 0.1672,
+   "w": 0.5674,
+   "h": 0.7125,
+   "shape": "rect",
+   "rise": 0.0011,
+   "cut": 0.0,
+   "arch": false
+  },
+  "kharkiv": {
+   "x": 0.2002,
+   "y": 0.1508,
+   "w": 0.5791,
+   "h": 0.7281,
+   "shape": "arch",
+   "rise": 0.0665,
+   "cut": 0.2555,
    "arch": true
+  },
+  "chernivtsi": {
+   "x": 0.207,
+   "y": 0.1406,
+   "w": 0.5752,
+   "h": 0.7359,
+   "shape": "arch",
+   "rise": 0.2134,
+   "cut": 0.3328,
+   "arch": true
+  },
+  "chernihiv": {
+   "x": 0.2305,
+   "y": 0.1609,
+   "w": 0.5381,
+   "h": 0.7063,
+   "shape": "rect",
+   "rise": 0.0,
+   "cut": -0.0009,
+   "arch": false
+  },
+  "kamianets": {
+   "x": 0.2051,
+   "y": 0.1344,
+   "w": 0.5752,
+   "h": 0.7453,
+   "shape": "arch",
+   "rise": 0.2285,
+   "cut": 0.337,
+   "arch": true
+  },
+  "lutsk": {
+   "x": 0.207,
+   "y": 0.1375,
+   "w": 0.5781,
+   "h": 0.7414,
+   "shape": "arch",
+   "rise": 0.2171,
+   "cut": 0.3319,
+   "arch": true
+  },
+  "empty": {
+   "x": 0.2275,
+   "y": 0.1602,
+   "w": 0.5449,
+   "h": 0.7188,
+   "shape": "rect",
+   "rise": 0.0,
+   "cut": 0.0,
+   "arch": false
+  },
+  "hutsul": {
+   "x": 0.2393,
+   "y": 0.1719,
+   "w": 0.5127,
+   "h": 0.7023,
+   "shape": "rect",
+   "rise": 0.0,
+   "cut": -0.0048,
+   "arch": false
+  },
+  "poltava": {
+   "x": 0.2061,
+   "y": 0.182,
+   "w": 0.5791,
+   "h": 0.6961,
+   "shape": "trap",
+   "rise": 0.1594,
+   "cut": 0.1771,
+   "arch": false
   },
   "lviv": {
    "x": 0.2041,
    "y": 0.1406,
    "w": 0.582,
    "h": 0.7375,
+   "shape": "arch",
+   "rise": 0.2203,
+   "cut": 0.3255,
+   "arch": true
+  },
+  "kyiv": {
+   "x": 0.2275,
+   "y": 0.1508,
+   "w": 0.5303,
+   "h": 0.7289,
+   "shape": "arch",
+   "rise": 0.0686,
+   "cut": 0.267,
+   "arch": true
+  },
+  "odesa": {
+   "x": 0.2021,
+   "y": 0.143,
+   "w": 0.583,
+   "h": 0.7344,
+   "shape": "arch",
+   "rise": 0.2245,
+   "cut": 0.3291,
    "arch": true
   }
  },
  "cards": [
   "card_00",
+  "card_01",
+  "card_02",
   "card_03",
-  "card_04"
+  "card_04",
+  "card_05",
+  "card_06",
+  "card_07",
+  "card_08",
+  "card_09",
+  "card_10",
+  "card_11",
+  "card_12",
+  "card_13",
+  "card_14",
+  "card_15"
  ],
  "ui": [
   "table",

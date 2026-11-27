@@ -434,7 +434,8 @@ function wallSVG(city,shape,L,ghost){const key=city?CITYKEY[city]:"empty",box=AR
  if(all){door=[0,2,1,3].filter(i=>L[i]).map(img).join("");if(L[4])over=img(4);}
  else if(L.some(x=>x))door=`<svg viewBox="10 10 80 140" preserveAspectRatio="none" aria-hidden="true">${doorInner(shape,L,ghost)}</svg>`;
  const pos=`left:${box.x*100}%;top:${box.y*100}%;width:${box.w*100}%;height:${box.h*100}%`;
- const rad=box.arch&&all?`border-radius:50% 50% 0 0 / ${(box.w*40/box.h).toFixed(1)}% ${(box.w*40/box.h).toFixed(1)}% 0 0;overflow:hidden;`:"";
+ const R=((box.rise!=null?box.rise:box.w*.4/box.h)*100).toFixed(1),C=((box.cut||0)*100).toFixed(1);
+ const rad=!all?"":box.shape==="trap"?`clip-path:polygon(${C}% 0,${100-C}% 0,100% ${R}%,100% 100%,0 100%,0 ${R}%);`:(box.shape==="arch"||(box.shape==null&&box.arch))?`border-radius:50% 50% 0 0 / ${R}% ${R}% 0 0;overflow:hidden;`:"";
  return `<div class="ws wa"><img class="wbg" src="/art/walls/${key}.webp" alt="" draggable="false">${city?`<span class="plq wplq">${city}</span>`:""}<div class="dw" style="${pos};${rad}">${door}</div>${over?`<div class="dw" style="${pos}">${over}</div>`:""}</div>`;}
 function orderPic(oid){const k="card_"+String(oid).padStart(2,"0");if(ARTM.cs.has(k))return `<img class="ws" src="/art/cards/${k}.webp" alt="" draggable="false">`;const o=ORD[oid];return wallSVG(o.city,o.shape,ideal(o));}
 /* ================= РУШІЙ ================= */
