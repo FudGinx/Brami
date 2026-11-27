@@ -492,7 +492,10 @@ const cnt=v=>typeof v==="number"?v:v.length;
 const reqOf=(d,k)=>d&&d.o>=0?ORD[d.o].req[k]:null;
 function mkGame(seats){const g={seats,cur:0,phase:"take",placed:0,mdisc:false,otook:false,market:[],deck:shuffle(PARTS.map(p=>p.id)),disc:[],od:shuffle(ORD.map((_,i)=>i)),om:[],
  pl:seats.map(()=>({doors:[null,null,null],st:[],hand:[],work:0,brak:0})),endBy:-1,left:-1,trig:false,over:false,seq:0,fx:null,round:1,rs:0,first:null,goals:shuffle([0,1,2,3,4,5,6,7,8]).slice(0,3)};
- g.pl.forEach(p=>{if(g.od.length)p.hand.push(g.od.pop());});refillO(g);refillM(g);return g;}
+ g.pl.forEach(p=>{if(g.od.length)p.hand.push(g.od.pop());});
+ /* компенсація за чергу ходу: пізнішим гравцям — Основа під їхнє замовлення та зірки */
+ const n=seats.length;g.pl.forEach((P,i)=>{P.hc=0;if(!i)return;const want=P.hand.length?ORD[P.hand[0]].req[0]:null;let k=g.deck.findIndex(id=>PT(id).t==="base"&&(!want||PT(id).s===want));if(k<0)k=g.deck.findIndex(id=>PT(id).t==="base");if(k>=0){P.st.push(g.deck.splice(k,1)[0]);P.hcBase=P.st[P.st.length-1];}P.hc=n===2?1:Math.max(0,i-1);});
+ refillO(g);refillM(g);return g;}
 function drawP(g){if(!g.deck.length){if(!g.disc.length)return null;g.deck=shuffle(g.disc);g.disc=[];g.rs++;}return g.deck.pop();}
 function refillM(g){while(g.market.length<MK){const c=drawP(g);if(c==null)break;g.market.push(c);}}
 function refillO(g){while(g.om.length<OM&&Array.isArray(g.od)&&g.od.length)g.om.push(g.od.pop());}
@@ -503,7 +506,7 @@ function targets(g,seat,pid){const P=g.pl[seat],p=PT(pid),res=[];
   if(ACC[n].includes(p.t))res.push({slot:i,layer:n});for(let k=0;k<n;k++)if(ACC[k].includes(p.t))res.push({slot:i,layer:k,rep:true});});return res;}
 function doorScore(d){if(!isDone(d))return 0;let s=0,m=0;d.L.forEach((id,i)=>{s++;if(d.o>=0&&PT(id).s===ORD[d.o].req[i]){s++;m++;}});return s+(m===5?3:0);}
 function matches(d){return d.o<0?0:d.L.filter((id,i)=>id!=null&&PT(id).s===ORD[d.o].req[i]).length;}
-function score(g,i){const P=g.pl[i];return P.doors.reduce((a,d)=>a+doorScore(d),0)+P.work-P.brak-(g.over?P.st.length:0)+(g.over&&typeof extras==="function"?extras(g,i).tot:0);}
+function score(g,i){const P=g.pl[i];return P.doors.reduce((a,d)=>a+doorScore(d),0)+P.work+(P.hc||0)-P.brak-(g.over?P.st.length:0)+(g.over&&typeof extras==="function"?extras(g,i).tot:0);}
 function apply(g,seat,m){if(!g||g.over||seat!==g.cur||!m)return false;const P=g.pl[seat];
  switch(m.a){
  case "order":{if(g.otook||P.hand.length>=HMAX||!g.om.includes(m.o))return false;g.om.splice(g.om.indexOf(m.o),1);P.hand.push(m.o);refillO(g);g.otook=true;g.fx={k:"order",o:m.o,seat};return true;}
@@ -786,8 +789,8 @@ function gallery(){let any=false;const rows=G.seats.map((s,i)=>{const ds=G.pl[i]
  return `<div class="galrow"><div class="galname">${seatAva(s,i)} ${esc(s.n)} <span class="sc">${ic("star")}${score(G,i)}</span></div><div class="galdoors">${ds.length?ds.map(([d,k])=>{const o=d.o>=0?ORD[d.o]:null;return `<button class="galdoor" onclick="mclose(-1);postcard(${i},${k},'gal')" title="${o?esc(o.city+" · "+o.name):"Вільна реставрація"}">${wallSVG(o?o.city:"",o?o.shape:"rect",d.L.map(id=>PT(id)))}<span class="galst">${"★".repeat(matches(d))}${"☆".repeat(5-matches(d))}</span></button>`;}).join(""):'<span class="waitb" style="color:#6b5f50">жодних завершених дверей</span>'}</div></div>`;}).join("");
  modal(`<h2>Альбоми реставраторів</h2>${rows}${any?`<p class="waitb" style="color:#6b5f50">Натисніть на двері, щоб відкрити листівку.</p>`:""}`,G.over?[["Підсумки",finalScreen],["Закрити",null]]:[["Закрити",null]]);}
 function finalScreen(){const rows=G.seats.map((s,i)=>{const P=G.pl[i];return {i,s,doors:P.doors.reduce((a,d)=>a+doorScore(d),0),work:P.work,brak:P.brak,left:P.st.length,tot:score(G,i)};}).sort((a,b)=>b.tot-a.tot);
- modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Цілі</th><th class="n">Ансамбль</th><th class="n">Підробіток</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
- ${rows.map(r=>{const x=extras(G,r.i);return `<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${x.gl}</td><td class="n">+${x.en}</td><td class="n">+${r.work}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`;}).join("")}</table></div><p class="waitb" style="color:#6b5f50">Цілі: ${G.goals.map(gi=>GOALS[gi].n).join(" · ")}</p>`,[["Альбоми",gallery],["Нова гра",()=>{leave();}],["Закрити",null]]);}
+ modal(`<h2>Реставрацію завершено!</h2><p style="font-size:18px">Перемагає <b>${esc(rows[0].s.n)}</b></p><div class="scroll"><table><tr><th></th><th class="n">Двері</th><th class="n">Цілі</th><th class="n">Ансамбль</th><th class="n">Підробіток</th><th class="n">Старт</th><th class="n">Кошик</th><th class="n">Лоток</th><th class="n">Разом</th></tr>
+ ${rows.map(r=>{const x=extras(G,r.i);return `<tr><td>${seatAva(r.s,r.i)} ${esc(r.s.n)}</td><td class="n">${r.doors}</td><td class="n">+${x.gl}</td><td class="n">+${x.en}</td><td class="n">+${r.work}</td><td class="n">+${G.pl[r.i].hc||0}</td><td class="n">−${r.brak}</td><td class="n">−${r.left}</td><th class="n">${r.tot}★</th></tr>`;}).join("")}</table></div><p class="waitb" style="color:#6b5f50">Цілі: ${G.goals.map(gi=>GOALS[gi].n).join(" · ")}</p>`,[["Альбоми",gallery],["Нова гра",()=>{leave();}],["Закрити",null]]);}
 function rules(){modal(`<h2>Як грати</h2>
 <p>${ic("scroll")} <b>Замовлення.</b> На старті у вас одне. Відкриті три — беріть одне за хід у будь-який момент (у руці до ${HMAX}).</p>
 <p>${ic("palette")} <b>1 · Взяти.</b> Перетягніть картку з крамниці в лоток: ліва половина — <b>усі деталі цього кольору</b>, права — <b>усі деталі цього типу</b>. Якщо не влізе в лоток — гра попередить. Або ${ic("hammer")} <b>підробіток</b>: +1★.</p>
@@ -818,7 +821,9 @@ async function startGame(){if(NET.role==="host"){beginGame(NET.lobby.map(s=>s.k=
  if(seats.some(s=>s.k==="net")&&!seats.some(s=>s.k==="local")){modal(`<h2>Де ваше місце?</h2><p>Усі живі гравці позначені як ${ic("net")} онлайн. Тоді друзі займуть ці місця, а вам за цим екраном не лишиться жодного.</p><p>Позначте <b>своє</b> місце як ${ic("user")} «за цим екраном», а місця друзів — ${ic("net")}.</p>`,[["Зрозуміло",null]]);return;}
  if(seats.some(s=>s.k==="net")){if(await hostRoom()){NET.lobby=seats.map(s=>({...s,peer:null}));lobbyRender();bcast();return;}seats.forEach(s=>{if(s.k==="net")s.k="bot";});}
  beginGame(seats);}
-function beginGame(seats){G=mkGame(seats.map(s=>({n:s.n,k:s.k,peer:s.peer||null})));VIEW=0;save();render();bcast();if(G.seats[0].k==="local"&&G.seats.filter(s=>s.k==="local").length>1)passScreen();schedule();}
+function beginGame(seats){G=mkGame(seats.map(s=>({n:s.n,k:s.k,peer:s.peer||null})));VIEW=0;save();render();bcast();if(G.seats.length>1)compModal(()=>{if(G.seats[0].k==="local"&&G.seats.filter(s=>s.k==="local").length>1)passScreen();});else if(G.seats[0].k==="local"&&G.seats.filter(s=>s.k==="local").length>1)passScreen();schedule();}
+function compModal(cb){const rows=G.seats.map((s,i)=>{const P=G.pl[i];const b=P.hcBase!=null?PT(P.hcBase):null;return `<tr><td><span style="display:flex;align-items:center;gap:8px;white-space:nowrap">${seatAva(s,i)} ${esc(s.n)}</span></td><td>${i===0?"ходить першим":(b?`${ic("base")} Основа · ${STY[b.s].n}`:"")}</td><td class="n">${P.hc?"+"+P.hc+"★":""}</td></tr>`;}).join("");
+ modal(`<h2>Черга ходу</h2><p class="waitb" style="color:#6b5f50">Хто ходить пізніше, отримує на старті Основу під своє замовлення (вже в лотку) і, за потреби, зірки — так шанси перемогти вирівнюються.</p><div class="scroll"><table>${rows}</table></div>`,[["Почати",cb]]);}
 function resume(){G=load();if(!G)return;G.seats.forEach(s=>{if(s.k==="net")s.k="bot";});VIEW=G.cur;render();schedule();}
 function guestWait(){if(G)return render();document.body.classList.remove('ingame');const ls=NET.lobby||[];app.innerHTML=`<div class="bar"><div class="logo">Брами та дворики</div></div><div class="lobby">${heroHTML()}<section class="panel"><div class="ptitle">${ic("net")} Кімната ${esc(NET.code.toUpperCase())}</div>${ls.length?ls.map((s,i)=>`<div class="lrow">${seatAva(s,i)}<span class="sn">${esc(s.n)}${s.peer&&s.peer===NET.myPeer?" — ви":""}</span></div>`).join(""):`<p class="waitb">Під’єднуємося до господаря кімнати…</p>`}<p class="waitb">Гра почнеться, коли господар натисне «Почати гру».</p><button class="btn alt" onclick="leave()">Вийти</button></section></div>`;}
 
