@@ -394,10 +394,14 @@ const AK=p=>p.t+"_"+p.s;
 const LAYOUT={0:[0,0,100,100],2:[0,0,100,21],1:[8,24,84,72],3:[36,46,28,22],4:[4,-19,92,21]};
 function partImg(p){return ARTM.ps.has(AK(p))?`<img class="part" src="/art/parts/${AK(p)}.webp" alt="" draggable="false">`:partSVG(p);}
 function wallSVG(city,shape,L,ghost){const key=city?CITYKEY[city]:"empty",box=ARTM.walls&&ARTM.walls[key];if(!box)return wallSVG0(city,shape,L,ghost);
- const all=L[0]&&L.every(x=>!x||ARTM.ps.has(AK(x)));let door;
- if(all)door=[0,2,1,3,4].map(i=>{if(!L[i])return "";const q=LAYOUT[i];return `<img class="${i?"":"b"}" src="/art/parts/${AK(L[i])}.webp" alt="" draggable="false" style="left:${q[0]}%;top:${q[1]}%;width:${q[2]}%;height:${q[3]}%">`;}).join("");
- else door=L.some(x=>x)?`<svg viewBox="10 10 80 140" preserveAspectRatio="none" aria-hidden="true">${doorInner(shape,L,ghost)}</svg>`:"";
- return `<div class="ws wa"><img class="wbg" src="/art/walls/${key}.webp" alt="" draggable="false"><div class="dw" style="left:${box.x*100}%;top:${box.y*100}%;width:${box.w*100}%;height:${box.h*100}%">${door}</div></div>`;}
+ const all=L[0]&&L.every(x=>!x||ARTM.ps.has(AK(x)));
+ const img=i=>{const q=LAYOUT[i];return `<img class="${i?"":"b"}" src="/art/parts/${AK(L[i])}.webp" alt="" draggable="false" style="left:${q[0]}%;top:${q[1]}%;width:${q[2]}%;height:${q[3]}%">`;};
+ let door="",over="";
+ if(all){door=[0,2,1,3].filter(i=>L[i]).map(img).join("");if(L[4])over=img(4);}
+ else if(L.some(x=>x))door=`<svg viewBox="10 10 80 140" preserveAspectRatio="none" aria-hidden="true">${doorInner(shape,L,ghost)}</svg>`;
+ const pos=`left:${box.x*100}%;top:${box.y*100}%;width:${box.w*100}%;height:${box.h*100}%`;
+ const rad=box.arch&&all?`border-radius:50% 50% 0 0 / ${(box.w*40/box.h).toFixed(1)}% ${(box.w*40/box.h).toFixed(1)}% 0 0;overflow:hidden;`:"";
+ return `<div class="ws wa"><img class="wbg" src="/art/walls/${key}.webp" alt="" draggable="false"><div class="dw" style="${pos};${rad}">${door}</div>${over?`<div class="dw" style="${pos}">${over}</div>`:""}</div>`;}
 function orderPic(oid){const k="card_"+String(oid).padStart(2,"0");if(ARTM.cs.has(k))return `<img class="ws" src="/art/cards/${k}.webp" alt="" draggable="false">`;const o=ORD[oid];return wallSVG(o.city,o.shape,ideal(o));}
 /* ================= РУШІЙ ================= */
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};

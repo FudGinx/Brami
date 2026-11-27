@@ -1,9 +1,14 @@
 {
  "parts": [
+  "base_cls",
   "base_mod",
+  "dec_cls",
   "dec_mod",
+  "fit_cls",
   "fit_mod",
+  "glass_cls",
   "glass_mod",
+  "panel_cls",
   "panel_mod"
  ],
  "walls": {
@@ -11,11 +16,21 @@
    "x": 0.2021,
    "y": 0.143,
    "w": 0.583,
-   "h": 0.7344
+   "h": 0.7344,
+   "arch": true
+  },
+  "lviv": {
+   "x": 0.2031,
+   "y": 0.1422,
+   "w": 0.583,
+   "h": 0.7352,
+   "arch": true
   }
  },
  "cards": [
-  "card_00"
+  "card_00",
+  "card_03",
+  "card_04"
  ],
  "ui": []
 }
