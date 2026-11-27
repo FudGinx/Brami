@@ -282,6 +282,28 @@ body.art-ui .tray .cell{border:none}
 .card.dim:hover{filter:grayscale(.4) brightness(.95);opacity:.9}
 .legend .dimkey{display:inline-block;width:16px;height:12px;border-radius:3px;background:#9a948a;opacity:.6}
 .netban{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:80;background:#3a2a10;color:#ffe3a6;border:1px solid var(--brass);padding:9px 16px;border-radius:12px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+/* ===== телефон ===== */
+@media(max-width:899px){
+ .walls{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}
+ .walls .door{flex:0 0 76%;scroll-snap-align:center}
+ .door>.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px;min-height:46px}
+ .door>.strip .lr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 1px;border-radius:9px;border:2px solid var(--rc,#7a7064);background:rgba(255,255,255,.04);position:relative;min-height:40px}
+ .door>.strip .lr .ic{width:16px;height:16px}
+ .door>.strip .lr .nm,.door>.strip .lr .need{display:none}
+ .door>.strip .lr .sh{display:block;font-size:9.5px;font-weight:700;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ .door>.strip .lr .st{position:absolute;top:-6px;right:-5px;width:15px;height:15px;border-radius:50%;background:#14241f;font-size:10px;line-height:15px;text-align:center}
+ .door>.strip .lr.done{background:var(--fc);color:#fff}
+ .door>.strip .lr.now{background:rgba(214,166,64,.28);box-shadow:0 0 0 2px var(--brass)}
+ .door>.strip .emptyhint{grid-column:1/-1;padding:4px;font-size:12px}
+ .turn{padding:6px 8px;gap:6px;flex-wrap:nowrap}
+ .turn .steps{flex-wrap:nowrap;gap:4px}.turn .step{padding:5px 8px;font-size:12px;gap:4px}.turn .step .ic{width:15px;height:15px}
+ .turn .hint{display:none}.turn .hint.warn{display:block;position:absolute;left:0;right:0;bottom:100%;background:#3a1714;color:#ffd6a0;font-size:12px;padding:6px 10px;border-top:1px solid var(--bad)}
+ .turn .btn{min-height:40px;padding:8px 12px;font-size:14px;margin-left:auto;white-space:nowrap}
+ .legend{font-size:11px;gap:8px}
+ .seats{gap:4px}.seat{min-height:36px}.ava{width:28px;height:28px}
+}
+@media(max-width:899px){body.art-ui .tray{background:linear-gradient(#e7dcc5,#d8c9ab);padding:10px;gap:8px;border-radius:16px}body.art-ui .tray .cell{border:2px dashed rgba(90,70,40,.3)}.turn .step{white-space:nowrap}}
+@media(max-width:420px){.turn .step:nth-child(3){display:none}.turn .btn{padding:8px 10px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
